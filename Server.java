@@ -43,7 +43,7 @@ public class Server extends Thread {
 	 private int MAX_PLAYERS = 4;
 
 	//The 2D game representation
-	Board board;
+	World board;
 	/*
 	 * The list of players or spectators subscribed to
 	 * receive updates regarding our game state.
@@ -65,9 +65,10 @@ public class Server extends Thread {
 	char highestPlayerChar;
 
 
-    public Server(Board b, int port) {
+    public Server(World b, int port) {
 		board = b;
 		listen_port = port;
+		//Should be a 2D array representing the map
 		buffer1 = new byte[MAX_BUF];
 		buffer2 = new byte[MAX_BUF];
 		working_buffer = buffer1;
@@ -105,7 +106,6 @@ public class Server extends Thread {
 			} catch (IOException e){
 				//TODO: log a packet read error
 			}
-
 			/*
 			 * TODO: undo the received packet and determine command
 			 * and call appropriate handling method.
@@ -165,7 +165,7 @@ public class Server extends Thread {
 	 * the empty one. Iterate through the Viewers/Players,
 	 * sending the ouput and removing it once it is done.
 	 */
-	private void distributeOutput(){
+	private void distributeOutput(World w){
 
 		Future<String> future;
 

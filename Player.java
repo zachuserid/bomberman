@@ -52,5 +52,11 @@ public class Player {
 	public boolean isAlive(){
 		return alive;
 	}
+	
+	public void update(){}
+	
+	private void handleInput(){
+		
+	}
 
 }

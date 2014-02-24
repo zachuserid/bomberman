@@ -1,5 +1,5 @@
 /**
- * @(#)Board.java
+ * @(#)World.java
  *
  *
  * @author
@@ -7,17 +7,17 @@
  */
 
 
-public class Board {
+public class World {
 
-	char board[][];
+	BoardElement world[][];
 	int width;
 	int height;
 
-    public Board(char[][] gameB) {
-    	board = gameB;
+    public World(BoardElement[][] gameB) {
+    	world = gameB;
     }
 
-    public Board(int x, int y) {
+    public World(int x, int y) {
     	width = x;
     	height = y;
     	//Generate random board with dimensions
