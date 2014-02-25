@@ -7,7 +7,7 @@
  */
 
 
-public class ClientNetworkHandler<R> extends NetworkHandler<R> {
+public class ClientNetworkHandler<S, R> extends NetworkHandler<S, R> {
 
     public ClientNetworkHandler() {
     }
@@ -16,7 +16,7 @@ public class ClientNetworkHandler<R> extends NetworkHandler<R> {
 		return (R[])null;
 	}
 
-    void sendData(){
+    void sendData(S data){
     }
 
 }
