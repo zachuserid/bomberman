@@ -42,17 +42,14 @@ public abstract class NetworkHandler<S, R> {
 	protected byte[] playerUpdateBufferIn;
 	//buffer send to world
 	protected byte[] playerUpdateBufferOut;
-	//array of returnable objects
-	protected R[] returnArr;
 
 	//CTOR
-    public NetworkHandler(R[] ret) {
+    public NetworkHandler() {
 
     	//Initialize the buffers
     	playerUpdateBufferIn = new byte[MAX_BUF];
     	playerUpdateBufferOut = new byte[MAX_BUF];
 
-		returnArr = ret;
     	//buffer indeces, all are empty.
     	uIn = 0;
     	uOut = 0;
@@ -67,9 +64,36 @@ public abstract class NetworkHandler<S, R> {
     }
 
     //METHODS
-    abstract R[] getData();
+    public abstract R[] getData();
 
-    abstract void sendData(S data);
+    public void sendData(S data){
+    	
+    	byte[] toSend = parseSend(data);
+    	
+    	
+    	
+    }
+    
+    protected abstract R parseReceive(byte[] data);
+    
+    protected abstract byte[] parseSend(S data);
+    
+    protected bufferData(DatagramPacket data){
+    	String buf = new String(packet.getData());
+
+		byte bytes[] = buf.getBytes();
+
+		updateWritable.acquireUninterruptibly();
+		updateReadable.acquireUninterruptibly();
+
+		for (int j=0; j<bytes.length; j++){
+			playerUpdateBufferIn[uIn++] = bytes[j];
+		}
+
+		updateReadable.release();
+		updateWritable.release();
+
+    }
 
     /*
     protected boolean swapWorldBuffer(){
@@ -83,6 +107,45 @@ public abstract class NetworkHandler<S, R> {
 
     }
     */
+    
+    //THIS METHOD WILL BE RUN IN A SEPERATE THREAD
+    public void initCommunication(){
+	  try {
+			socket = new DatagramSocket(listen_port);
+		} catch (SocketException e){
+			System.out.println("A socket error occured: " + e.getMessage());
+			return;
+		} catch (Exception e){
+			System.out.println("An unexpected error occured: " + e.getMessage());
+			return;
+		}
+
+		byte[] receiveData = new byte[MAX_BUF];
+
+		//Our infinite loop of accepting and handling packets
+		while(true){
+			//Construct a packet to be filled by network layer OS(Java VM) call
+			DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+			try {
+				socket.receive(receivePacket);
+			} catch (IOException e){
+				//TODO: log a packet read error
+			}
+			/*
+			 * TODO: parse the received packet and determine command
+			 * and call appropriate handling method.
+			 *
+			 * We will send all packets from the network to bufferData()
+			 * IMPORTANT: We only want to send it one packet at a time,
+			 * as this will represent one players commands. The network layer
+			 * may do this for us.
+			 *
+			 */
+
+			 bufferData(receivePacket);
+
+		}
+    }
 
     //returns success of swap
     protected boolean swapUpdateBuffer(){

@@ -7,18 +7,54 @@
  */
 
 
-public class ClientNetworkHandler<S, R> extends NetworkHandler<S, R> {
+public class ClientNetworkHandler extends NetworkHandler<PlayerUpdate[], char[][]> {
 
 	//Accept a new return buffer to fill with <R> type data
-    public ClientNetworkHandler(R[] ret) {
-    	super(ret);
+    public ClientNetworkHandler() {
     }
 
-	R[] getData(){
-		return (R[])null;
+    public void sendData(PlayerUpdate[] data){
+    	
+    	byte[] parsed = parseSend(data);
+    	
+    }
+	
+	public char[][] getData(){
+		
+		
+		return null;
+		
 	}
 
-    void sendData(S data){
+	
+	protected char[][] parseReceive(){
+		
+	}
+	
+	protected byte[] parseSend
+	
+	
+    /*
+     * lock on the write buffer and buffer the packet
+     */
+    void bufferData(DatagramPacket packet){
+
+    	String buf = new String(packet.getData());
+
+		byte bytes[] = buf.getBytes();
+
+		updateWritable.acquireUninterruptibly();
+		updateReadable.acquireUninterruptibly();
+
+		for (int j=0; j<bytes.length; j++){
+			playerUpdateBufferIn[uIn++] = bytes[j];
+		}
+
+		updateReadable.release();
+		updateWritable.release();
+
+
     }
+    
 
 }

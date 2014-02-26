@@ -7,7 +7,7 @@
  */
 
 
-public class World {
+public class World{
 
 	BoardElement world[][];
 	int width;
@@ -21,6 +21,18 @@ public class World {
     	width = x;
     	height = y;
     	//Generate random board with dimensions
+    }
+    
+    public char getCharAt(int x, int y){
+    	return 'c';
+    }
+    
+    public int getHeight(){
+    	return 5;
+    }
+    
+    public int getWidth(){
+    	return 5;
     }
 
 

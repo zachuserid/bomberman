@@ -8,6 +8,8 @@
 
 
 public class PlayerUpdate {
+	
+	//enum {}
 
     public PlayerUpdate() {
     }
