@@ -23,13 +23,10 @@ public class Subscriber {
 	private InetAddress address;
 	//The client's port
 	private int port;
-	//The player object representation
-	private Player player;
 
-    public Subscriber(InetAddress addr, int prt, Player playa) {
+    public Subscriber(InetAddress addr, int prt) {
     	address = addr;
     	port = prt;
-    	player = playa;
     }
 
     public InetAddress getAddr(){

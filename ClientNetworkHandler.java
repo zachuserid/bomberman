@@ -9,7 +9,9 @@
 
 public class ClientNetworkHandler<S, R> extends NetworkHandler<S, R> {
 
-    public ClientNetworkHandler() {
+	//Accept a new return buffer to fill with <R> type data
+    public ClientNetworkHandler(R[] ret) {
+    	super(ret);
     }
 
 	R[] getData(){

@@ -137,7 +137,7 @@ public class Server extends Thread {
 
 			Player p = new Player(startX, startY, START_HEALTH, (char)(highestPlayerChar+1), true);
 
-			spectators.add( (new Subscriber(IPAddress, port, p)) );
+			spectators.add( (new Subscriber(IPAddress, port)) );
 
 			return true;
 		}
