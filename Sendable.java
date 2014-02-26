@@ -15,6 +15,8 @@ public interface Sendable<T> {
 	 * Should be synchronized on the T object
 	 */
 	public byte[] getBytes();
+	
+	public T getCopy();
 
 }
 
