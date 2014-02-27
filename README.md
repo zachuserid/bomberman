@@ -1,4 +1,0 @@
-bomberman
-=========
-
-COMP3303
