@@ -1,19 +1,16 @@
 package BombermanGame;
 
-
 import java.util.ArrayList;
-
-
 
 public class Main
 {
 	public static void main(String[] args)
 	{
 		//M
-		World w = new World(GridGenerator.FromFile(""));
+		World w = new World(GridGenerator.FromFile("Worlds/w1.txt"));
 		
 		//V
-		BombermanView v = new BombermanView(w, 50);
+		ViewRenderer v = new BombermanView(w, 50);
 		
 		//C
 		ArrayList<BombermanController> c = new ArrayList<BombermanController>();
@@ -27,8 +24,6 @@ public class Main
 		c.add(pc);
 		
 		w.AddEntity(p);	
-		
-		
 		
 		long milliwait = 100;
 		
@@ -48,7 +43,7 @@ public class Main
 				
 				time = System.currentTimeMillis() - start;
 			}
-		} finally{v.Close();}
+		} finally{v.Dispose();}
 		
 		for(PlayerCommand com : ((BombermanPlayerController)c.get(0)).getCommandsClear()) System.out.println(com.Command.toString()); 
 	}

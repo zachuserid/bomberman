@@ -207,7 +207,7 @@ public abstract class NetworkHandler<S, R> {
 
 
     //initializes the threads and starts the server
-    public void Initialize()
+    public boolean Initialize()
     {
     	try
     	{
@@ -215,13 +215,15 @@ public abstract class NetworkHandler<S, R> {
     	} catch (SocketException e)
     	{
     		System.out.println("Could not bind socket. " + e.getMessage());
-    		return;
+    		return false;
     	}
 
     	this.active = true;
 
     	this.recieveThread.start();
     	this.sendThread.start();
+    	
+    	return true;
     }
 
     /*

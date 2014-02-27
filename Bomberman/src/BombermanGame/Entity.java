@@ -1,5 +1,9 @@
 package BombermanGame;
 
+/*
+ * this is an entity in the world
+ * an entity has dynamic position and a name
+ */
 public abstract class Entity
 {
 	protected String name;

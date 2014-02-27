@@ -1,21 +1,34 @@
 package BombermanGame;
 
 import java.util.ArrayList;
-import Network.Sendable;
 
-public class World implements Sendable<World>
+/*
+ * the world is the model for the bomberman game
+ * requests to alter the model are done via associated methods that return WorldActionOutcome
+ * a world also has a list of entities
+ */
+public class World
 {
+	//this is the backing character grid
 	protected char[][] grid;
 
+	//list of entities in the world
 	protected ArrayList<Entity> entities;
 
-
+	//the width of the world in "squares" (not pixels)
 	public int getGridWidth() {return grid.length;}
 	public int getGridHeight() {return grid[0].length;}
+	
+	//returns the (currently)char elements at x,y
+	public char getElementAt(int x, int y)
+	{
+		return this.grid[x][y];
+	}
 
 	public ArrayList<Entity> getEntities() {return this.entities;}
 
 
+	//creates a new world with a grid
 	public World(char[][] grid)
 	{
 		this.grid = grid;
@@ -23,18 +36,20 @@ public class World implements Sendable<World>
 		this.entities = new ArrayList<Entity>();
 	}
 
-
+	//adds an entity to world (should be mapped to an outside controller to be dynamic)
 	public boolean AddEntity(Entity e)
 	{
 		this.entities.add(e);
 		return true;
 	}
 
+	//currently unused, may be needed for "static" object updates (animations or something)
 	public void Update(float time)
 	{
 
 	}
 
+	//these are all the requests for an entity to try and do something
 	public WorldActionOutcome TryMoveLeft(Entity e)
 	{
 		int x = e.getX() - 1;
@@ -88,40 +103,5 @@ public class World implements Sendable<World>
 		System.out.println(e.name + " plants bomb.");
 
 		return WorldActionOutcome.Approved;
-	}
-	
-	public World getCopy()
-	{
-		
-    	int wid = this.getGridWidth();
-    	int hei = this.getGridHeight();
-    	char newGrid[][] = new char[wid][hei];
-
-    	for( int i=0; i<wid; i++ )
-    	{
-    		for ( int j=0; j< hei; j++ )
-    		{
-    			newGrid[i][j] = this.grid[i][j];
-    		}
-    	}
-
-    	return ( new World( newGrid ) );
-    	
-	}
-	
-	public byte[] getBytes()
-	{
-		//TODO: implement this
-		int wid = this.getGridWidth();
-		int hei = this.getGridHeight();
-		byte theBytes[] = new byte[(wid * hei) + 1];
-
-		for (int i=0; i<wid; i++){
-			for (int j=0; j<hei; j++){
-				theBytes[ (i*wid) + j ] = (byte)grid[i][j];
-			}
-		}
-
-		return theBytes;
 	}
 }

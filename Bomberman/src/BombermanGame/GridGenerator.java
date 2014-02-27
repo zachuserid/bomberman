@@ -1,42 +1,54 @@
 package BombermanGame;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
+/*
+ * this class simply reads a grid from a file
+ * it may eventually have a random generation or other fancy things
+ */
 public class GridGenerator
 {
 	public static char[][] FromFile(String path)
 	{
+		//creates the grid
 		char[][] grid = null;
 		
-		/*
-		BufferedReader br = new BufferedReader(new FileReader(path));
-	    try 
+		//creates a reader
+		BufferedReader br = null;
+		
+		try 
 	    {
-	        StringBuilder sb = new StringBuilder();
+			//opens the reader with the path
+			br = new BufferedReader(new FileReader(path));
+			
+			//reads in a line
 	        String line = br.readLine();
 	        
-	        int x, y;
+	        //the "height" of the grid (actually width)
+	        int x;
 	        x = Integer.parseInt(line);
-	        line = br.readLine();
-	        y = Integer.parseInt(line);
 
-	        grid = new char[x][y];
+	        grid = new char[x][];
 	        
 	        line = br.readLine();
+	        
+	        x = 0;
 	        
 	        while (line != null) 
 	        {
-
+	        	grid[x] = line.toCharArray();
+	        	x++;
+	        	
 	            line = br.readLine();
 	        }
-	        
-	        System.out.print(x + ", " + y);
-	        //String everything = sb.toString();
 	    }
+		catch(IOException e) {}
 	    finally 
 	    {
-	        br.close();
-	    }*/
-		
-		grid = new char[5][5];
+	        try {br.close();} catch(IOException e){}
+	    }	
 	    
 	    return grid;
 	}

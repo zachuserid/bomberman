@@ -1,5 +1,6 @@
 package BombermanGame;
 
+//a simple point class
 public class Point
 {
 	public static Point Zero() {return new Point(0);}

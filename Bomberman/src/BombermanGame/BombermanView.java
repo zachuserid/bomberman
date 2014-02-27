@@ -1,106 +1,79 @@
 package BombermanGame;
 
-import java.awt.Canvas;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.image.BufferStrategy;
-import java.awt.image.BufferedImage;
 
-import javax.swing.JFrame;
-
-
-public class BombermanView
+/*
+ * this class renders a bomberman world
+ * it has simple loops to represent entities and such as shapes
+ */
+public class BombermanView extends ViewRenderer
 {
-	protected JFrame frame;
-	
-	protected int width, height;
-	
 	protected int gridX, gridY, gridDim;
 	
-	protected BufferStrategy buffer;
-	
-	protected BufferedImage drawBuffer;
-	
 	protected World world;
+	
+	protected Color[] playerColors;
 	
 
 	public BombermanView(World w, int gridDim)
 	{
+		super("Bomberman", w.getGridWidth() * gridDim, w.getGridHeight() * gridDim);
+		
 		this.world = w;
-		this.width = w.getGridWidth() * gridDim;
-		this.height = w.getGridHeight() * gridDim;
 		this.gridX = w.getGridWidth();
 		this.gridY = w.getGridHeight();
 		this.gridDim = gridDim;
 		
-		this.frame = new JFrame("Bomberman");
-		//this.frame.setUndecorated(true);
-		this.frame.setIgnoreRepaint(true);
-		this.frame.setVisible(true);
-		this.frame.setResizable(false);
-		this.frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		
-		//rendering canvas
-		Canvas c = new Canvas();
-		
-		c.setIgnoreRepaint(true);
-		c.setSize(new Dimension(this.width, this.height));
-		
-		this.frame.add(c);
-		this.frame.pack();
-		
-		c.createBufferStrategy(2);
-		this.buffer = c.getBufferStrategy();
-		
-		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-
-		GraphicsDevice gd = ge.getDefaultScreenDevice();
-
-		GraphicsConfiguration gc = gd.getDefaultConfiguration();
-		
-		this.drawBuffer = gc.createCompatibleImage(this.width, this.height);
+		//default player colors for now
+		this.playerColors = new Color[4];
+		this.playerColors[0] = Color.RED;
+		this.playerColors[0] = Color.GREEN;
+		this.playerColors[0] = Color.BLUE;
+		this.playerColors[0] = Color.YELLOW;
 	}
 	
-	public void Draw()
+	@Override
+	public void CustomDraw(Graphics2D g)
 	{
-		Graphics2D g = (Graphics2D) this.drawBuffer.createGraphics();
+		//draws the board elements
+		g.setColor(Color.LIGHT_GRAY);
+		for(int x = 0; x < this.gridX; x++)
+			for(int y = 0; y < this.gridY; y++)
+			{
+				char c = this.world.getElementAt(x, y);
+				if(c == 'D')
+				{
+					int xl = x * this.gridDim;
+					int yl = y * this.gridDim;
+					
+					g.drawRect(xl + 5, yl + 5, this.gridDim - 10, this.gridDim - 10);
+				}
+			}
 		
-		g.setColor(Color.BLACK);
-		g.fillRect(0, 0, this.width, this.height);
-		
-		g.setColor(Color.WHITE);
-		
+		//draws the grid
+		g.setColor(Color.GRAY);
+				
 		for(int x = 1; x < this.gridX; x++)
-			g.drawLine(x * this.gridDim, 0, x * this.gridDim, this.height);
-		
+			g.drawLine(x * this.gridDim, 0, x * this.gridDim, this.getRenderHeight());
+				
 		for(int y = 1; y < this.gridY; y++)
-			g.drawLine(0, y * this.gridDim, this.width, y * this.gridDim);
+			g.drawLine(0, y * this.gridDim, this.getRenderWidth(), y * this.gridDim);
 		
-		g.setColor(Color.GREEN);
+		//draws the entities
+		int i = 0;
 		for(Entity e : this.world.getEntities())
 		{
+			g.setColor(this.playerColors[i]);
+			
 			int x = e.getX() * this.gridDim;
 			int y = e.getY() * this.gridDim;
 			
 			g.drawOval(x, y, this.gridDim, this.gridDim);
+			
+			i++;
 		}
-		
-		
-		Graphics finalGraphics = this.buffer.getDrawGraphics();
-		finalGraphics.drawImage(this.drawBuffer, 0, 0, null);
-		
-		if(!this.buffer.contentsLost()) this.buffer.show();
 	}
 	
-	public void Close()
-	{	
-		this.buffer.getDrawGraphics().dispose();
-		
-		this.frame.dispose();
-	}
+	
 }

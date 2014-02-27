@@ -5,23 +5,37 @@ import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
-
+/*
+ * this class handles input from the keyboard and tries to make actions in the world.
+ * it hooks to the dispatch key event to get key states
+ * on update these key states are compared to determine if the player is trying to do something
+ * if an action is performed, it is added to an action log for this controller
+ */
 public class BombermanPlayerController extends BombermanController implements KeyEventDispatcher
 {
+	//creates a default player controller with WASD keys
 	public static BombermanPlayerController Default(BombermanPlayer player, World w) {return new BombermanPlayerController(player, w, 'a', 'd', 'w', 's', ' ');}
 	
+	//the amount of controls (this is to make adding/removing them easier)
 	protected int controlCount;
-	//the arrays representing the state of a key being pressed
+	
+	//the arrays representing the state of a key being pressed and released
 	protected boolean[] boolsDown;
+	protected boolean[] boolsUp;
+	
 	//the chars to map to input
 	protected char[] cKeys;
 	
+	//the player entity mapped to this control
 	protected BombermanPlayer player;
 	
+	//the world mapped to this control
 	protected World world;
 	
+	//the log of commands that were approved by the world
 	protected ArrayList<PlayerCommand> commands;
 	
+	//the current id that would be given to a new command
 	protected int commandIds;
 	
 	
@@ -42,11 +56,17 @@ public class BombermanPlayerController extends BombermanController implements Ke
 		this.commands = new ArrayList<PlayerCommand>();
 		this.commandIds = 0;
 		
+		//adds this object as a listener to the key dispatch event
 		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(this);
 		
 		this.controlCount = 5;
 		
 		this.boolsDown = new boolean[this.controlCount];
+		
+		//creates the up array and sets it as starting all true
+		this.boolsUp = new boolean[this.controlCount];
+		for(int i = 0; i < this.controlCount; i++)
+			this.boolsUp[i] = true;
 		
 		//the keys mapped to a control
 		this.cKeys = new char[this.controlCount];
@@ -57,18 +77,29 @@ public class BombermanPlayerController extends BombermanController implements Ke
 		this.cKeys[4] = bomb;
 	}
 	
-	
+	//this is what happens every time a dispatch key even occurs
 	@Override
 	public boolean dispatchKeyEvent(KeyEvent e)
 	{
+		//gets the character of the event
 		char c = e.getKeyChar();
 		
+		//checks it against every control
 		for(int i = 0; i < this.controlCount; i++)
 		{
 			if(c == this.cKeys[i])
 			{
+				//if its pressed and was released, this is a valid keydown input
 				if(e.getID() == KeyEvent.KEY_PRESSED)
-					this.boolsDown[i] = true;
+				{
+					if(this.boolsUp[i])
+					{
+						this.boolsUp[i] = false;
+						this.boolsDown[i] = true;
+					}
+				}
+				else if(e.getID() == KeyEvent.KEY_RELEASED)
+					this.boolsUp[i] = true;
 				
 				i = this.controlCount;
 			}
@@ -80,6 +111,8 @@ public class BombermanPlayerController extends BombermanController implements Ke
 	@Override
 	public void Update(float time)
 	{
+		//checks the states of the commands and updates if necessary
+		//if an an action is valid (according to the world) it is added to the list of commands	
 		if(this.CheckBool(0))
 		{
 			if(this.world.TryMoveLeft(this.player) == WorldActionOutcome.Approved)
@@ -111,6 +144,7 @@ public class BombermanPlayerController extends BombermanController implements Ke
 	}
 	
 	
+	//every time a value is requested, it is reset to false
 	protected boolean CheckBool(int i)
 	{
 		if(this.boolsDown[i])
