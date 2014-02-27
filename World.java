@@ -7,11 +7,13 @@
  */
 
 
-public class World{
+public class World implements Sendable<World>{
 
 	BoardElement world[][];
 	int width;
 	int height;
+
+	public char grid[][];
 
     public World(BoardElement[][] gameB) {
     	world = gameB;
@@ -22,17 +24,30 @@ public class World{
     	height = y;
     	//Generate random board with dimensions
     }
-    
-    public char getCharAt(int x, int y){
+
+    public char getCharAt(int x, int y)
+    {
     	return 'c';
     }
-    
-    public int getHeight(){
+
+    public int getHeight()
+    {
     	return 5;
     }
-    
-    public int getWidth(){
+
+    public int getWidth()
+    {
     	return 5;
+    }
+
+    public World getCopy()
+    {
+    	return new World(5, 5);
+    }
+
+    public byte[] getBytes()
+    {
+    	return new byte[5];
     }
 
 

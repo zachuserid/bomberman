@@ -14,67 +14,67 @@ import java.util.ArrayList;
 //Param <S>: type of send data
 //Param <R>: type of receive data
 //Sendable = copyable
-public abstract class NetworkHandler<S implements Sendable, R implements Sendable> {
-	
+public abstract class NetworkHandler<S, R> {
+
 	protected boolean sA, rA;
-	
+
 	protected int sAIndex, sBIndex, rAIndex, rBIndex;
 
 	protected S[] sendBufferA, sendBufferB;
-	
+
 	protected R[] receiveBufferA, receiveBufferB;
-	
+
 	protected Thread sendThread, recieveThread;
-	
+
 	protected DatagramSocket socket;
-	
+
 	protected boolean active;
-	
-	
+
+
 	//returns the active buffer
 	protected S[] getSendWrite()
 	{
 		if(this.sA) return this.sendBufferA;
 		return this.sendBufferB;
 	}
-	
+
 	protected S[] getSendRead()
 	{
 		if(this.sA) return this.sendBufferB;
 		return this.sendBufferA;
 	}
-	
-	protected S[] getReceiveWrite()
+
+	protected R[] getReceiveWrite()
 	{
 		if(this.rA) return this.receiveBufferA;
 		return this.receiveBufferB;
 	}
-	
-	protected S[] getReceiveRead()
+
+	protected R[] getReceiveRead()
 	{
 		if(this.rA) return this.receiveBufferB;
 		return this.receiveBufferA;
 	}
-	
+
 	//returns the index for the active buffer
 	protected int getSendWriteIndex()
 	{
 		if(this.sA) return this.sAIndex;
 		return this.sBIndex;
 	}
-	
+
 	protected int getSendReadIndex()
 	{
 		if(this.sA) return this.sBIndex;
 		return this.sAIndex;
 	}
-	
+
 	protected int getReceiveWriteIndex()
 	{
 		if(this.rA) return this.rAIndex;
 		return this.rBIndex;
 	}
-	
+
 	protected int getReceiveReadIndex()
 	{
 		if(this.rA) return this.rBIndex;
@@ -82,34 +82,34 @@ public abstract class NetworkHandler<S implements Sendable, R implements Sendabl
 	}
 
 	//sets the index for the active buffer
-	protected int setSendWriteIndex(int index)
+	protected void setSendWriteIndex(int index)
 	{
 		if(this.sA) this.sAIndex = index;
 		else this.sBIndex = index;
 	}
-	
-	protected int setSendReadIndex(int index)
+
+	protected void setSendReadIndex(int index)
 	{
 		if(this.sA) this.sBIndex = index;
 		else this.sAIndex = index;
 	}
-	
-	protected int setReceiveWriteIndex(int index)
+
+	protected void setReceiveWriteIndex(int index)
 	{
 		if(this.rA) this.rAIndex = index;
 		else this.rBIndex = index;
 	}
-	
-	protected int setReceiveReadIndex(int index)
+
+	protected void setReceiveReadIndex(int index)
 	{
 		if(this.rA) this.rBIndex = index;
-		else this.rAIndex = index;	
+		else this.rAIndex = index;
 	}
-	
+
 
 	//CTOR
     public NetworkHandler(S[] as, S[] bs, R[] ar, R[] br) {
-    	
+
     	this.sAIndex = 0;
     	this.sBIndex = 0;
     	this.rAIndex = 0;
@@ -117,25 +117,25 @@ public abstract class NetworkHandler<S implements Sendable, R implements Sendabl
 
     	this.sendBufferA = as;
     	this.sendBufferB = bs;
-    	
+
     	this.receiveBufferA = ar;
     	this.receiveBufferB = br;
-    	
+
     	this.sendThread = new Thread(new Runnable(){
     		public void run(){
-    			this.SenderThreadMethod();
+    			SenderThreadMethod();
     		}
     	});
     	this.recieveThread = new Thread(new Runnable(){
     		public void run(){
-    			this.ReceiverThreadMethod();
+    			ReceiverThreadMethod();
     		}
     	});
     }
 
-    
+
     //METHODS
-    
+
     //swaps the buffers used for recieving and processing data
     protected void swapReceiveBuffer()
     {
@@ -147,7 +147,7 @@ public abstract class NetworkHandler<S implements Sendable, R implements Sendabl
     		}
     	}
     }
-    
+
     //swaps the buffers used for processing and sending data
     protected void swapSendBuffer()
     {
@@ -155,12 +155,12 @@ public abstract class NetworkHandler<S implements Sendable, R implements Sendabl
     	{
     		synchronized(this.getSendWrite())
     		{
-    			this.rB = !this.rB;
-    			this.getSendWrite.notify();
+    			this.sA = !this.sA;
+    			this.getSendWrite().notify();
     		}
     	}
     }
-    
+
     /*
      * takes control of the buffer that was being filled with object data
      * copies that buffer to the given buffer
@@ -168,21 +168,21 @@ public abstract class NetworkHandler<S implements Sendable, R implements Sendabl
     public int getData(R[] buffer)
     {
     	this.swapReceiveBuffer();
-    	
+
     	R[] b = this.getReceiveRead();
-    	
+
     	int length;
-    	
+
     	synchronized(b)
     	{
     		length = this.getReceiveReadIndex();
-    		
+
     		for(int i = 0; i < length; i++)
-    			buffer[i] = b[i].getCopy();
-    		
+    			buffer[i] = getReceiveCopy(b[i]);
+
     		this.setReceiveReadIndex(0);
     	}
-    	
+
     	return length;
     }
 
@@ -191,38 +191,46 @@ public abstract class NetworkHandler<S implements Sendable, R implements Sendabl
      * swaps the buffer to now be the reading buffer
      */
     public void sendData(S[] buffer){
-    	
+
     	S[] b = this.getSendWrite();
-    	
+
     	synchronized(b)
     	{
-    		int length = Math.min(data.length, b.length);
-    		
+    		int length = Math.min(buffer.length, b.length);
+
     		for(int i = 0; i < length; i++)
-    			b[i] = buffer[i].getCopy();
-    		
-    		
+    			b[i] = getSendCopy(buffer[i]);
+
     	}
-    	
+
     	this.swapSendBuffer();
     }
-    
+
+    //return a R(eceive) type object from parsing raw packet data
     protected abstract R parseReceive(byte[] data);
-    
+
+    //return raw packet data from an S(end) type object
     protected abstract byte[] parseSend(S data);
-    
-    
+
+
     //initializes the threads and starts the server
     public void Initialize()
     {
-    	this.BindSocket(this.socket);
-    	
+    	try
+    	{
+    		this.BindSocket(this.socket);
+    	} catch (SocketException e)
+    	{
+    		System.out.println("Could not bind socket. " + e.getMessage());
+    		return;
+    	}
+
     	this.active = true;
-    	
+
     	this.recieveThread.start();
     	this.sendThread.start();
     }
-    
+
     /*
      * gets the reading buffer
      * sees if there is something in it
@@ -234,36 +242,36 @@ public abstract class NetworkHandler<S implements Sendable, R implements Sendabl
     {
     	while(this.active)
     	{
-    		
+
     		S[] b = this.getSendRead();
-    		
+
 	    	synchronized(b)
 	    	{
 	    		if(this.getSendReadIndex() != 0)
 	    		{
 		    		int length = this.getSendReadIndex();
-		    		
+
 		    		byte[] toSend = new byte[64000];
 		    		int sendIndex = 0;
-		    		
+
 		    		for(int i = 0; i < length; i++)
 		    		{
 		    			byte[] data = this.parseSend(b[i]);
 		    			for(int n = 0; n < data.length; n++)
-		    				toSend[n + sendIndex] = data[n]; 
+		    				toSend[n + sendIndex] = data[n];
 	    				sendIndex += data.length;
 	    			}
-		    		
+
 		    		this.Send(toSend);
-	    		
+
 	    			this.setSendReadIndex(0);
 	    		}
-	    		
-	    		b.wait();
+
+	    		try { b.wait(); } catch(Exception e){}
     		}
     	}
     }
-    
+
     /*
      * waits for a new packet
      * grabs the writing buffer
@@ -276,28 +284,37 @@ public abstract class NetworkHandler<S implements Sendable, R implements Sendabl
     	while(this.active)
     	{
     		DatagramPacket packet = new DatagramPacket(new byte[64000], 64000);
-    		
-    		this.socket.receive(packet);
-    		
+
+			try
+			{
+				this.socket.receive(packet);
+			} catch (Exception e) {}
+
     		R[] b = this.getReceiveWrite();
-    		
+
     		synchronized(b)
     		{
     			int index = this.getReceiveWriteIndex();
-    			
+
     			b[index] = this.parseReceive(packet.getData());
-    			
+
     			this.setReceiveWriteIndex(++index);
     		}
     	}
     }
-    
+
     //binds socket for either client or server
-    protected abstract void BindSocket(DatagramSocket socket);
-    
+    protected abstract void BindSocket(DatagramSocket socket) throws SocketException;
+
     //sends data for either a client or server
     protected abstract void Send(byte[] data);
-    
+
+    //a copy method to be implemented at lowest level
+    public abstract S getSendCopy(S original);
+
+	//a copy of the receive type object given
+    public abstract R getReceiveCopy(R original);
+
     //stops the handler
     public void Stop()
     {

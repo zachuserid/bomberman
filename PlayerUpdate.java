@@ -7,12 +7,21 @@
  */
 
 
-public class PlayerUpdate {
-	
+public class PlayerUpdate implements Sendable<PlayerUpdate>{
+
 	//enum {}
 
     public PlayerUpdate() {
     }
 
+	public PlayerUpdate getCopy()
+    {
+    	return new PlayerUpdate();
+    }
+
+    public byte[] getBytes()
+    {
+    	return new byte[5];
+    }
 
 }
