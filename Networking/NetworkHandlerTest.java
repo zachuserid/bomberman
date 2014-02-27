@@ -10,11 +10,17 @@
 public class NetworkHandlerTest {
 
     public NetworkHandlerTest() {
+    }
 
-    	public static void main(String args[]){
 
+    public static void main(String args[])
+    {
+    	if ( args.length != 2 ){
+    		System.out.println("Insufficient arguments");
+    		return;
     	}
 
+    	System.out.println("Starting network handler");
     }
 
 

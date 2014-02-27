@@ -19,9 +19,7 @@ public abstract class ServerNetworkHandler<S, R> extends NetworkHandler<S, R> {
 	protected int listen_port;
 
 	//Constructor(s)
-	/*
-	 * Take in an empty R array to work with
-	 */
+
     public ServerNetworkHandler(S[] as, S[] bs, R[] ar, R[] br, int port) {
     	super(as, bs, ar, br);
 		listen_port = port;

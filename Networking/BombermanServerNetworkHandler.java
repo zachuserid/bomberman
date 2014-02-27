@@ -50,6 +50,7 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 
     @Override
     public byte[] parseSend(World world){
+    	//TODO: convert world data into byte array
 		return new byte[world.getWidth() * world.getHeight()];
     }
 
@@ -88,12 +89,13 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
      * If any commands are player joins, add the player.
      * Otherwise, lock on the write buffer and buffer the packet
      */
-    void bufferData(DatagramPacket packet)
+    protected DatagramPacket filterNewPlayerRequests(DatagramPacket packet)
     {
 
 		String buf = new String( packet.getData() );
     	//Handle any join requests
     	Matcher m = joinPat.matcher(buf);
+
     	while(m.find())
     	{
     		//send player details to handleNewPlayer()

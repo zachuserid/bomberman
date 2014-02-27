@@ -36,10 +36,10 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 		return new byte[10];
 	}
 
+	//Send the packet data to the server's network handler
 	@Override
     public void Send(byte[] packet_data)
     {
-			//Send this spectator the data
 			DatagramPacket sendPacket = new DatagramPacket(packet_data,
 								packet_data.length, address, port);
 			try {
@@ -56,8 +56,9 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 	@Override
     public World getReceiveCopy(World orig)
     {
-    	//Should resemble the following..
+
 		return orig.getCopy();
+		//Should resemble the following..
 		/*
     	int wid = orig.getWidth();
     	int hei = orig.getHeight();
