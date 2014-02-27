@@ -1,3 +1,5 @@
+package Network;
+
 /**
  * @(#)NetworkHandler.java
  *
@@ -6,18 +8,13 @@
  * @version 1.00 2014/2/24
  */
 
-import java.util.concurrent.*;
-import java.io.*;
 import java.net.*;
-import java.util.ArrayList;
 
 //Param <S>: type of send data
 //Param <R>: type of receive data
 //Sendable = copyable
 public abstract class NetworkHandler<S, R> {
 
-	//Data members
-	
 	protected boolean sA, rA;
 
 	protected int sAIndex, sBIndex, rAIndex, rBIndex;
@@ -32,8 +29,7 @@ public abstract class NetworkHandler<S, R> {
 
 	protected boolean active;
 
-	//Getters & Setters
-	
+
 	//returns the active buffer
 	protected S[] getSendWrite()
 	{
@@ -110,8 +106,7 @@ public abstract class NetworkHandler<S, R> {
 	}
 
 
-	//Constructors
-	
+	//CTOR
     public NetworkHandler(S[] as, S[] bs, R[] ar, R[] br) {
 
     	this.sAIndex = 0;
@@ -138,29 +133,33 @@ public abstract class NetworkHandler<S, R> {
     }
 
 
-    //Methods
-    
-    //initializes the threads and starts the server
-    public boolean Initialize()
+    //METHODS
+
+    //swaps the buffers used for recieving and processing data
+    protected void swapReceiveBuffer()
     {
-    	try
+    	synchronized(this.getReceiveWrite())
     	{
-    		this.BindSocket(this.socket);
-    	} catch (SocketException e)
-    	{
-    		System.out.println("Could not bind socket. " + e.getMessage());
-    		return false;
+    		synchronized(this.getReceiveRead())
+    		{
+    			this.rA = !this.rA;
+    		}
     	}
-
-    	this.active = true;
-
-    	this.recieveThread.start();
-    	this.sendThread.start();
-    	
-    	return true;
     }
-    
-    
+
+    //swaps the buffers used for processing and sending data
+    protected void swapSendBuffer()
+    {
+    	synchronized(this.getSendRead())
+    	{
+    		synchronized(this.getSendWrite())
+    		{
+    			this.sA = !this.sA;
+    			this.getSendWrite().notify();
+    		}
+    	}
+    }
+
     /*
      * takes control of the buffer that was being filled with object data
      * copies that buffer to the given buffer
@@ -181,11 +180,10 @@ public abstract class NetworkHandler<S, R> {
     			buffer[i] = getReceiveCopy(b[i]);
 
     		this.setReceiveReadIndex(0);
-        	System.out.println("getData: " + this.setReceiveReadIndex(0) + " returning length: " + length);
     	}
+
     	return length;
     }
-    
 
     /*
      * copies the data to the writing buffer to send
@@ -201,42 +199,31 @@ public abstract class NetworkHandler<S, R> {
 
     		for(int i = 0; i < length; i++)
     			b[i] = getSendCopy(buffer[i]);
-    		System.out.println("sendData()");
-    	}
 
+    	}
+    	System.out.println("sendData() swapping send buffers after copy");
     	this.swapSendBuffer();
     }
 
-    
-    //swaps the buffers used for recieving and processing data
-    protected void swapReceiveBuffer()
-    {
-    	synchronized(this.getReceiveWrite())
-    	{
-    		synchronized(this.getReceiveRead())
-    		{
-    			System.out.println("Swapping receive");
-    			this.rA = !this.rA;
-    		}
-    	}
-    }
-    
 
-    //swaps the buffers used for processing and sending data
-    protected void swapSendBuffer()
+    //initializes the threads and starts the server
+    public void Initialize()
     {
-    	synchronized(this.getSendRead())
+    	try
     	{
-    		synchronized(this.getSendWrite())
-    		{
-    			System.out.println("Swapping send");
-    			this.sA = !this.sA;
-    			this.getSendWrite().notify();
-    		}
+    		this.BindSocket(this.socket);
+    	} catch (SocketException e)
+    	{
+    		System.out.println("Could not bind socket. " + e.getMessage());
+    		return;
     	}
+
+    	this.active = true;
+
+    	this.recieveThread.start();
+    	this.sendThread.start();
     }
 
-    
     /*
      * gets the reading buffer
      * sees if there is something in it
@@ -278,7 +265,6 @@ public abstract class NetworkHandler<S, R> {
     	}
     }
 
-    
     /*
      * waits for a new packet
      * grabs the writing buffer
@@ -305,30 +291,22 @@ public abstract class NetworkHandler<S, R> {
 
 				this.preProcessPacket(packet);
 
+				//System.out.println("Writing to receive array at index " + index);
 				if ( index < b.length )
 				{
-					System.out.println("Received a packet: " + b[index]);
-					
 					b[index] = this.parseReceive( packet.getData() );
-
-					this.setReceiveWriteIndex(++index);
+	    			this.setReceiveWriteIndex(++index);
 				} else { System.out.println("Receive buffer overflow"); }
-    			
+			
     		}
     	}
     }
 
-    
     //stops the handler
     public void Stop()
     {
-    	System.out.println("Closing socket");
-    	
     	this.active = false;
-    	
-    	socket.close();
     }
-    
 
     //Abstracts and overrides
 

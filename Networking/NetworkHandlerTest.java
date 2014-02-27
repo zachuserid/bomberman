@@ -64,6 +64,8 @@ class TestServer extends ServerNetworkHandler<String, String>{
 
 }
 
+
+
 class testClient extends ClientNetworkHandler<String, String> {
 
 	//return a R(eceive) type object from parsing raw packet data
