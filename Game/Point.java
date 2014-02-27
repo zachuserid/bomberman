@@ -1,4 +1,4 @@
-package bomberman;
+
 public class Point
 {
 	public static Point Zero() {return new Point(0);}
