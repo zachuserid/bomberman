@@ -21,6 +21,7 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 	 */
 	ArrayList<Subscriber> spectators;
 
+	//If we know about the world, we can get rid of this
 	final static int MAX_PLAYERS = 10;
 
     //Parsing expressions for bomberman communication protocol
@@ -42,20 +43,23 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 	 * from a factory method.
 	 */
 	@Override
-    public PlayerCommand parseReceive(byte[] data){
+    public PlayerCommand parseReceive(byte[] data)
+    {
 		//TODO: convert the byte array into a playerCommand object
 
     	return (PlayerCommand)null;
     }
 
     @Override
-    public byte[] parseSend(World world){
+    public byte[] parseSend(World world)
+    {
     	//TODO: convert world data into byte array
 		return new byte[world.getWidth() * world.getHeight()];
     }
 
 	@Override
-    public void Send(byte[] packet_data){
+    public void Send(byte[] packet_data)
+    {
 
 			//Iterate over all subscribers
 			for (Subscriber client: spectators){
@@ -89,7 +93,8 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
      * If any commands are player joins, add the player.
      * Otherwise, lock on the write buffer and buffer the packet
      */
-    protected DatagramPacket filterNewPlayerRequests(DatagramPacket packet)
+    @Override
+    public void preProcessPacket(DatagramPacket packet)
     {
 
 		String buf = new String( packet.getData() );
@@ -106,6 +111,8 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
     	//Remove these join messages from the other commands
 		buf = buf.replaceAll(joinRE, "");
 
+		packet.setData( buf.getBytes() );
+
     }
 
     void handleNewPlayer(String name, InetAddress ip, int port){
@@ -116,6 +123,7 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 		spectators.add( (new Subscriber(ip, port)) );
     }
 
+	//If this class knows about the world, this should be in there...
     private boolean canAddPlayer(){
 		//Add any failing conditions here for cases that
 		// players cannot be added

@@ -206,12 +206,6 @@ public abstract class NetworkHandler<S, R> {
     	this.swapSendBuffer();
     }
 
-    //return a R(eceive) type object from parsing raw packet data
-    protected abstract R parseReceive(byte[] data);
-
-    //return raw packet data from an S(end) type object
-    protected abstract byte[] parseSend(S data);
-
 
     //initializes the threads and starts the server
     public void Initialize()
@@ -296,12 +290,28 @@ public abstract class NetworkHandler<S, R> {
     		{
     			int index = this.getReceiveWriteIndex();
 
-    			b[index] = this.parseReceive(packet.getData());
+				this.preProcessPacket(packet);
+
+    			b[index] = this.parseReceive( packet.getData() );
 
     			this.setReceiveWriteIndex(++index);
     		}
     	}
     }
+
+    //stops the handler
+    public void Stop()
+    {
+    	this.active = false;
+    }
+
+    //Abstracts and overrides
+
+    //return a R(eceive) type object from parsing raw packet data
+    protected abstract R parseReceive(byte[] data);
+
+    //return raw packet data from an S(end) type object
+    protected abstract byte[] parseSend(S data);
 
     //binds socket for either client or server
     protected abstract void BindSocket(DatagramSocket socket) throws SocketException;
@@ -315,9 +325,6 @@ public abstract class NetworkHandler<S, R> {
 	//a copy of the receive type object given
     public abstract R getReceiveCopy(R original);
 
-    //stops the handler
-    public void Stop()
-    {
-    	this.active = false;
-    }
+    //method to perform any logic which requires the datagram packet
+    protected void preProcessPacket(DatagramPacket packet){ /*default, no implementation */ }
 }
