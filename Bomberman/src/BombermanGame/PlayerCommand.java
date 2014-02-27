@@ -28,13 +28,12 @@ public class PlayerCommand implements Sendable<PlayerCommand>
 	public byte[] getBytes()
 	{
 		// TODO Auto-generated method stub
-		return null;
+		return this.Command.toString().getBytes();
 	}
 
 	@Override
 	public PlayerCommand getCopy()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return new PlayerCommand(this.Command, this.Time, this.Id);
 	}
 }

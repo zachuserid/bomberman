@@ -1,13 +1,14 @@
 package BombermanGame;
 
 import java.util.ArrayList;
+import Network.Sendable;
 
 /*
  * the world is the model for the bomberman game
  * requests to alter the model are done via associated methods that return WorldActionOutcome
  * a world also has a list of entities
  */
-public class World
+public class World implements Sendable<World>
 {
 	//this is the backing character grid
 	protected char[][] grid;
@@ -103,5 +104,18 @@ public class World
 		System.out.println(e.name + " plants bomb.");
 
 		return WorldActionOutcome.Approved;
+	}
+	
+	@Override
+	public byte[] getBytes()
+	{
+		return new String("WORLD STRING").getBytes();
+	}
+	@Override
+	public World getCopy()
+	{
+		//add actual copy
+		
+		return new World(this.grid);
 	}
 }
