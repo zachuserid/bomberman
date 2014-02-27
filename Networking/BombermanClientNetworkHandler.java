@@ -11,12 +11,12 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 
-public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerUpdate, World> {
+public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCommand, World> {
 
     //Data members
 
     public BombermanClientNetworkHandler(int size, InetAddress ip, int port) {
-    	super(new PlayerUpdate[size], new PlayerUpdate[size], new World[size], new World[size], ip, port);
+    	super(new PlayerCommand[size], new PlayerCommand[size], new World[size], new World[size], ip, port);
     }
 
 
@@ -30,7 +30,7 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerUp
 	}
 
 	@Override
-	protected byte[] parseSend(PlayerUpdate data)
+	protected byte[] parseSend(PlayerCommand data)
 	{
 		//TODO: turn the playerCommand into a protocol string
 		return new byte[10];
@@ -48,7 +48,7 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerUp
     }
 
 	@Override
-    public PlayerUpdate getSendCopy(PlayerUpdate orig)
+    public PlayerCommand getSendCopy(PlayerCommand orig)
     {
     	return orig.getCopy();
     }

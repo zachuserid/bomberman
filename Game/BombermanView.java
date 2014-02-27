@@ -23,13 +23,17 @@ public class BombermanView
 	protected BufferStrategy buffer;
 	
 	protected BufferedImage drawBuffer;
+	
+	protected World world;
+	
 
-	public BombermanView(int gridX, int gridY, int gridDim)
+	public BombermanView(World w, int gridDim)
 	{
-		this.width = gridX * gridDim;
-		this.height = gridY * gridDim;
-		this.gridX = gridX;
-		this.gridY = gridY;
+		this.world = w;
+		this.width = w.getGridWidth() * gridDim;
+		this.height = w.getGridHeight() * gridDim;
+		this.gridX = w.getGridWidth();
+		this.gridY = w.getGridHeight();
 		this.gridDim = gridDim;
 		
 		this.frame = new JFrame("Bomberman");
@@ -75,8 +79,14 @@ public class BombermanView
 		for(int y = 1; y < this.gridY; y++)
 			g.drawLine(0, y * this.gridDim, this.width, y * this.gridDim);
 		
-		g.setColor(Color.RED);
-		g.drawLine(0, 0, (int)(this.width * Math.random()), (int)(this.height * Math.random()));
+		g.setColor(Color.GREEN);
+		for(Entity e : this.world.getEntities())
+		{
+			int x = e.getX() * this.gridDim;
+			int y = e.getY() * this.gridDim;
+			
+			g.drawOval(x, y, this.gridDim, this.gridDim);
+		}
 		
 		
 		Graphics finalGraphics = this.buffer.getDrawGraphics();
@@ -86,9 +96,7 @@ public class BombermanView
 	}
 	
 	public void Close()
-	{
-		this.drawBuffer.createGraphics().dispose();
-		
+	{	
 		this.buffer.getDrawGraphics().dispose();
 		
 		this.frame.dispose();

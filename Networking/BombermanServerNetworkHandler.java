@@ -12,7 +12,7 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.regex.*;
 
-public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, PlayerUpdate> {
+public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, PlayerCommand> {
 
     //Specific bomberman server related data members
     /*
@@ -30,7 +30,7 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 
 	//Constructors
     public BombermanServerNetworkHandler(int size, int port) {
-    	super(new World[size], new World[size], new PlayerUpdate[size], new PlayerUpdate[size], port);
+    	super(new World[size], new World[size], new PlayerCommand[size], new PlayerCommand[size], port);
     }
 
 	//Methods
@@ -42,10 +42,10 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 	 * from a factory method.
 	 */
 	@Override
-    public PlayerUpdate parseReceive(byte[] data){
+    public PlayerCommand parseReceive(byte[] data){
 		//TODO: convert the byte array into a playerCommand object
 
-    	return (PlayerUpdate)null;
+    	return (PlayerCommand)null;
     }
 
     @Override
@@ -78,7 +78,7 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
     }
 
 	@Override
-    public PlayerUpdate getReceiveCopy(PlayerUpdate orig)
+    public PlayerCommand getReceiveCopy(PlayerCommand orig)
     {
     	return orig.getCopy();
     }
