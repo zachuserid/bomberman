@@ -341,7 +341,9 @@ public abstract class NetworkHandler<S, R> {
 				{
 					//Convert bytes to receive type object and add it to the buffer
 					int newIndex = this.parseReceive( b, index, packet.getData() );
+					
 					System.out.println("got new write index of " + newIndex + " after parsing");
+					
 					//Increment the producer buffer index
 	    			this.setReceiveWriteIndex(newIndex);
 
