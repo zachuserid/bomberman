@@ -22,8 +22,8 @@ public abstract class ClientNetworkHandler<S, R> extends NetworkHandler<S, R> {
 	//Methods
 	
 	//Accept a new return buffer to fill with <R> type data
-    public ClientNetworkHandler(S[] s1, S[] s2, R[] r1, R[] r2, InetAddress ip, int port) {
-    	super(s1, s2, r1, r2);
+    public ClientNetworkHandler(InetAddress ip, int port) {
+    	super();
     	this.address = ip;
     	this.port = port;
     }
@@ -31,7 +31,7 @@ public abstract class ClientNetworkHandler<S, R> extends NetworkHandler<S, R> {
 	@Override
     public DatagramSocket BindSocket() throws SocketException
     {
-    	System.out.println("Client: binding to socket, port: " + port);
+    	//System.out.println("Client: binding to socket, port: " + port);
     	return new DatagramSocket(port, address);
     }
     
@@ -45,7 +45,7 @@ public abstract class ClientNetworkHandler<S, R> extends NetworkHandler<S, R> {
 
 			try {
 				
-				System.out.println("Sending data: " + new String(packet_data) + " to " + port );
+				System.out.println("Client Sending data: " + new String(packet_data) + " to " + port );
 				
 				socket.send(sendPacket);
 				

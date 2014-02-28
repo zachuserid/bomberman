@@ -9,6 +9,7 @@ package Test;
  */
 
 import java.net.*;
+import java.util.ArrayList;
 import java.util.concurrent.*;
 
 import Networking.ClientNetworkHandler;
@@ -21,9 +22,7 @@ public class NetworkHandlerTest {
     }
 
     public void startClient()
-    {
-    	
-    	
+    {	
     	//Sending thread
     	new Thread(new Runnable(){
     		public void run(){
@@ -37,74 +36,75 @@ public class NetworkHandlerTest {
     	    		return;
     	    	}
     	    	
-    	    	TestClient testClient = new TestClient(50000, addr, 8080);
+    	    	TestClient testClient = new TestClient(addr, 8090);
     	    	
-    			if ( !testClient.Initialize() )
+    			if ( testClient.Initialize() )
     	    	{
-    	    		System.out.println("testClient failed to start");
-    	    	}
-    			
-    			String sendBuf[] = new String[25];
-    			
-    			for ( int i=0; i<25; i++ )
-    			{
-    				
-    	    		sendBuf[i] = "String index" + i + "-";
+    	    		for(int i = 0; i < 10; i++)
+    	    		{
+    	    			System.out.println("Sending packet");
+    	    			
+    	    			ArrayList<String> sendBuf = new ArrayList<String>();
+    	    			sendBuf.add("Message " + i);
+    	    			testClient.sendData(sendBuf);
+    	    			
+    	    			try { Thread.sleep(2000); } 
+    	    			catch(Exception e){System.out.println("Could not sleep");}
+    	    			
+    	    			System.out.println("Trying to pull data");
+	        	    	
+	        	    	ArrayList<String> recBuf  = testClient.getData();
+	        	    	
+	        	    	if(recBuf.size() == 0) System.out.println("No data");
+	        	    	else
+	        	    	{
+	        	    		System.out.println("Client Pulled ");
+	        	    		for ( int n=0; n<recBuf.size(); n++ ) System.out.print(recBuf.get(n));
+		        			System.out.println("");
+	        	    	}
+    	    		}
     	    		
-    			}
-    			
-    	    	testClient.sendData(sendBuf);
-    	    		
-    	    	
-    			
-    			System.out.println("Terminating Client");
-    			
-    			try { Thread.sleep(20000); } catch(Exception e){
-    				System.out.println("Could not sleep");
-    			}
-    			
-    			testClient.Stop();
-    			
+    	    		System.out.println("Terminating Client");
+        			testClient.Stop();
+    	    	}	
     		}
     	}).start();
-    	
-    	
-    	
-    	
+    	  	
     	//Receiving thread
     	new Thread(new Runnable(){
     		public void run(){
     			
-    			String recBuf[] = new String[25];
-    			
-    			TestServer testServer = new TestServer(50000, 8080);
+    			TestServer testServer = new TestServer(8080);
     		    
-    	    	if ( !testServer.Initialize() )
+    	    	if ( testServer.Initialize() )
     	    	{
-    	    		System.out.println("testServer failed to start");
+    	    		//Allow traffic to get from client to server
+        	    	try { Thread.sleep(5000); } 
+        	    	catch(Exception e){}
+        	    	
+        	    	
+        	    	for(int i = 0; i < 10; i++)
+        	    	{
+	        	    	System.out.println("Trying to pull data");
+	        	    	
+	        	    	ArrayList<String> recBuf  = testServer.getData();
+	        	    	
+	        	    	if(recBuf.size() == 0) System.out.println("No data");
+	        	    	else
+	        	    	{
+	        	    		System.out.println("Pulled ");
+	        	    		for ( int n=0; n<recBuf.size(); n++ ) System.out.print(recBuf.get(n));
+		        			System.out.println("");
+	        	    	}
+	        			
+	        			try { Thread.sleep(2000); } catch(Exception e){
+	        				System.out.println("Could not sleep");
+	        			}
+        	    	}
+        			
+        	    	System.out.println("Terminating Server");
+        			testServer.Stop();
     	    	}
-    	    	
-    	    	//Allow traffic to get from client to server
-    	    	try { Thread.sleep(5000); } catch(Exception e){}
-    	    	
-    	    	testServer.getData(recBuf);
-    	    	
-    			for ( int i=0; i<25; i++ )
-    			{
-    	    		if ( recBuf[i] != null && !recBuf[i].equals("") ){
-    	    			System.out.println("IMPORTANT: recBuf["+i+"] = " + recBuf[i]);
-    	    		}
-    	    	}
-    			
-    			
-    			System.out.println("Terminating Server");
-    			
-    			try { Thread.sleep(20000); } catch(Exception e){
-    				System.out.println("Could not sleep");
-    			}
-    			
-    			testServer.Stop();
-    			
     		}
     	}).start();
     	
@@ -120,72 +120,59 @@ public class NetworkHandlerTest {
     	
     	NetworkHandlerTest test = new NetworkHandlerTest();
     	
-    	System.out.println("Starting network handler");
+    	System.out.println("Starting network handlers");
     	
     	if ( args[0].toLowerCase().equals("client") )
     	{
     		test.startClient();
     	}
     }
-
-
 }
 
 
 /*
  *  The test server class
  */
-class TestServer extends ServerNetworkHandler<String, String>{
+class TestServer extends ServerNetworkHandler<String, String>
+{
+		public TestServer(int port)
+		{
+			super(port);
+		}
 
-	//listen port
-	int port;
+		
+		//Methods 
+		
+		//return a R(eceive) type object from parsing raw packet data
+		@Override
+	    protected String[] parseReceive(byte[] data)
+	    {
+	    	return new String[] { new String(data) };
+	    }
 
-	//Constructors
-	
-	public TestServer(int size, int port){
-		super(new String[size], new String[size], new String[size], new String[size], port);
-	}
+		
+	    //return raw packet data from an S(end) type object
+	    @Override
+	    protected byte[] parseSend(String data)
+	    {
+	    	return data.getBytes();
+	    }
 
-	
-	//Methods 
-	
-	//return a R(eceive) type object from parsing raw packet data
-	@Override
-    protected int parseReceive(String[] array, int currIndex, byte[] data)
-    {
-    	String rawStr = new String( data );
-    	String strs[] = rawStr.split("-");
-    	for (int i=0; i<(strs.length-1); i++)
-    	{
-    		array[currIndex++] = strs[i];
-    	}
-    	return currIndex;
-    }
+	    
+	    //a copy method to be implemented at lowest level
+	    @Override
+	    public String getSendCopy(String original)
+	    {
+	    	return new String (original);
+	    }
 
-	
-    //return raw packet data from an S(end) type object
-    @Override
-    protected byte[] parseSend(String data)
-    {
-    	return data.getBytes();
-    }
-
-    
-    //a copy method to be implemented at lowest level
-    @Override
-    public String getSendCopy(String original)
-    {
-    	return new String (original);
-    }
-
-    
-	//a copy of the receive type object given
-	@Override
-    public String getReceiveCopy(String original)
-	{
-		return new String (original);
-	}
-
+	    
+		//a copy of the receive type object given
+		@Override
+	    public String getReceiveCopy(String original)
+		{
+			return new String (original);
+		}
 }
 
 
@@ -193,28 +180,20 @@ class TestServer extends ServerNetworkHandler<String, String>{
 /*
  * The test client class
  */
-class TestClient extends ClientNetworkHandler<String, String> {
-
-	//Constructors 
-	
-	public TestClient(int size, InetAddress ip, int port){
-		super(new String[size], new String[size], new String[size], new String[size], ip, port);
+class TestClient extends ClientNetworkHandler<String, String>
+{
+	public TestClient(InetAddress ip, int port)
+	{
+		super(ip, port);
 	}
 	
 	//Methods
 	
 	//return a R(eceive) type object from parsing raw packet data
 	@Override
-	protected int parseReceive(String[] array, int currIndex, byte[] data)
+	protected String[] parseReceive(byte[] data)
     {
-    	String rawStr = new String( data );
-    	String strs[] = rawStr.split("-");
-    	for (int i=0; i<(strs.length-1); i++)
-    	{
-    		array[currIndex++] = strs[i];
-
-    	}
-    	return currIndex;
+		return new String[] { new String(data) };
     }
 	
 

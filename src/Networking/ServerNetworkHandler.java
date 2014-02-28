@@ -25,8 +25,9 @@ public abstract class ServerNetworkHandler<S, R> extends NetworkHandler<S, R> {
 
 	//Constructor(s)
 
-    public ServerNetworkHandler(S[] as, S[] bs, R[] ar, R[] br, int port) {
-    	super(as, bs, ar, br);
+    public ServerNetworkHandler(int port) 
+    {
+    	super();
 		listen_port = port;
     }
 
@@ -51,7 +52,7 @@ public abstract class ServerNetworkHandler<S, R> extends NetworkHandler<S, R> {
 	@Override
     protected DatagramSocket BindSocket() throws SocketException
     {
-    	System.out.println("Server: binding to port " + this.listen_port);
+    	//System.out.println("Server: binding to port " + this.listen_port);
 		return new DatagramSocket(this.listen_port);
     }
     
