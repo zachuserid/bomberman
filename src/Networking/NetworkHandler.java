@@ -179,6 +179,8 @@ public abstract class NetworkHandler<S, R> {
     		for(int i = 0; i < length; i++)
     			buffer[i] = getReceiveCopy(b[i]);
 
+    		//Empty the read buffer
+    		System.out.println("Emptying the receive buffer after read");
     		this.setReceiveReadIndex(0);
     	}
 
@@ -199,6 +201,9 @@ public abstract class NetworkHandler<S, R> {
 
     		for(int i = 0; i < length; i++)
     			b[i] = getSendCopy(buffer[i]);
+    		
+    		int tmp = this.getSendReadIndex();
+    		this.setSendReadIndex(tmp+length);
 
     	}
     	System.out.println("sendData() swapping send buffers after copy");
@@ -242,6 +247,7 @@ public abstract class NetworkHandler<S, R> {
 
 	    	synchronized(b)
 	    	{
+	    		System.out.println("SenderThread synced.. index: " + getSendReadIndex());
 	    		if(this.getSendReadIndex() != 0)
 	    		{
 		    		int length = this.getSendReadIndex();
@@ -253,10 +259,17 @@ public abstract class NetworkHandler<S, R> {
 		    		{
 		    			byte[] data = this.parseSend(b[i]);
 		    			for(int n = 0; n < data.length; n++)
-		    				toSend[n + sendIndex] = data[n];
+		    			{
+		    				if ( n + sendIndex < toSend.length )
+		    					toSend[n + sendIndex] = data[n];
+		    			}
 	    				sendIndex += data.length;
 	    			}
-
+		    		System.out.println("SenderThread sending " + toSend);
+		    		
+		    		if ( toSend == null ) 
+		    			System.out.println("SENDING NULL!");
+		    		
 		    		this.Send(toSend);
 
 	    			this.setSendReadIndex(0);
@@ -282,13 +295,19 @@ public abstract class NetworkHandler<S, R> {
 
 			try
 			{
-				this.socket.receive(packet);
-			} catch (Exception e) {}
 
+				this.socket.receive(packet);
+				
+				System.out.println("RECEIVE THREAD: " + packet.getData().length);
+			} catch (Exception e) {
+				System.out.println("Receive error: " + e.getMessage());
+			}
+			//System.out.println("Receive thread outside of receive");
     		R[] b = this.getReceiveWrite();
 
     		synchronized(b)
     		{
+    			//System.out.println("ReceiverThread synced");
     			int index = this.getReceiveWriteIndex();
 
 				this.preProcessPacket(packet);
@@ -297,8 +316,11 @@ public abstract class NetworkHandler<S, R> {
 				if ( index < b.length )
 				{
 					b[index] = this.parseReceive( packet.getData() );
+					//System.out.println("ReceiverThread b["+index+"] = " + b[index]);
 	    			this.setReceiveWriteIndex(++index);
-				} else { System.out.println("Receive buffer overflow"); }
+	    			byte tmp[] = packet.getData();
+	    			System.out.println("incrementing receiveWriteIndex with data len " + tmp.length);
+				} else { /*System.out.println("Receive buffer overflow");*/ }
 			
     		}
     	}
