@@ -203,7 +203,12 @@ public abstract class NetworkHandler<S, R> {
     			b[i] = getSendCopy(buffer[i]);
     		
 <<<<<<< HEAD
+<<<<<<< HEAD
     		this.setSendWriteIndex(length);
+=======
+    		int tmp = this.getSendReadIndex();
+    		this.setSendReadIndex(tmp+length);
+>>>>>>> f87333772215265f22ed83686e949939949a0838
 =======
     		int tmp = this.getSendReadIndex();
     		this.setSendReadIndex(tmp+length);
