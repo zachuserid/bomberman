@@ -166,7 +166,7 @@ public abstract class NetworkHandler<S, R> {
      */
     public int getData(R[] buffer)
     {
-    	this.swapReceiveBuffer();
+    	//this.swapReceiveBuffer();
 
     	R[] b = this.getReceiveRead();
 
@@ -176,11 +176,14 @@ public abstract class NetworkHandler<S, R> {
     	{
     		length = this.getReceiveReadIndex();
 
-    		for(int i = 0; i < length; i++)
-    			buffer[i] = getReceiveCopy(b[i]);
+    		System.out.println("~~~length of receive buffer: "+ length + " write index: " + this.getReceiveWriteIndex());
 
+    		for(int i = 0; i < length; i++)
+    		{
+    			buffer[i] = getReceiveCopy(b[i]);
+    		}
     		//Empty the read buffer
-    		System.out.println("Emptying the receive buffer after read");
+    		System.out.println("~~~~setting receiveRead to 0");
     		this.setReceiveReadIndex(0);
     	}
 
@@ -200,13 +203,26 @@ public abstract class NetworkHandler<S, R> {
     		int length = Math.min(buffer.length, b.length);
 
     		for(int i = 0; i < length; i++)
+    		{
+    			//@DEBUG
+    			if ( buffer[i] == null )
+    			{
+    				System.out.println("Trying to getSendCopy(null)");
+    			}
     			b[i] = getSendCopy(buffer[i]);
+    			
+    			//@DEBUG
+    			if ( b[i] == null )
+    			{
+    				System.out.println("WARNING: null got into send buffer at index " + i);
+    			}
+
+    		}
     		
-    		int tmp = this.getSendReadIndex();
-    		this.setSendReadIndex(tmp+length);
+    		this.setSendWriteIndex(length);
 
     	}
-    	System.out.println("sendData() swapping send buffers after copy");
+    	
     	this.swapSendBuffer();
     }
 
@@ -216,7 +232,7 @@ public abstract class NetworkHandler<S, R> {
     {
     	try
     	{
-    		this.BindSocket(this.socket);
+    		this.socket = this.BindSocket();
     	} catch (SocketException e)
     	{
     		System.out.println("Could not bind socket. " + e.getMessage());
@@ -247,17 +263,22 @@ public abstract class NetworkHandler<S, R> {
 
 	    	synchronized(b)
 	    	{
-	    		System.out.println("SenderThread synced.. index: " + getSendReadIndex());
 	    		if(this.getSendReadIndex() != 0)
 	    		{
+	    			System.out.println("Server about to send");
+	    			//Obtain the consumer buffer for send objects
 		    		int length = this.getSendReadIndex();
 
+		    		//Byte array raw packet data
 		    		byte[] toSend = new byte[64000];
 		    		int sendIndex = 0;
 
+		    		//For the number of objects to send
 		    		for(int i = 0; i < length; i++)
 		    		{
+		    			//Obtain the byte representation of this one object
 		    			byte[] data = this.parseSend(b[i]);
+		    			//Add its bytes to the outgoing raw packet
 		    			for(int n = 0; n < data.length; n++)
 		    			{
 		    				if ( n + sendIndex < toSend.length )
@@ -265,13 +286,13 @@ public abstract class NetworkHandler<S, R> {
 		    			}
 	    				sendIndex += data.length;
 	    			}
-		    		System.out.println("SenderThread sending " + toSend);
 		    		
-		    		if ( toSend == null ) 
-		    			System.out.println("SENDING NULL!");
+		    		System.out.println("IMPORTANT: SenderThread sending " + new String( toSend ) );
 		    		
+		    		//Send data over network
 		    		this.Send(toSend);
 
+		    		//Reset the consumer buffer to be produced to (over top of the data)
 	    			this.setSendReadIndex(0);
 	    		}
 
@@ -291,36 +312,40 @@ public abstract class NetworkHandler<S, R> {
     {
     	while(this.active)
     	{
+    		System.out.println("current receive write: " + getReceiveWriteIndex()
+    				           + ". current send read: " + getSendReadIndex());
     		DatagramPacket packet = new DatagramPacket(new byte[64000], 64000);
 
 			try
 			{
-
 				this.socket.receive(packet);
 				
-				System.out.println("RECEIVE THREAD: " + packet.getData().length);
+				System.out.println("IMPORTANT: RECEIVE THREAD: " + new String ( packet.getData() ));
 			} catch (Exception e) {
 				System.out.println("Receive error: " + e.getMessage());
 			}
 			//System.out.println("Receive thread outside of receive");
+			//Obtain the consumer buffer for received data
     		R[] b = this.getReceiveWrite();
 
     		synchronized(b)
     		{
-    			//System.out.println("ReceiverThread synced");
     			int index = this.getReceiveWriteIndex();
+    			System.out.println("About to log some receives starting at " + index);
 
+    			//Allow handling of datagram packet before we strip the data
 				this.preProcessPacket(packet);
 
 				//System.out.println("Writing to receive array at index " + index);
 				if ( index < b.length )
 				{
-					b[index] = this.parseReceive( packet.getData() );
-					//System.out.println("ReceiverThread b["+index+"] = " + b[index]);
-	    			this.setReceiveWriteIndex(++index);
-	    			byte tmp[] = packet.getData();
-	    			System.out.println("incrementing receiveWriteIndex with data len " + tmp.length);
-				} else { /*System.out.println("Receive buffer overflow");*/ }
+					//Convert bytes to receive type object and add it to the buffer
+					int newIndex = this.parseReceive( b, index, packet.getData() );
+					System.out.println("got new write index of " + newIndex + " after parsing");
+					//Increment the producer buffer index
+	    			this.setReceiveWriteIndex(newIndex);
+
+				} else { System.out.println("Receive buffer overflow"); }
 			
     		}
     	}
@@ -330,18 +355,23 @@ public abstract class NetworkHandler<S, R> {
     public void Stop()
     {
     	this.active = false;
+    	
+    	if ( this.socket != null )
+    	{
+    		this.socket.close();
+    	}
     }
 
     //Abstracts and overrides
 
     //return a R(eceive) type object from parsing raw packet data
-    protected abstract R parseReceive(byte[] data);
+    protected abstract int parseReceive(R[] array, int currIndex, byte[] data);
 
     //return raw packet data from an S(end) type object
     protected abstract byte[] parseSend(S data);
 
     //binds socket for either client or server
-    protected abstract void BindSocket(DatagramSocket socket) throws SocketException;
+    protected abstract DatagramSocket BindSocket() throws SocketException;
 
     //sends data for either a client or server
     protected abstract void Send(byte[] data);

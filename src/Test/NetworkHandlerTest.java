@@ -44,17 +44,24 @@ public class NetworkHandlerTest {
     	    		System.out.println("testClient failed to start");
     	    	}
     			
-    			String sendBuf[] = new String[25000];
+    			String sendBuf[] = new String[25];
     			
-    			for ( int i=0; i<25; i++ ){
+    			for ( int i=0; i<25; i++ )
+    			{
     				
-    	    		sendBuf[i] = "String index" + i;
+    	    		sendBuf[i] = "String index" + i + "-";
     	    		
-    	    		testClient.sendData(sendBuf);
+    			}
+    			
+    	    	testClient.sendData(sendBuf);
     	    		
-    	    	}
+    	    	
     			
     			System.out.println("Terminating Client");
+    			
+    			try { Thread.sleep(20000); } catch(Exception e){
+    				System.out.println("Could not sleep");
+    			}
     			
     			testClient.Stop();
     			
@@ -68,7 +75,7 @@ public class NetworkHandlerTest {
     	new Thread(new Runnable(){
     		public void run(){
     			
-    			String recBuf[] = new String[25000];
+    			String recBuf[] = new String[25];
     			
     			TestServer testServer = new TestServer(50000, 8080);
     		    
@@ -77,18 +84,24 @@ public class NetworkHandlerTest {
     	    		System.out.println("testServer failed to start");
     	    	}
     	    	
-    			for ( int i=0; i<25; i++ ){
-
-    	    		testServer.getData(recBuf);
-    	    		if ( recBuf[0] != null ){
-    	    			System.out.println("recBuf["+i+"] = " + recBuf[i]);
-    	    		} else {
-    	    			System.out.println("recBuf["+i+"] = Null");
+    	    	//Allow traffic to get from client to server
+    	    	try { Thread.sleep(5000); } catch(Exception e){}
+    	    	
+    	    	testServer.getData(recBuf);
+    	    	
+    			for ( int i=0; i<25; i++ )
+    			{
+    	    		if ( recBuf[i] != null && !recBuf[i].equals("") ){
+    	    			System.out.println("IMPORTANT: recBuf["+i+"] = " + recBuf[i]);
     	    		}
     	    	}
     			
     			
     			System.out.println("Terminating Server");
+    			
+    			try { Thread.sleep(20000); } catch(Exception e){
+    				System.out.println("Could not sleep");
+    			}
     			
     			testServer.Stop();
     			
@@ -138,9 +151,15 @@ class TestServer extends ServerNetworkHandler<String, String>{
 	
 	//return a R(eceive) type object from parsing raw packet data
 	@Override
-    protected String parseReceive(byte[] data)
+    protected int parseReceive(String[] array, int currIndex, byte[] data)
     {
-    	return new String( data );
+    	String rawStr = new String( data );
+    	String strs[] = rawStr.split("-");
+    	for (int i=0; i<(strs.length-1); i++)
+    	{
+    		array[currIndex++] = strs[i];
+    	}
+    	return currIndex;
     }
 
 	
@@ -186,9 +205,16 @@ class TestClient extends ClientNetworkHandler<String, String> {
 	
 	//return a R(eceive) type object from parsing raw packet data
 	@Override
-    protected String parseReceive(byte[] data)
+	protected int parseReceive(String[] array, int currIndex, byte[] data)
     {
-    	return new String( data );
+    	String rawStr = new String( data );
+    	String strs[] = rawStr.split("-");
+    	for (int i=0; i<(strs.length-1); i++)
+    	{
+    		array[currIndex++] = strs[i];
+
+    	}
+    	return currIndex;
     }
 	
 

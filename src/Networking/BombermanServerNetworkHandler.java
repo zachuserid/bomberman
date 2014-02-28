@@ -39,11 +39,40 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 	 * from a factory method.
 	 */
 	@Override
-    public PlayerCommand parseReceive(byte[] data)
+    public int parseReceive(PlayerCommand[] array, int currIndex, byte[] data)
     {
-		//TODO: convert the byte array into a playerCommand object
-
-    	return (PlayerCommand)null;
+		/*
+		 * TODO: The receive() could potentially obtain
+		 * many client update requests as one packet.
+		 * 
+		 * We must delimit the data into various packets based on
+		 * some protocol. It may be as simple as prepending the number
+		 * of bytes for the packet as the first 3 chars in the byte array
+		 * before the client sends it, which can be parseInt() and we would 
+		 * then be able to separate the Objects and append the new ones to the array.
+		 */
+		
+		/*
+		 * I'm thinking the protocol string can look something like this: 
+		 * ":|||join, <name>|||:<timestamp>,<name>||<command>|<details|...>||<command2>|<details|...>"
+		 * ex: :|||join, zach|||:1231241,zach||move|5|7||move|4|7:1235213,alex||move|7|7||move|7|8
+		 * always start player update with ':'
+		 * new player sends |||join, name|||
+		 * others send ||command|x|y||...
+		 */
+		
+		//split the array based on above, or using a delimeter
+		// (see NetworkHandlerTest.parseReceive() for simple example).
+		
+		//for (int i=0; i<split.legth; i++)
+		//{
+			//below params will come from parsing this individual player update protocol str
+		//	PlayerCommand pc = new PlayerCommand(null, 0.02f, 1);
+		//	array[currIndex++] = pc;
+		//}
+		
+		
+    	return currIndex;
     }
 
 	
@@ -118,5 +147,27 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 
 		return true;
 	}
+    
+    
+    //Main
+  	public static void main(String args[]){
+  		
+  		if ( args.length < 1 )
+  		{
+  			System.out.println("Usage: java BombermanServerNetworkHandler <port>");
+  			return;
+  		}
+  		
+  		int port = Integer.parseInt(args[0]);
+      	
+      	BombermanServerNetworkHandler server = new BombermanServerNetworkHandler(50000, port);
+      	
+  		if ( !server.Initialize() )
+      	{
+      		System.out.println("Failed to start server.");
+      		return;
+      	}
+  		
+  	}
 
 }

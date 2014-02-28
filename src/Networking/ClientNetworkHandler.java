@@ -28,13 +28,11 @@ public abstract class ClientNetworkHandler<S, R> extends NetworkHandler<S, R> {
     	this.port = port;
     }
 
-
-    @SuppressWarnings("resource")
 	@Override
-    public void BindSocket(DatagramSocket sock) throws SocketException
+    public DatagramSocket BindSocket() throws SocketException
     {
     	System.out.println("Client: binding to socket, port: " + port);
-    	sock = new DatagramSocket(port, address);
+    	return new DatagramSocket(port, address);
     }
     
     
@@ -44,11 +42,17 @@ public abstract class ClientNetworkHandler<S, R> extends NetworkHandler<S, R> {
     {
 			DatagramPacket sendPacket = new DatagramPacket(packet_data,
 								packet_data.length, address, port);
+
 			try {
-				System.out.println("Sending data: " + new String(packet_data) + " to " + port);
+				
+				System.out.println("Sending data: " + new String(packet_data) + " to " + port );
+				
 				socket.send(sendPacket);
+				
 			} catch(Exception e){
-				System.out.println("Failed to send data of length " + packet_data.length);
+				
+				System.out.println("Failed to send data of length " + packet_data.length + ": " + e.getMessage());
+				
 			}
     }
 

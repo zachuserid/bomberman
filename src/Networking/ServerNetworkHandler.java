@@ -47,13 +47,12 @@ public abstract class ServerNetworkHandler<S, R> extends NetworkHandler<S, R> {
     }
     
     
-	//binds socket for either client or server
-    @SuppressWarnings("resource")
+	//binds socket for either client or servers
 	@Override
-    protected void BindSocket(DatagramSocket socket) throws SocketException
+    protected DatagramSocket BindSocket() throws SocketException
     {
-		socket = new DatagramSocket(this.listen_port);
-		System.out.println("Server: binding to port " + this.listen_port);
+    	System.out.println("Server: binding to port " + this.listen_port);
+		return new DatagramSocket(this.listen_port);
     }
     
     
@@ -69,11 +68,16 @@ public abstract class ServerNetworkHandler<S, R> extends NetworkHandler<S, R> {
 				//Send this spectator the data
 				DatagramPacket sendPacket = new DatagramPacket(packet_data, packet_data.length,
 																client.getAddr(), client.getPort());
+				
 				try {
-					System.out.println("Sending data: " + new String(packet_data) + " to " + client.getPort());
+					
+					System.out.println("Sending data: '" + new String(packet_data) + "' to " + client.getPort());
 					socket.send(sendPacket);
+					
 				} catch(Exception e){
-					System.out.println("Failed to send data of length " + packet_data.length);
+					
+					System.out.println("Failed to send data of length " + packet_data.length + ": " + e.getMessage());
+					
 				}
 			}
     }
