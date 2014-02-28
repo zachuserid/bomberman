@@ -199,6 +199,8 @@ public abstract class NetworkHandler<S, R> {
 
     		for(int i = 0; i < length; i++)
     			b[i] = getSendCopy(buffer[i]);
+    		
+    		this.setSendWriteIndex(length);
 
     	}
     	System.out.println("sendData() swapping send buffers after copy");
