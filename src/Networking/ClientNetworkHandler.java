@@ -32,7 +32,7 @@ public abstract class ClientNetworkHandler<S, R> extends NetworkHandler<S, R> {
     public DatagramSocket BindSocket() throws SocketException
     {
     	//System.out.println("Client: binding to socket, port: " + port);
-    	return new DatagramSocket(port, address);
+    	return new DatagramSocket();
     }
     
     

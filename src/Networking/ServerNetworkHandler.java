@@ -29,6 +29,7 @@ public abstract class ServerNetworkHandler<S, R> extends NetworkHandler<S, R> {
     {
     	super();
 		listen_port = port;
+		subscribers = new ArrayList<Subscriber>();
     }
 
     
@@ -42,9 +43,9 @@ public abstract class ServerNetworkHandler<S, R> extends NetworkHandler<S, R> {
     
 	//Methods
 
-    protected void addSubscriber(InetAddress addr, int port)
+    protected void addSubscriber(String name, InetAddress addr, int port)
     {
-    	subscribers.add( new Subscriber(addr, port) );
+    	subscribers.add( new Subscriber(name, addr, port) );
     }
     
     
@@ -63,8 +64,13 @@ public abstract class ServerNetworkHandler<S, R> extends NetworkHandler<S, R> {
     {
 
 			ArrayList<Subscriber> spectators = this.getSubscribers();
+			
+			System.out.println("+++length of subscribers: " + spectators.size());
+			
 			//Iterate over all subscribers
 			for (Subscriber client: spectators){
+				System.out.println("The server is sending to spectator with port " + client.getPort());
+
 
 				//Send this spectator the data
 				DatagramPacket sendPacket = new DatagramPacket(packet_data, packet_data.length,

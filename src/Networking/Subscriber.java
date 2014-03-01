@@ -24,20 +24,28 @@ public class Subscriber {
 	private InetAddress address;
 	//The client's port
 	private int port;
+	
+	private String name;
 
-    public Subscriber(InetAddress addr, int prt) {
+    public Subscriber(String name, InetAddress addr, int prt) {
+    	this.name = name;
     	address = addr;
     	port = prt;
     }
 
     public InetAddress getAddr()
     {
-    	return address;
+    	return this.address;
     }
 
     public int getPort()
     {
-    	return port;
+    	return this.port;
+    }
+    
+    public String getName()
+    {
+    	return this.name;
     }
 
 }

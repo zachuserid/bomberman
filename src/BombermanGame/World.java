@@ -109,8 +109,22 @@ public class World implements Sendable<World>
 	@Override
 	public byte[] getBytes()
 	{
-		return new String("WORLD STRING").getBytes();
+		int width = this.getGridWidth();
+		int height = this.getGridHeight();
+		
+		byte worldBytes[] = new byte[width * height];
+		
+		for (int i=0; i<width; i++)
+		{
+			for (int j=0; j<height; j++)
+			{
+				worldBytes[ (i * width) + j ] = (byte)this.grid[i][j];
+			}
+		}
+		
+		return worldBytes;
 	}
+	
 	@Override
 	public World getCopy()
 	{

@@ -27,8 +27,10 @@ public class PlayerCommand implements Sendable<PlayerCommand>
 	@Override
 	public byte[] getBytes()
 	{
-		// TODO Auto-generated method stub
-		return this.Command.toString().getBytes();
+		String byteStr = "";
+		byteStr += this.Time + "," + this.Id
+							 + "," + this.Command;
+		return byteStr.getBytes();
 	}
 
 	@Override

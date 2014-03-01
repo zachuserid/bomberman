@@ -98,6 +98,7 @@ public abstract class NetworkHandler<S, R> {
     	return true;
     }
 
+    
     //stops the handler
     public void Stop()
     {
@@ -125,7 +126,7 @@ public abstract class NetworkHandler<S, R> {
 
     	ArrayList<R> list = new ArrayList<R>(b.size());
     	
-    	System.out.println("receive read buffer has " + b.size());
+    	System.out.println("receive read buffer has " + b.size() + " write buffer has " + this.getReceiveWrite().size());
     	
     	synchronized(b)
     	{
@@ -213,13 +214,14 @@ public abstract class NetworkHandler<S, R> {
 
 			try
 			{
+
 				this.socket.receive(packet);
 				
-				System.out.println("Received " + new String ( packet.getData() ));
+				System.out.println("NOTE: Received " + new String ( packet.getData() ));
 				
 			} catch (Exception e) 
 			{ 
-				//System.out.println("Receive error: " + e.getMessage()); 
+				System.out.println("RECEIVE ERROR: " + e.getMessage()); 
 				packet = null;
 			}
 			
