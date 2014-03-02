@@ -15,19 +15,42 @@ public abstract class ClientNetworkHandler<S, R> extends NetworkHandler<S, R> {
 	//Data members
 
 	//The server's communication details
-	InetAddress address;
-	int port;
+	private InetAddress address;
+	private int port;
 
+	/*
+	 * Network status:
+	 * 0 - Failure to register server IP
+	 * 1 - Success status
+	 */
+	private int networkStatus;
 	
-	//Methods
+	//Constructor
 	
 	//Accept a new return buffer to fill with <R> type data
-    public ClientNetworkHandler(InetAddress ip, int port) {
+    public ClientNetworkHandler(String ip, int port) {
     	super();
-    	this.address = ip;
     	this.port = port;
+    	this.networkStatus = 1;
+		//Create an IP address object
+    	try {
+    		this.address = InetAddress.getByName(ip);
+    	} catch (Exception e)
+    	{
+    		this.networkStatus = 0;
+    	}
+    	
+    }
+    
+    //Getters & Setters
+    
+    public int getNetworkStatus()
+    {
+    	return this.networkStatus;
     }
 
+    //Methods
+    
 	@Override
     public DatagramSocket BindSocket() throws SocketException
     {

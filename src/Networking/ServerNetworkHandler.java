@@ -45,6 +45,7 @@ public abstract class ServerNetworkHandler<S, R> extends NetworkHandler<S, R> {
 
     protected void addSubscriber(String name, InetAddress addr, int port)
     {
+    	System.out.println("New player: " + name);
     	subscribers.add( new Subscriber(name, addr, port) );
     }
     
@@ -65,7 +66,7 @@ public abstract class ServerNetworkHandler<S, R> extends NetworkHandler<S, R> {
 
 			ArrayList<Subscriber> spectators = this.getSubscribers();
 			
-			System.out.println("+++length of subscribers: " + spectators.size());
+			System.out.println("++length of subscribers: " + spectators.size());
 			
 			//Iterate over all subscribers
 			for (Subscriber client: spectators){
@@ -83,7 +84,7 @@ public abstract class ServerNetworkHandler<S, R> extends NetworkHandler<S, R> {
 					
 				} catch(Exception e){
 					
-					System.out.println("Failed to send data of length " + packet_data.length + ": " + e.getMessage());
+					System.out.println("Failed to send data of length " + packet_data.length + ". " + e.getMessage());
 					
 				}
 			}

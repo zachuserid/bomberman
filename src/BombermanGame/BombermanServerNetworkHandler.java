@@ -87,8 +87,10 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 		 */		
 		String protoStr = new String(data);
 		
-		String playerUpdateStrs[] = protoStr.split(":");
+		System.out.println("Parsing string: "+protoStr);
 		
+		String playerUpdateStrs[] = protoStr.split(":");
+
 		//Give space for an array for each player. Note length - 1 since the split
 		// will give empty String since it is the first character in the protocol
 		PlayerCommand commands[][] = new PlayerCommand[playerUpdateStrs.length-1][];
@@ -97,9 +99,16 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
     	for (int i=1; i<playerUpdateStrs.length; i++)
     	{
     		
-    		String updates[] = playerUpdateStrs[i].split(",");
-    		//For all updates that they sent
+    		//check that entire message was not stripped
+    		if ( playerUpdateStrs[i-1].trim().equals("") ){
+    			commands[i-1] = null;
+    			continue;
+    		}
     		
+    		System.out.println("player update at " + i + ": '" + playerUpdateStrs[i].trim() + "'");
+    		
+    		String updates[] = playerUpdateStrs[i].split(",");
+    		    		
     		/*
     		 * Instantiate this player's array. It has length
     		 * of the update array length/3, as that is the
@@ -108,7 +117,7 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
     		 * string length so long as join games are properly
     		 * filtered in preProcessPacket()
     		 */
-    		commands[i] = new PlayerCommand[updates.length/3];
+    		commands[i-1] = new PlayerCommand[updates.length/3];
     		
     		for (int j=0; j<updates.length; j+=3)
     		{
@@ -116,7 +125,7 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
     			int id = Integer.parseInt(updates[j+1]);
     			PlayerCommandType type = PlayerCommandType.values()[Integer.parseInt(updates[j+2])];
     			
-    			commands[i][j] = new PlayerCommand(type, time, id);
+    			commands[i-1][j] = new PlayerCommand(type, time, id);
     			
     		}
     	}
@@ -128,7 +137,19 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 	@Override
 	protected byte[] parseSend(World world)
 	{
-		return world.getBytes();
+		byte worldBytes[] = world.getBytes();
+		
+		byte byteData[] = new byte[worldBytes.length+2];
+		
+		byteData[0] = (byte)world.getGridWidth();
+		byteData[1] = (byte)world.getGridHeight();
+		
+		for ( int i=0; i<worldBytes.length; i++ )
+		{
+			byteData[i+2] = worldBytes[i];
+		}
+		
+		return byteData;
 	}
 
 

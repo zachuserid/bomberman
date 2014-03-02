@@ -106,8 +106,8 @@ public abstract class NetworkHandler<S, R> {
     	
     	if ( this.socket != null ) this.socket.close();
     	
-    	
     	ArrayDeque<S> d = this.getSendRead();
+    	
     	synchronized(d)
     	{
     		d.notify();
@@ -125,9 +125,7 @@ public abstract class NetworkHandler<S, R> {
     	ArrayDeque<R> b = this.getReceiveRead();
 
     	ArrayList<R> list = new ArrayList<R>(b.size());
-    	
-    	System.out.println("receive read buffer has " + b.size() + " write buffer has " + this.getReceiveWrite().size());
-    	
+    	    	
     	synchronized(b)
     	{
     		while(!b.isEmpty()) list.add(this.getReceiveCopy(b.pop()));
@@ -221,7 +219,7 @@ public abstract class NetworkHandler<S, R> {
 				
 			} catch (Exception e) 
 			{ 
-				System.out.println("RECEIVE ERROR: " + e.getMessage()); 
+				System.out.println("Socket exception: " + e.getMessage()); 
 				packet = null;
 			}
 			
@@ -235,7 +233,11 @@ public abstract class NetworkHandler<S, R> {
 	    		synchronized(b)
 	    		{
 	    			R[] data = this.parseReceive(packet.getData());
-	    			for(int i = 0; i < data.length; i++) b.push(data[i]);
+	    			for(int i = 0; i < data.length; i++)
+	    			{
+	    				if ( data[i] != null )
+	    					b.push(data[i]);
+	    			}
 	    			
 	    			System.out.println(data.length + " element(s) added to receive buffer");
 				}

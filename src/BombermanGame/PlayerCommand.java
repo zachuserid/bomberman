@@ -38,4 +38,11 @@ public class PlayerCommand implements Sendable<PlayerCommand>
 	{
 		return new PlayerCommand(this.Command, this.Time, this.Id);
 	}
+	
+	@Override
+	public String toString()
+	{
+		return "Player " + this.PlayerName + " request " + this.Id + 
+				" for move " + this.Command	+ " at " + this.Time;
+	}
 }

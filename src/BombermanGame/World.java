@@ -132,4 +132,20 @@ public class World implements Sendable<World>
 		
 		return new World(this.grid);
 	}
+	
+	public void printGrid()
+	{
+		int w = this.getGridWidth();
+		int h = this.getGridHeight();
+		for (int i=0; i<w; i++)
+		{
+			for (int j=0; j<h; j++)
+			{
+				System.out.print(this.grid[i][j]);
+			}
+			System.out.println("");
+		}
+		
+	}
+	
 }

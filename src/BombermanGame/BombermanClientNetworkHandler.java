@@ -1,54 +1,74 @@
 package BombermanGame;
 
-import java.net.InetAddress;
+import java.util.ArrayList;
 
 import Networking.ClientNetworkHandler;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
 
 public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[], char[][]>{
 
 	//Members
 	
-	int grid_dimension;
+	int grid_width;
+	int grid_height;
 	
 	//Constructor
 	
-	public BombermanClientNetworkHandler(InetAddress ip, int port, String filePath)
+	public BombermanClientNetworkHandler(String ip, int port)
 	{
 		super(ip, port);
-		
-		BufferedReader br;
-		try 
-	    {
-			//opens the reader with the path
-			br = new BufferedReader(new FileReader(filePath));
-			
-			//reads in the first line of the file
-	        grid_dimension = Integer.parseInt( br.readLine() );
-
-	    } catch (Exception e)
-	    {
-	    	System.out.println("Client could not read dimensions from file: '"+filePath+"'");
-	    }
+		//Initialize dimensions as "unknown" until we receive some packets
+		grid_width = -1;
+		grid_height = -1;
 	}
 
 
 	//Methods
+	
+	//Create packet requesting a join game, and call super.sendData();
+	public void joinGame()
+	{
+		ArrayList<PlayerCommand[]> toSend = new ArrayList<PlayerCommand[]>();
+		
+		PlayerCommand joinCom[] = new PlayerCommand[1];
+		
+		joinCom[0] = new PlayerCommand(PlayerCommandType.Join, 0, 0);
+		
+		toSend.add( joinCom );
+		
+		this.sendData(toSend);
+	}
     
+	/*
+	 * **Note: The first two bytes sent to us
+	 * for each grid update will represent the
+	 * width and height of the grid, respectively.
+	 * As we are bounding the grid to 127 x 127,
+	 * each value can be represented as one byte.
+	 */
 	@Override
 	protected char[][][] parseReceive(byte[] data) 
 	{
+		//get the first two bytes out of the data
+		int w = data[0];
+		int h = data[1];
+		
+		if ( this.grid_width != w || this.grid_height != h )
+		{
+			System.out.println("Changing grid dimensions to ["+w+"]["+h+"]");
+			this.grid_width = w;
+			this.grid_height = h;
+		}
+		
 		//we only require one world grid update, so we will ignore the
 		// array aspect and only populate 1 char[][]
-		char[][][] gridArr = new char[1][this.grid_dimension][this.grid_dimension];
 		
-		for (int i=0; i<this.grid_dimension; i++)
+		char[][][] gridArr = new char[1][this.grid_width][this.grid_height];
+		
+		for (int i=0; i<this.grid_width; i++)
 		{
-			for (int j=0; j<this.grid_dimension; j++)
+			for (int j=0; j<this.grid_height; j++)
 			{
-				gridArr[0][i][j] = (char)data[ (i * this.grid_dimension) + j ];
+				gridArr[0][i][j] = (char)data[ ( (i * this.grid_width) + j) + 2 ];
 			}
 		}
 		
@@ -62,15 +82,28 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 	{
 		//:<time>,<id>,<PlayerCommand>
 		String toSend = ":"; //Start of player request
+		
+		boolean needTrim = false;
+		
 		for (int i=0; i<commands.length; i++)
 		{
+			if ( commands[i].Command == PlayerCommandType.Join )
+			{
+				System.out.println("Sending join game message");
+				//Not sending a name, server will take care of that
+				toSend += "|||join,,|||";
+				continue;
+			}
+			
 			toSend += commands[i].Time;
 			toSend += "," + commands[i].Id;
 			toSend += "," + commands[i].Command + ",";
+			needTrim = true;
 		}
 		
 		//remove trailing ','
-		toSend = toSend.substring(0, toSend.length()-1);
+		if (needTrim)
+			toSend = toSend.substring(0, toSend.length()-1);
 		
 		return toSend.getBytes();
 	}

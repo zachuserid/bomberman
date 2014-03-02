@@ -26,17 +26,8 @@ public class NetworkHandlerTest {
     	//Client thread
     	new Thread(new Runnable(){
     		public void run(){
-    			
-    	    	InetAddress addr;
-    	    	try {
-    	    		addr = InetAddress.getByName("localhost");
-    	    	} catch (UnknownHostException e)
-    	    	{
-    	    		System.out.println("Client: Unknown host exception!");
-    	    		return;
-    	    	}
     	    	
-    	    	TestClient testClient = new TestClient(addr, 8090);
+    	    	TestClient testClient = new TestClient("localhost", 8090);
     	    	
     			if ( testClient.Initialize() )
     	    	{
@@ -214,7 +205,7 @@ class TestServer extends ServerNetworkHandler<String, String>
  */
 class TestClient extends ClientNetworkHandler<String, String>
 {
-	public TestClient(InetAddress ip, int port)
+	public TestClient(String ip, int port)
 	{
 		super(ip, port);
 	}
