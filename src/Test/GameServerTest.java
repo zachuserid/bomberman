@@ -34,11 +34,13 @@ public class GameServerTest
 				PlayerCommand coms[] = received.get(i);
 				for (int j=0; j<coms.length; j++)
 				{
-					System.out.println("command received: " + coms[j].toString());
+					System.out.println("command received: " + coms[j].toString() + ", with name " + coms[j].PlayerName);
 				}
 			}
 			if ( h == 20 ) break;
 		}
+		
+		//Send out a map update
 		
 		char wGrid[][] = 
 			{  
@@ -47,6 +49,17 @@ public class GameServerTest
 				{'.', '.', '.', '.', '.'},
 				{'.', '.', 'e', '.', '.'},
 				{'P', '.', '.', '.', '.'}
+			};
+		
+		//Send another world
+		
+		char wGrid2[][] = 
+			{  
+				{'.', 'E', 'O', 'c', '.'},
+			    {'.', 'e', 'P', 'D', '.'},
+				{'.', 'P', 'O', '.', '.'},
+				{'.', '.', 'O', 'B', '.'},
+				{'P', '.', '.', '.', '.'},
 			};
 		
 		ArrayList<World> worldList = new ArrayList<World>();
@@ -60,6 +73,20 @@ public class GameServerTest
 		worldList.add(world);
 		
 		server.sendData(worldList);
+		
+		
+		worldList = new ArrayList<World>();
+		
+		world = new World(wGrid2);
+
+		System.out.println("Server, sending grid:");
+		
+		world.printGrid();
+		
+		worldList.add(world);
+		
+		server.sendData(worldList);
+		
 		
 		Thread.sleep(5000);
 		

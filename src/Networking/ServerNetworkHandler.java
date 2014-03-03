@@ -45,7 +45,9 @@ public abstract class ServerNetworkHandler<S, R> extends NetworkHandler<S, R> {
 
     protected void addSubscriber(String name, InetAddress addr, int port)
     {
-    	System.out.println("New player: " + name);
+    	if ( name.trim().equals("") ) System.out.println("New spectator");
+    	else System.out.println("New player: " + name);
+    	
     	subscribers.add( new Subscriber(name, addr, port) );
     }
     

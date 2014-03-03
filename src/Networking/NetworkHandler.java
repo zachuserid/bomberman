@@ -144,7 +144,7 @@ public abstract class NetworkHandler<S, R> {
 
     	synchronized(b)
     	{
-    		for(S d : data) b.push(this.getSendCopy(d));
+    		for(S d : data) b.add(this.getSendCopy(d));
     		
     		System.out.println("send write buffer has " + b.size());
     	}
@@ -236,7 +236,7 @@ public abstract class NetworkHandler<S, R> {
 	    			for(int i = 0; i < data.length; i++)
 	    			{
 	    				if ( data[i] != null )
-	    					b.push(data[i]);
+	    					b.add(data[i]);
 	    			}
 	    			
 	    			System.out.println(data.length + " element(s) added to receive buffer");

@@ -113,12 +113,12 @@ public class World implements Sendable<World>
 		int height = this.getGridHeight();
 		
 		byte worldBytes[] = new byte[width * height];
-		
+		System.out.println("World width: " + width + " height: " + height);
 		for (int i=0; i<width; i++)
 		{
 			for (int j=0; j<height; j++)
 			{
-				worldBytes[ (i * width) + j ] = (byte)this.grid[i][j];
+				worldBytes[ (j * height) + i ] = (byte)this.grid[j][i];
 			}
 		}
 		

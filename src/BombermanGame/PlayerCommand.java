@@ -23,6 +23,14 @@ public class PlayerCommand implements Sendable<PlayerCommand>
 		//the server will populate this with the packet's user name
 		this.PlayerName = "";
 	}
+	
+	public PlayerCommand(String name, PlayerCommandType command, float time, int id)
+	{
+		this.Command = command;
+		this.Time = time;
+		this.Id = id;
+		this.PlayerName = name;
+	}
 
 	@Override
 	public byte[] getBytes()
@@ -36,7 +44,7 @@ public class PlayerCommand implements Sendable<PlayerCommand>
 	@Override
 	public PlayerCommand getCopy()
 	{
-		return new PlayerCommand(this.Command, this.Time, this.Id);
+		return new PlayerCommand(this.PlayerName, this.Command, this.Time, this.Id);
 	}
 	
 	@Override
