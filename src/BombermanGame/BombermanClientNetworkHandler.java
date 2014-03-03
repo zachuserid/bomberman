@@ -1,10 +1,9 @@
 package BombermanGame;
 
-import java.util.ArrayList;
 
 import Networking.ClientNetworkHandler;
 
-public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[], char[][]>{
+public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[], BomberPacket>{
 
 	//Members
 	
@@ -27,15 +26,11 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 	//Create packet requesting a join game, and call super.sendData();
 	public void joinGame()
 	{
-		ArrayList<PlayerCommand[]> toSend = new ArrayList<PlayerCommand[]>();
-		
 		PlayerCommand joinCom[] = new PlayerCommand[1];
 		
 		joinCom[0] = new PlayerCommand(PlayerCommandType.Join, 0, 0);
 		
-		toSend.add( joinCom );
-		
-		this.sendData(toSend);
+		this.Send(joinCom);
 	}
     
 	/*
@@ -46,33 +41,54 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 	 * each value can be represented as one byte.
 	 */
 	@Override
-	protected char[][][] parseReceive(byte[] data) 
+	protected BomberPacket[] parseReceive(byte[] data) 
 	{
-		//get the first two bytes out of the data
-		int w = data[0];
-		int h = data[1];
-		
-		if ( this.grid_width != w || this.grid_height != h )
-		{
-			System.out.println("Changing grid dimensions to ["+w+"]["+h+"]");
-			this.grid_width = w;
-			this.grid_height = h;
-		}
-		
 		//we only require one world grid update, so we will ignore the
 		// array aspect and only populate 1 char[][]
 		
-		char[][][] gridArr = new char[1][this.grid_width][this.grid_height];
+		BomberPacket p = new BomberPacket();
 		
-		for (int i=0; i<this.grid_width; i++)
+		if((int)data[0] == 5)
 		{
-			for (int j=0; j<this.grid_height; j++)
+			String s = new String(data);
+			s = s.substring(1);
+			String[] ss = s.split(",");
+			s = ss[0];
+			char c = ss[1].charAt(0);
+			int x = (int)ss[2].getBytes()[0];
+			int y = (int)ss[3].getBytes()[0];
+			BombermanPlayer player = new BombermanPlayer(s, new Point(x, y), c);
+			p.Data = player;
+			p.Command = PlayerCommandType.Join;
+		}
+		else
+		{
+			//get the first two bytes out of the data
+			int w = data[1];
+			int h = data[2];
+			
+			if ( this.grid_width != w || this.grid_height != h )
 			{
-				gridArr[0][i][j] = (char)data[ ( (i * this.grid_width) + j) + 2 ];
+				System.out.println("Changing grid dimensions to ["+w+"]["+h+"]");
+				this.grid_width = w;
+				this.grid_height = h;
 			}
+			
+			char[][] gridArr = new char[this.grid_width][this.grid_height];
+			
+			for (int i=0; i<this.grid_width; i++)
+			{
+				for (int j=0; j<this.grid_height; j++)
+				{
+					gridArr[i][j] = (char)data[ ( (i * this.grid_width) + j) + 2 ];
+				}
+			}
+			
+			p.Command = PlayerCommandType.Update;
+			p.Data = gridArr;
 		}
 		
-		return gridArr;
+		return new BomberPacket[] {p};
 	}
 
 
@@ -126,21 +142,42 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 
 
 	@Override
-	protected char[][] getReceiveCopy(char[][] original)
+	protected BomberPacket getReceiveCopy(BomberPacket original)
 	{
-		int w = original.length;
-		int h = original[0].length;
-		char[][] gridCopy = new char[w][h];
-		for (int i=0; i<w; i++)
+		if(original.Command == PlayerCommandType.Join)
 		{
-			for (int j=0; j<h; j++)
-			{
-				gridCopy[i][j] = original[i][j];
-			}
+			BomberPacket p = new BomberPacket();
+			p.Command = PlayerCommandType.Join;
+			
+			BombermanPlayer or = (BombermanPlayer)original.Data;
+			
+			BombermanPlayer player = new BombermanPlayer(or.getName(), new Point(or.getX(), or.getY()), or.getCharacter());
+			
+			p.Data = player;
+			
+			return p;
 		}
-		
-		return gridCopy;
+		else
+		{
+			BomberPacket p = new BomberPacket();
+			p.Command = original.Command;
+			
+			char[][] or = (char[][])original.Data;
+			
+			int w = or.length;
+			int h = or[0].length;
+			char[][] gridCopy = new char[w][h];
+			for (int i=0; i<w; i++)
+			{
+				for (int j=0; j<h; j++)
+				{
+					gridCopy[i][j] = or[i][j];
+				}
+			}
+			
+			p.Data = gridCopy;
+			
+			return p;
+		}
 	}
-	
-
 }

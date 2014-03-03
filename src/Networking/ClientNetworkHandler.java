@@ -61,7 +61,7 @@ public abstract class ClientNetworkHandler<S, R> extends NetworkHandler<S, R> {
     
 	//Send the packet data to the server's network handler
 	@Override
-    protected void Send(byte[] packet_data)
+    protected void sendData(byte[] packet_data)
     {
 			DatagramPacket sendPacket = new DatagramPacket(packet_data,
 								packet_data.length, address, port);

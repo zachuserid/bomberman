@@ -8,5 +8,8 @@ public enum PlayerName {
 	Koopa,
 	GuyFawkes,
 	Rachet,
-	BulletBill
+	BulletBill,
+	Nine,
+	Ten,
+	Eleven
 }

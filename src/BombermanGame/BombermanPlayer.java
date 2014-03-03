@@ -6,9 +6,9 @@ package BombermanGame;
  */
 public class BombermanPlayer extends Entity
 {
-	public BombermanPlayer(String name, Point location)
+	public BombermanPlayer(String name, Point location, char character)
 	{
-		super(name, location);
+		super(name, location, character);
 	}
 	
 	public void Update(float elapsed, World world)

@@ -8,5 +8,6 @@ public enum PlayerCommandType
 	MoveUp,
 	MoveDown,
 	PlantBomb,
-	Join
+	Join,
+	Update
 }

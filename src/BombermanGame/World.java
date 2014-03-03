@@ -25,13 +25,18 @@ public class World implements Sendable<World>
 		return this.entities.size();
 	}
 	
-	public Point getNextPlayerLocation() 
+	protected Point getNextPlayerLocation() 
 	{ 
 		for(int x = 0; x < this.getGridWidth(); x++) 
 			for(int y = 0; y < this.getGridHeight(); y++)
 				if(this.getElementAt(x, y)=='.') return new Point(x,y);
 		
 		return Point.Zero();
+	}
+	
+	protected char getNextChar()
+	{
+		return Characters.values()[this.entities.size()].toString().toCharArray()[0];
 	}
 	
 	//returns the (currently)char elements at x,y
@@ -54,14 +59,22 @@ public class World implements Sendable<World>
 	//adds an entity to world (should be mapped to an outside controller to be dynamic)
 	public boolean AddEntity(Entity e)
 	{
-		//this.grid[e.getX()][e.getY()] = Character.toChars(this.entities.size())[0];
-		this.grid[e.getX()][e.getY()] = Characters.values()[this.entities.size()].toString().toCharArray()[0];
+		this.grid[e.getX()][e.getY()] = this.getNextChar();
 		System.out.println("adding character " + this.grid[e.getX()][e.getY()] + " at "+e.getX()+","+e.getY() + "size: "+ this.entities.size());
 		this.entities.add(e);
 		
 		return true;
 	}
 
+	public BombermanPlayer AddPlayer(String name)
+	{
+		BombermanPlayer p = new BombermanPlayer(name, this.getNextPlayerLocation(), this.getNextChar());
+		
+		this.AddEntity(p);
+		
+		return p;
+	}
+	
 	//currently unused, may be needed for "static" object updates (animations or something)
 	public void Update(float time)
 	{
@@ -185,5 +198,8 @@ enum Characters {
 	c,
 	e,
 	f,
-	g
+	g,
+	h,
+	i,
+	j
 }

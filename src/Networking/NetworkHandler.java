@@ -138,14 +138,13 @@ public abstract class NetworkHandler<S, R> {
      * copies the data to the writing buffer to send
      * swaps the buffer to now be the reading buffer
      */
-    public void sendData(ArrayList<S> data)
+    public void Send(S data)
     {
     	ArrayDeque<S> b = this.getSendWrite();
 
     	synchronized(b)
     	{
-    		for(S d : data) b.add(this.getSendCopy(d));
-    		
+    		b.add(this.getSendCopy(data));
     	}
     	
     	this.swapSendBuffer();
@@ -185,7 +184,7 @@ public abstract class NetworkHandler<S, R> {
 	    			//System.out.println("Sending string: " + new String( sendData ) );
 		    		
 		    		//Send data over network
-		    		this.Send(sendData);
+		    		this.sendData(sendData);
 	    		}
 	    		
 	    		//if still active, wait on this buffer to be signaled
@@ -214,7 +213,7 @@ public abstract class NetworkHandler<S, R> {
 
 				this.socket.receive(packet);
 				
-				System.out.println("NOTE: Received " + new String ( packet.getData() ));
+				//System.out.println("NOTE: Received " + new String ( packet.getData() ));
 				
 			} catch (Exception e) 
 			{ 
@@ -238,7 +237,7 @@ public abstract class NetworkHandler<S, R> {
 	    					b.add(data[i]);
 	    			}
 	    			
-	    			System.out.println(data.length + " element(s) added to receive buffer");
+	    			//System.out.println(data.length + " element(s) added to receive buffer");
 				}
     		}
     	}
@@ -284,7 +283,7 @@ public abstract class NetworkHandler<S, R> {
     protected abstract DatagramSocket BindSocket() throws SocketException;
 
     //sends data for either a client or server
-    protected abstract void Send(byte[] data);
+    protected abstract void sendData(byte[] data);
     
     //a copy method to be implemented at lowest level
     protected abstract S getSendCopy(S original);

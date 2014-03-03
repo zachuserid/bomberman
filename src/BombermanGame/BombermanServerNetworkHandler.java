@@ -1,8 +1,12 @@
 package BombermanGame;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.regex.Pattern;
 import java.net.*;
 import java.util.regex.*;
+
 import Networking.ServerNetworkHandler;
 import Networking.Subscriber;
 
@@ -10,9 +14,13 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 
 	//Members
 	
-	private final int MAX_PLAYERS = PlayerName.values().length;
-	//An index for the PlayerNames to use
-	private int namesUsed = 0;
+	protected ArrayDeque<PlayerCommand> joinBufferA, joinBufferB;
+	
+	protected int maxPlayers;
+	
+	protected int currentPlayers;
+	
+	protected boolean jA;
 	
 	//Parsing expressions for Bomberman communication protocol
     private String joinRE = "\\|\\|\\|.*?\\|\\|\\|";
@@ -20,31 +28,68 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 	
 	//Constructor
 	
-	public BombermanServerNetworkHandler(int port) {
+	public BombermanServerNetworkHandler(int port, int maxPlayers) {
 		super(port);
+		
+		this.maxPlayers = maxPlayers;
+		
+		this.jA = true;
+		
+		this.joinBufferA = new ArrayDeque<PlayerCommand>();
+		this.joinBufferB = new ArrayDeque<PlayerCommand>();
 	}
 	
 	//Methods
 	
-	void handleNewPlayer(String name, InetAddress ip, int port, boolean playing)
+	public PlayerCommand[] getJoinRequests()
+    {
+		this.swapJoinBuffer();
+    	
+    	ArrayDeque<PlayerCommand> b = this.getJoinRead();
+  	
+    	synchronized(b)
+    	{
+    		PlayerCommand[] list = new PlayerCommand[b.size()];
+    		
+    		for(int i = 0; i < b.size(); i++)
+    			list[i] = b.pop();
+    		list = this.getReceiveCopy(list);
+    		
+    		return list;
+    	}
+    }
+	
+	public void Send(String name, String data)
+	{
+		this.sendData(name, data.getBytes());
+	}
+	
+	protected void handleNewSubscriber(String name, InetAddress ip, int port, boolean playing)
 	{
     	if ( playing && canAddPlayer() )
     	{
-    		String playerName = PlayerName.values()[this.namesUsed++].toString();
+    		String playerName = PlayerName.values()[this.currentPlayers++].toString();
     		//Could add logic to use playerName, only if name is taken..
     		name = playerName;
+    		
+    		PlayerCommand c = new PlayerCommand(name, PlayerCommandType.Join, 0, 0);
+    		
+    		ArrayDeque<PlayerCommand> b = this.getJoinWrite();
+    		synchronized(b)
+    		{
+    			b.add(c);
+    		}
     	}
     	
 		this.addSubscriber(name, ip, port);
     }
-
     
 	//If this class knows about the world, this should be in there...
     private boolean canAddPlayer()
     {
 		//Add any failing conditions here for cases that
 		// players cannot be added
-		if ( this.namesUsed == this.MAX_PLAYERS ){
+		if ( this.currentPlayers == this.maxPlayers ){
 			return false;
 		}
 
@@ -70,13 +115,11 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
     		String request = m.group().split(",")[0]; //join or watch
     		String name = m.group().split(",")[1].trim().toLowerCase();
     		if ( request.equals("|||join") ) 
-    			handleNewPlayer(name, packet.getAddress(), packet.getPort(), true);
+    			handleNewSubscriber(name, packet.getAddress(), packet.getPort(), true);
     		else if ( request.equals("|||watch") )	
-    			handleNewPlayer(name, packet.getAddress(), packet.getPort(), false);
+    			handleNewSubscriber(name, packet.getAddress(), packet.getPort(), false);
     		
-    		//Add the join PlayerCommand to the front of the string
-    		buf = buf.replace(":",  ":0,0,"+PlayerCommandType.Join.toString());
-    		
+    		return false;
     	}
 
     	//Remove these join messages byte buffer
@@ -177,10 +220,12 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 	{
 		byte worldBytes[] = world.getBytes();
 		
-		byte byteData[] = new byte[worldBytes.length+2];
+		byte byteData[] = new byte[worldBytes.length+3];
 		
-		byteData[0] = (byte)world.getGridWidth();
-		byteData[1] = (byte)world.getGridHeight();
+		//comment about this
+		byteData[0] = (byte)0;
+		byteData[1] = (byte)world.getGridWidth();
+		byteData[2] = (byte)world.getGridHeight();
 		
 		for ( int i=0; i<worldBytes.length; i++ )
 		{
@@ -210,5 +255,27 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 		
 		return cp;
 	}
+	
+	protected void swapJoinBuffer()
+    {
+    	synchronized(this.getJoinWrite())
+    	{
+    		synchronized(this.getJoinRead())
+    		{
+    			this.jA = !this.jA;
+    		}
+    	}
+    }
+	
+	protected ArrayDeque<PlayerCommand> getJoinWrite()
+	{
+		if(this.jA) return this.joinBufferA;
+		return this.joinBufferB;
+	}
 
+	protected ArrayDeque<PlayerCommand> getJoinRead()
+	{
+		if(this.jA) return this.joinBufferB;
+		return this.joinBufferA;
+	}
 }

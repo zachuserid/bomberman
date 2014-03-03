@@ -9,7 +9,10 @@ package Networking;
  */
 
 import java.net.*;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 
 public abstract class ServerNetworkHandler<S, R> extends NetworkHandler<S, R> {
 
@@ -21,7 +24,7 @@ public abstract class ServerNetworkHandler<S, R> extends NetworkHandler<S, R> {
 	 * The list of players or spectators subscribed to
 	 * receive updates regarding our game state.
 	 */
-	ArrayList<Subscriber> subscribers;
+	HashMap<String,Subscriber> subscribers;
 
 	//Constructor(s)
 
@@ -29,26 +32,31 @@ public abstract class ServerNetworkHandler<S, R> extends NetworkHandler<S, R> {
     {
     	super();
 		listen_port = port;
-		subscribers = new ArrayList<Subscriber>();
+		subscribers = new HashMap<String,Subscriber>();
     }
 
     
     //Getters
     
-    public ArrayList<Subscriber> getSubscribers()
+    public Collection<Subscriber> getSubscribers()
     {
-    	return this.subscribers;
+    	return this.subscribers.values();
     }
 
+    public void Send(String name, S data)
+    {
+    	this.sendData(name, this.parseSend(data));
+    }
+    
+    
     
 	//Methods
-
     protected void addSubscriber(String name, InetAddress addr, int port)
     {
     	if ( name.trim().equals("") ) System.out.println("New spectator");
     	else System.out.println("New player: " + name);
     	
-    	subscribers.add( new Subscriber(name, addr, port) );
+    	subscribers.put(name, new Subscriber(name, addr, port) );
     }
     
     
@@ -60,34 +68,31 @@ public abstract class ServerNetworkHandler<S, R> extends NetworkHandler<S, R> {
 		return new DatagramSocket(this.listen_port);
     }
     
-    
     //Send data to all registered subscribers
 	@Override
-    protected void Send(byte[] packet_data)
+    protected void sendData(byte[] packet_data)
     {
 
-			ArrayList<Subscriber> spectators = this.getSubscribers();
+			Collection<Subscriber> subs = this.getSubscribers();
 						
 			//Iterate over all subscribers
-			for (Subscriber client: spectators){
-				//System.out.println("The server is sending to spectator with port " + client.getPort());
+			for (Subscriber client: subs) this.sendData(client.getName(), packet_data);
+    }
+	
+    protected void sendData(String name, byte[] packet_data)
+    {
 
-
-				//Send this spectator the data
-				DatagramPacket sendPacket = new DatagramPacket(packet_data, packet_data.length,
-																client.getAddr(), client.getPort());
+    		Subscriber sub = this.subscribers.get(name);
+    		if(sub == null) return;
+    		
+			//Send this spectator the data
+			DatagramPacket sendPacket = new DatagramPacket(packet_data, packet_data.length,
+															sub.getAddr(), sub.getPort());
 				
-				try {
-					
-					socket.send(sendPacket);
-					
-				} catch(Exception e){
-					
-					System.out.println("Failed to send data of length " + packet_data.length + ". " + e.getMessage());
-					
-				}
+			try {socket.send(sendPacket);} 
+			catch(Exception e)
+			{
+				System.out.println("Failed to send data of length " + packet_data.length + ". " + e.getMessage());
 			}
     }
-
-
 }
