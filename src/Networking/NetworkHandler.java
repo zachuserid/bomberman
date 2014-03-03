@@ -146,7 +146,6 @@ public abstract class NetworkHandler<S, R> {
     	{
     		for(S d : data) b.add(this.getSendCopy(d));
     		
-    		System.out.println("send write buffer has " + b.size());
     	}
     	
     	this.swapSendBuffer();
@@ -170,7 +169,7 @@ public abstract class NetworkHandler<S, R> {
 	    	{
 	    		if(!b.isEmpty())
 	    		{
-	    			System.out.println("Sending " + b.size() + " items");
+	    			//System.out.println("Sending " + b.size() + " items");
 	    			
 	    			//change this for slightly more efficient way eventually
 	    			byte[] sendData = new byte[16000];
@@ -183,7 +182,7 @@ public abstract class NetworkHandler<S, R> {
 	    				for(int i = 0; i < d.length; i++) sendData[index++] = d[i];
 	    			}
 	    			
-	    			System.out.println("Sending string: " + new String( sendData ) );
+	    			//System.out.println("Sending string: " + new String( sendData ) );
 		    		
 		    		//Send data over network
 		    		this.Send(sendData);

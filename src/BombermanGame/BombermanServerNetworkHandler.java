@@ -65,7 +65,7 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 
     	while(m.find())
     	{
-    		System.out.println("FOUND THE PATTERN TO ADD NEW PLAYER");
+    		System.out.println("Processing new player request");
     		//send player details to handleNewPlayer()
     		String request = m.group().split(",")[0]; //join or watch
     		String name = m.group().split(",")[1].trim().toLowerCase();
@@ -133,13 +133,10 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
     		
     		//check that entire message was not stripped (new player)
     		if ( playerUpdateStrs[i].trim().equals(",") ){
-    			System.out.println("CONTINUING");
     			commands[i-1] = null;
     			continue;
     		}
-    		
-    		System.out.println("player update at " + i + ": '" + playerUpdateStrs[i].trim() + "'");
-    		    		
+    		    		    		
     		String updates[] = playerUpdateStrs[i].split(",");
     		
     		//Get the name from the string, as it was appended by preProcessPacket()
@@ -157,18 +154,16 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
     		 */
     		commands[i-1] = new PlayerCommand[ (updates.length-1) /3];
     		int commandsIndex=0;
-    		System.out.println("length: " + updates.length + ", commands.length: " + commands[i-1].length);
     		
     		for (int j=1; j<updates.length-1; j+=3)
     		{
-    			System.out.println("updates starting at " + j + " are " + updates[j] + ", " + updates[j+1] +", " + updates[j+2] + ". Player name: " + playerName);
     			float time = Float.parseFloat(updates[j]);
     			int id = Integer.parseInt(updates[j+1]);
     			PlayerCommandType type = PlayerCommandType.valueOf(updates[j+2].trim());
     			
     			commands[i-1][commandsIndex++] = new PlayerCommand(playerName, type, time, id);
     			
-    			System.out.println("created command for player " + commands[i-1][commandsIndex-1].PlayerName);
+    			//System.out.println("created command for player " + commands[i-1][commandsIndex-1].PlayerName);
     			
     		}
     	}

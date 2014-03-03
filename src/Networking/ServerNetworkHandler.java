@@ -67,12 +67,10 @@ public abstract class ServerNetworkHandler<S, R> extends NetworkHandler<S, R> {
     {
 
 			ArrayList<Subscriber> spectators = this.getSubscribers();
-			
-			System.out.println("++length of subscribers: " + spectators.size());
-			
+						
 			//Iterate over all subscribers
 			for (Subscriber client: spectators){
-				System.out.println("The server is sending to spectator with port " + client.getPort());
+				//System.out.println("The server is sending to spectator with port " + client.getPort());
 
 
 				//Send this spectator the data
@@ -81,7 +79,6 @@ public abstract class ServerNetworkHandler<S, R> extends NetworkHandler<S, R> {
 				
 				try {
 					
-					System.out.println("Sending data: '" + new String(packet_data) + "' to " + client.getPort());
 					socket.send(sendPacket);
 					
 				} catch(Exception e){

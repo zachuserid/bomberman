@@ -12,7 +12,7 @@ public class GameClientTest
 	{
     	
     	//Create a game server and client
-		BombermanClientNetworkHandler client = new BombermanClientNetworkHandler("127.0.0.1", 8080);
+		BombermanClientNetworkHandler client = new BombermanClientNetworkHandler("127.0.0.1", 8090);
 
 		System.out.println("--Starting (Test) Game Client--");
 		
@@ -52,6 +52,7 @@ public class GameClientTest
 				World rec_world = new World(rec_grid);
 				System.out.println("Received this world update from server:");
 				rec_world.printGrid();
+				System.out.println("Grid[0][1]: " + rec_grid[0][1]);
 			}
 			if ( h == 20 ) break;
 		}

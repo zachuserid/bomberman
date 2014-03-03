@@ -62,6 +62,8 @@ public class GameServerTest
 				{'P', '.', '.', '.', '.'},
 			};
 		
+		System.out.println("Grid[0][1]: " + wGrid2[0][1]);
+		
 		ArrayList<World> worldList = new ArrayList<World>();
 		
 		World world = new World(wGrid);

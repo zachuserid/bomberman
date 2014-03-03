@@ -20,6 +20,11 @@ public class World implements Sendable<World>
 	public int getGridWidth() {return grid.length;}
 	public int getGridHeight() {return grid[0].length;}
 	
+	public int getPlayerCount()
+	{
+		return this.entities.size();
+	}
+	
 	public Point getNextPlayerLocation() 
 	{ 
 		for(int x = 0; x < this.getGridWidth(); x++) 
@@ -49,8 +54,9 @@ public class World implements Sendable<World>
 	//adds an entity to world (should be mapped to an outside controller to be dynamic)
 	public boolean AddEntity(Entity e)
 	{
-		this.grid[e.getX()][e.getY()] = Character.toChars(this.entities.size())[0];
-		
+		//this.grid[e.getX()][e.getY()] = Character.toChars(this.entities.size())[0];
+		this.grid[e.getX()][e.getY()] = Characters.values()[this.entities.size()].toString().toCharArray()[0];
+		System.out.println("adding character " + this.grid[e.getX()][e.getY()] + " at "+e.getX()+","+e.getY() + "size: "+ this.entities.size());
 		this.entities.add(e);
 		
 		return true;
@@ -137,7 +143,6 @@ public class World implements Sendable<World>
 		int height = this.getGridHeight();
 		
 		byte worldBytes[] = new byte[width * height];
-		System.out.println("World width: " + width + " height: " + height);
 		for (int i=0; i<width; i++)
 		{
 			for (int j=0; j<height; j++)
@@ -172,4 +177,13 @@ public class World implements Sendable<World>
 		
 	}
 	
+}
+
+enum Characters {
+	a,
+	b,
+	c,
+	e,
+	f,
+	g
 }
