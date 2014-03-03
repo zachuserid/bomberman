@@ -20,6 +20,15 @@ public class World implements Sendable<World>
 	public int getGridWidth() {return grid.length;}
 	public int getGridHeight() {return grid[0].length;}
 	
+	public Point getNextPlayerLocation() 
+	{ 
+		for(int x = 0; x < this.getGridWidth(); x++) 
+			for(int y = 0; y < this.getGridHeight(); y++)
+				if(this.getElementAt(x, y)=='.') return new Point(x,y);
+		
+		return Point.Zero();
+	}
+	
 	//returns the (currently)char elements at x,y
 	public char getElementAt(int x, int y)
 	{
@@ -40,7 +49,10 @@ public class World implements Sendable<World>
 	//adds an entity to world (should be mapped to an outside controller to be dynamic)
 	public boolean AddEntity(Entity e)
 	{
+		this.grid[e.getX()][e.getY()] = Character.toChars(this.entities.size())[0];
+		
 		this.entities.add(e);
+		
 		return true;
 	}
 
@@ -56,7 +68,10 @@ public class World implements Sendable<World>
 		int x = e.getX() - 1;
 		if(x >= 0)
 		{
+			char c = this.getElementAt(e.getX(), e.getY());
+			this.grid[e.getX()][e.getY()] = '.';
 			e.setX(x);
+			this.grid[e.getX()][e.getY()] = c;
 			return WorldActionOutcome.Approved;
 		}
 
@@ -68,7 +83,10 @@ public class World implements Sendable<World>
 		int x = e.getX() + 1;
 		if(x < this.getGridWidth())
 		{
+			char c = this.getElementAt(e.getX(), e.getY());
+			this.grid[e.getX()][e.getY()] = '.';	
 			e.setX(x);
+			this.grid[e.getX()][e.getY()] = c;
 			return WorldActionOutcome.Approved;
 		}
 
@@ -80,7 +98,10 @@ public class World implements Sendable<World>
 		int y = e.getY() - 1;
 		if(y >= 0)
 		{
+			char c = this.getElementAt(e.getX(), e.getY());
+			this.grid[e.getX()][e.getY()] = '.';
 			e.setY(y);
+			this.grid[e.getX()][e.getY()] = c;
 			return WorldActionOutcome.Approved;
 		}
 
@@ -92,7 +113,10 @@ public class World implements Sendable<World>
 		int y = e.getY() + 1;
 		if(y < this.getGridHeight())
 		{
+			char c = this.getElementAt(e.getX(), e.getY());
+			this.grid[e.getX()][e.getY()] = '.';
 			e.setY(y);
+			this.grid[e.getX()][e.getY()] = c;
 			return WorldActionOutcome.Approved;
 		}
 
