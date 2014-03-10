@@ -125,6 +125,7 @@ public class BombermanServerMain
 					
 					c.AddPlayer(p);
 					
+					System.out.println("~~~~~~~Got join request from " + command.PlayerName);
 					
 					String joinString = new String(new String(new byte[]{(byte)5}) + p.getName() + "," + p.getCharacter() + ","
 							+p.getX() + "," + p.getY());
@@ -170,6 +171,8 @@ public class BombermanServerMain
 		} catch(Exception e){v.Dispose();}
 		finally
 		{
+			System.out.println("Stopping server");
+			
 			network.Stop();
 			
 			synchronized(commands)

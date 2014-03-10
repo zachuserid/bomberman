@@ -1,11 +1,10 @@
 package BombermanGame;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.regex.Pattern;
 import java.net.*;
 import java.util.regex.*;
+import Networking.DoubleBuffer;
 
 import Networking.ServerNetworkHandler;
 import Networking.Subscriber;
@@ -14,13 +13,11 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 
 	//Members
 	
-	protected ArrayDeque<PlayerCommand> joinBufferA, joinBufferB;
+	protected DoubleBuffer<PlayerCommand> doubleJoinBuffer;
 	
 	protected int maxPlayers;
 	
 	protected int currentPlayers;
-	
-	protected boolean jA;
 	
 	//Parsing expressions for Bomberman communication protocol
     private String joinRE = "\\|\\|\\|.*?\\|\\|\\|";
@@ -33,30 +30,20 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 		
 		this.maxPlayers = maxPlayers;
 		
-		this.jA = true;
-		
-		this.joinBufferA = new ArrayDeque<PlayerCommand>();
-		this.joinBufferB = new ArrayDeque<PlayerCommand>();
+		this.doubleJoinBuffer = new DoubleBuffer<PlayerCommand>();
 	}
 	
 	//Methods
 	
 	public PlayerCommand[] getJoinRequests()
     {
-		this.swapJoinBuffer();
+    	ArrayList<PlayerCommand> joins = this.doubleJoinBuffer.readAll(true);
     	
-    	ArrayDeque<PlayerCommand> b = this.getJoinRead();
-  	
-    	synchronized(b)
-    	{
-    		PlayerCommand[] list = new PlayerCommand[b.size()];
-    		
-    		for(int i = 0; i < b.size(); i++)
-    			list[i] = b.pop();
-    		list = this.getReceiveCopy(list);
-    		
-    		return list;
-    	}
+    	PlayerCommand joinCommands[] = new PlayerCommand[joins.size()];
+    	
+    	joins.toArray(joinCommands);
+    	
+    	return joinCommands;
     }
 	
 	public void Send(String name, String data)
@@ -74,11 +61,8 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
     		
     		PlayerCommand c = new PlayerCommand(name, PlayerCommandType.Join, 0, 0);
     		
-    		ArrayDeque<PlayerCommand> b = this.getJoinWrite();
-    		synchronized(b)
-    		{
-    			b.add(c);
-    		}
+    		//add the join command to the join buffer without swapping after
+    		doubleJoinBuffer.write(c, false);
     	}
     	
 		this.addSubscriber(name, ip, port);
@@ -223,13 +207,13 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 		byte byteData[] = new byte[worldBytes.length+3];
 		
 		//comment about this
-		byteData[0] = (byte)0;
+		byteData[0] = (byte)0; //header packet type
 		byteData[1] = (byte)world.getGridWidth();
 		byteData[2] = (byte)world.getGridHeight();
 		
 		for ( int i=0; i<worldBytes.length; i++ )
 		{
-			byteData[i+2] = worldBytes[i];
+			byteData[i+3] = worldBytes[i];
 		}
 		
 		return byteData;
@@ -254,28 +238,5 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 		}
 		
 		return cp;
-	}
-	
-	protected void swapJoinBuffer()
-    {
-    	synchronized(this.getJoinWrite())
-    	{
-    		synchronized(this.getJoinRead())
-    		{
-    			this.jA = !this.jA;
-    		}
-    	}
-    }
-	
-	protected ArrayDeque<PlayerCommand> getJoinWrite()
-	{
-		if(this.jA) return this.joinBufferA;
-		return this.joinBufferB;
-	}
-
-	protected ArrayDeque<PlayerCommand> getJoinRead()
-	{
-		if(this.jA) return this.joinBufferB;
-		return this.joinBufferA;
 	}
 }

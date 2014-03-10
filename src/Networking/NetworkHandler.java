@@ -9,62 +9,31 @@ package Networking;
  */
 
 import java.net.*;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 
 //S: type of send data
 //R: type of receive data
 public abstract class NetworkHandler<S, R> {
 
-	protected boolean sA, rA;
-
 	protected int sAIndex, sBIndex, rAIndex, rBIndex;
-
-	protected ArrayDeque<S> sendBufferA, sendBufferB;
-
-	protected ArrayDeque<R> receiveBufferA, receiveBufferB;
 
 	protected Thread sendThread, recieveThread;
 
 	protected DatagramSocket socket;
 
 	protected boolean active;
-
-
-	//returns the active buffer for a given task
-	protected ArrayDeque<S> getSendWrite()
-	{
-		if(this.sA) return this.sendBufferA;
-		return this.sendBufferB;
-	}
-
-	protected ArrayDeque<S> getSendRead()
-	{
-		if(this.sA) return this.sendBufferB;
-		return this.sendBufferA;
-	}
-
-	protected ArrayDeque<R> getReceiveWrite()
-	{
-		if(this.rA) return this.receiveBufferA;
-		return this.receiveBufferB;
-	}
-
-	protected ArrayDeque<R> getReceiveRead()
-	{
-		if(this.rA) return this.receiveBufferB;
-		return this.receiveBufferA;
-	}
+	
+	protected DoubleBuffer<S> doubleSendBuffer;
+	
+	protected DoubleBuffer<R> doubleReceiveBuffer;
 
 
     public NetworkHandler() 
     {
-    	this.sendBufferA = new ArrayDeque<S>();
-    	this.sendBufferB = new ArrayDeque<S>();
 
-    	this.receiveBufferA = new ArrayDeque<R>();
-    	this.receiveBufferB = new ArrayDeque<R>();
-
+    	this.doubleSendBuffer = new DoubleBuffer<S>();
+    	this.doubleReceiveBuffer = new DoubleBuffer<R>();
+    	
     	this.sendThread = new Thread(new Runnable(){
     		public void run(){
     			SenderThreadMethod();
@@ -106,32 +75,20 @@ public abstract class NetworkHandler<S, R> {
     	
     	if ( this.socket != null ) this.socket.close();
     	
-    	ArrayDeque<S> d = this.getSendRead();
-    	
-    	synchronized(d)
+    	synchronized(this.doubleSendBuffer)
     	{
-    		d.notify();
+    		this.doubleSendBuffer.notify();
     	}
+
     }
     
     /*
-     * takes control of the buffer that was being filled with object data
-     * copies the data and returns it
+     * empties the receive buffer and returns
+     * all of its contents
      */
     public ArrayList<R> getData()
-    {
-    	this.swapReceiveBuffer();
-    	
-    	ArrayDeque<R> b = this.getReceiveRead();
-
-    	ArrayList<R> list = new ArrayList<R>(b.size());
-    	    	
-    	synchronized(b)
-    	{
-    		while(!b.isEmpty()) list.add(this.getReceiveCopy(b.pop()));
-    	}
-    	
-    	return list;
+    {	
+    	return this.doubleReceiveBuffer.readAll(true);
     }
 
     /*
@@ -140,14 +97,13 @@ public abstract class NetworkHandler<S, R> {
      */
     public void Send(S data)
     {
-    	ArrayDeque<S> b = this.getSendWrite();
-
-    	synchronized(b)
-    	{
-    		b.add(this.getSendCopy(data));
-    	}
+    	//System.out.println("Send(S data)");
+    	this.doubleSendBuffer.write(this.getSendCopy(data), true);
     	
-    	this.swapSendBuffer();
+    	synchronized(this.doubleSendBuffer)
+    	{
+    		this.doubleSendBuffer.notify();
+    	}
     }
 
 
@@ -162,34 +118,43 @@ public abstract class NetworkHandler<S, R> {
     {
     	while(this.active)
     	{
-    		ArrayDeque<S> b = this.getSendRead();
+    		//System.out.println("reading all from sendBuffer");
+			ArrayList<S> b = doubleSendBuffer.readAll(false);
+			
+			if (!b.isEmpty())
+			{
+				//System.out.println("SenderThreadMethod b is not empty");
+				// System.out.println("Sending " + b.size() + " items");
 
-	    	synchronized(b)
-	    	{
-	    		if(!b.isEmpty())
-	    		{
-	    			//System.out.println("Sending " + b.size() + " items");
-	    			
-	    			//change this for slightly more efficient way eventually
-	    			byte[] sendData = new byte[16000];
-	    			int index = 0;
-	    			
-	    			while(!b.isEmpty()) 
-	    			{
-	    				byte[] d = this.parseSend(b.pop());
-	    				
-	    				for(int i = 0; i < d.length; i++) sendData[index++] = d[i];
-	    			}
-	    			
-	    			//System.out.println("Sending string: " + new String( sendData ) );
-		    		
-		    		//Send data over network
-		    		this.sendData(sendData);
-	    		}
-	    		
-	    		//if still active, wait on this buffer to be signaled
-	    		if(this.active) try { b.wait(); } catch(Exception e){ System.out.println("Exception in sender wait"); }
-    		}
+				// change this for slightly more efficient way eventually
+				byte[] sendData = new byte[16000];
+				int index = 0;
+
+				for (int i = 0; i < b.size(); i++) 
+				{
+					byte[] d = this.parseSend(b.get(i));
+
+					for (int j = 0; j < d.length; j++)
+						sendData[index++] = d[j];
+				}
+
+				// System.out.println("Sending string: " + new String( sendData
+				// ) );
+
+				// Send data over network
+				//System.out.println("SenderThreadMethod sendData()");
+				this.sendData(sendData);
+			}
+
+	    	//if still active, wait on send buffer to be signaled
+			synchronized(this.doubleSendBuffer)
+			{
+				if(this.active)
+				{
+					try { this.doubleSendBuffer.wait(); } 
+					catch(Exception e){ System.out.println("Exception in sender wait"); }
+				}
+			}
     	}
     	
     	System.out.println("Sender thread complete");
@@ -223,51 +188,20 @@ public abstract class NetworkHandler<S, R> {
 			
     		//Allow handling of datagram packet before we strip the data
 			//if it returns true, we should do continue to process it normally
-			if(packet != null && this.preProcessPacket(packet))
-			{
-				//Obtain the consumer buffer for received data
-        		ArrayDeque<R> b = this.getReceiveWrite();
-        		
-	    		synchronized(b)
-	    		{
-	    			R[] data = this.parseReceive(packet.getData());
-	    			for(int i = 0; i < data.length; i++)
-	    			{
-	    				if ( data[i] != null )
-	    					b.add(data[i]);
-	    			}
-	    			
-	    			//System.out.println(data.length + " element(s) added to receive buffer");
+			if (packet != null && this.preProcessPacket(packet)) {
+				// Write to the receive buffer
+				R[] data = this.parseReceive(packet.getData());
+				for (int i = 0; i < data.length; i++) {
+					if (data[i] != null)
+						this.doubleReceiveBuffer.write(data[i], false);
 				}
-    		}
+
+				 //System.out.println(data.length +" element(s) added to receive buffer");
+
+			}
     	}
     	
     	System.out.println("Receiver thread complete");
-    }
-
-    //swaps the buffers used for recieving and processing data
-    protected void swapReceiveBuffer()
-    {
-    	synchronized(this.getReceiveWrite())
-    	{
-    		synchronized(this.getReceiveRead())
-    		{
-    			this.rA = !this.rA;
-    		}
-    	}
-    }
-
-    //swaps the buffers used for processing and sending data
-    protected void swapSendBuffer()
-    {
-    	synchronized(this.getSendRead())
-    	{
-    		synchronized(this.getSendWrite())
-    		{
-    			this.sA = !this.sA;
-    			this.getSendWrite().notify();
-    		}
-    	}
     }
     
     //method to perform any logic which requires the datagram packet, if returns true, packet processed normally
