@@ -9,8 +9,6 @@ package Networking;
  */
 
 import java.net.*;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -48,6 +46,10 @@ public abstract class ServerNetworkHandler<S, R> extends NetworkHandler<S, R> {
     	this.sendData(name, this.parseSend(data));
     }
     
+    public Subscriber getSubscriberByName(String name)
+    {
+    	return this.subscribers.get(name);
+    }
     
     
 	//Methods

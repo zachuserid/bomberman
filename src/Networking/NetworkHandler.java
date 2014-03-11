@@ -98,6 +98,7 @@ public abstract class NetworkHandler<S, R> {
     public void Send(S data)
     {
     	//System.out.println("Send(S data)");
+    	
     	this.doubleSendBuffer.write(this.getSendCopy(data), true);
     	
     	synchronized(this.doubleSendBuffer)
@@ -137,9 +138,6 @@ public abstract class NetworkHandler<S, R> {
 					for (int j = 0; j < d.length; j++)
 						sendData[index++] = d[j];
 				}
-
-				// System.out.println("Sending string: " + new String( sendData
-				// ) );
 
 				// Send data over network
 				//System.out.println("SenderThreadMethod sendData()");
@@ -197,7 +195,6 @@ public abstract class NetworkHandler<S, R> {
 				}
 
 				 //System.out.println(data.length +" element(s) added to receive buffer");
-
 			}
     	}
     	
@@ -206,7 +203,7 @@ public abstract class NetworkHandler<S, R> {
     
     //method to perform any logic which requires the datagram packet, if returns true, packet processed normally
     protected boolean preProcessPacket(DatagramPacket packet){ return true; }
-
+    
     //return a R(eceive) type object from parsing raw packet data
     protected abstract R[] parseReceive(byte[] data);
 

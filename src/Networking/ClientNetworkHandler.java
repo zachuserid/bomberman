@@ -39,7 +39,6 @@ public abstract class ClientNetworkHandler<S, R> extends NetworkHandler<S, R> {
     	{
     		this.networkStatus = 0;
     	}
-    	
     }
     
     //Getters & Setters

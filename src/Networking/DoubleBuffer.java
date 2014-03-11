@@ -93,8 +93,8 @@ public class DoubleBuffer<T> {
     	if (swap) this.swapBuffer();
 	}
 	
-	public void writeAll(T []data)
-	{
+	public void writeAll(T []data, boolean swap)
+	{	
 		ArrayDeque<T> b = this.getWrite();
 		synchronized(b)
 		{
@@ -105,7 +105,7 @@ public class DoubleBuffer<T> {
 		}
 		
 		//swap the buffer
-    	this.swapBuffer();
+    	if (swap) this.swapBuffer();
 	}
 
 }

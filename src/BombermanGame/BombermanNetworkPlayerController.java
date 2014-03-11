@@ -27,8 +27,8 @@ public class BombermanNetworkPlayerController extends BombermanController
 	public void AddCommands(String name, ArrayList<PlayerCommand> commands)
 	{
 		PlayerMovePair pair = this.players.get(name);
-		
-		pair.Commands.addAll(commands);
+		if (pair != null)
+			pair.Commands.addAll(commands);
 	}
 	
 	

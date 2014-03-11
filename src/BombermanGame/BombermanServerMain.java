@@ -145,7 +145,8 @@ public class BombermanServerMain
 					}
 						
 					ArrayList<PlayerCommand> cs = new ArrayList<PlayerCommand>();
-					for(PlayerCommand pc : command) cs.add(pc);
+					for(PlayerCommand pc : command)
+						cs.add(pc);
 					c.AddCommands(command[0].PlayerName, cs);
 				}
 
@@ -168,7 +169,12 @@ public class BombermanServerMain
 						
 				time = System.currentTimeMillis() - start;
 			}
-		} catch(Exception e){v.Dispose();}
+		} catch(Exception e)
+		{
+			System.out.println("Exception in server main: " + e.getMessage());
+			e.printStackTrace();
+			if (v != null) v.Dispose(); 
+		}
 		finally
 		{
 			System.out.println("Stopping server");
