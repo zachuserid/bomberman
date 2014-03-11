@@ -186,6 +186,13 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
     		{
     			float time = Float.parseFloat(updates[j]);
     			int id = Integer.parseInt(updates[j+1]);
+    			/*
+    			 * TODO: get the subscriber based on the name in this packet.
+    			 * If the id here is > than the subscriber.getAckCount() then
+    			 * subscriber.setAckCount(id); Ack the subscriber after we
+    			 * inspect each packet from this player to get the maximum
+    			 * ackCount.
+    			 */
     			PlayerCommandType type = PlayerCommandType.valueOf(updates[j+2].trim());
     			
     			commands[i-1][commandsIndex++] = new PlayerCommand(playerName, type, time, id);

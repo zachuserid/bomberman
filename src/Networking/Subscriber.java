@@ -24,13 +24,16 @@ public class Subscriber {
 	private InetAddress address;
 	//The client's port
 	private int port;
-	
+	//The highest received acknowledgment
+	private int ackCount;
+	//The subscriber's name
 	private String name;
 
     public Subscriber(String name, InetAddress addr, int prt) {
     	this.name = name;
-    	address = addr;
-    	port = prt;
+    	this.address = addr;
+    	this.port = prt;
+    	this.ackCount = 0;
     }
 
     public InetAddress getAddr()
@@ -46,6 +49,14 @@ public class Subscriber {
     public String getName()
     {
     	return this.name;
+    }
+    
+    public int getAckCount(){
+    	return this.ackCount;
+    }
+    
+    public void setAckCount(int ack){
+    	this.ackCount = ack;
     }
 
 }
