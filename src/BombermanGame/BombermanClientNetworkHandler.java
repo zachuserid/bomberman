@@ -34,7 +34,7 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 	{
 		PlayerCommand joinCom[] = new PlayerCommand[1];
 		
-		joinCom[0] = new PlayerCommand(PlayerCommandType.Join, 0, 0);
+		joinCom[0] = new PlayerCommand(PlayerCommandType.Join, 0);
 		
 		this.Send(joinCom);
 	}
@@ -142,10 +142,9 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 	@Override
 	protected byte[] parseSend(PlayerCommand[] commands) 
 	{
+		//TODO: handle new formatting
 		//Format ':<time>,<id>,<PlayerCommand>'
 		
-		//TODO: Get the non-acked commands and append them
-		// before resending everything to date.
 		ArrayList<PlayerCommand> backlog = this.commandBacklog.readAll(true);
 		
 		//To store the new and backlogged commands
@@ -166,27 +165,37 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 		
 		String toSend = ":"; //Start of player request
 		
-		boolean needTrim = false;
+		//append this command type to the buffer (1 byte)
+		//Note: all updates sent in this call will be of ths same type..
+		//Only update or join...
+		if (allCommands[0].Command == PlayerCommandType.Join)
+			toSend += PlayerCommandType.valueOf("Join").ordinal();
+		else
+			toSend += PlayerCommandType.valueOf("Update").ordinal();
 		
-		for (int i=0; i<allCommands.length; i++)
+		//Get a 4 byte representation of the integer to send in the join packet
+		byte commandIdBytes[] = java.nio.ByteBuffer.allocate(4).putInt(allCommands[0].Id).array();
+		
+		//Append all byte values to the string to send
+		// represents an int of the first player command Id.
+		//Will be incremented by the server on parse, to rebuild the commands
+		for (int k=0; k<commandIdBytes.length; k++)
+			toSend += commandIdBytes[k];
+		
+		if ( allCommands[0].Command == PlayerCommandType.Join )
 		{
-			if ( allCommands[i].Command == PlayerCommandType.Join )
-			{
-				System.out.println("Sending join game message");
-				//Not sending a name, server will take care of that
-				toSend += "|||join,,|||";
-				continue;
-			}
-			
-			toSend += allCommands[i].Time;
-			toSend += "," + allCommands[i].Id;
-			toSend += "," + allCommands[i].Command + ",";
-			needTrim = true;
+			System.out.println("Sending join game message");
+			//Not sending a name, server will take care of that
+			toSend += "1"; //playing
 		}
-		
-		//remove trailing ','
-		if (needTrim)
-			toSend = toSend.substring(0, toSend.length()-1);
+		else 
+		{
+			for (int i=0; i<allCommands.length; i++)
+			{
+				System.out.println("Sending update command");
+				toSend += allCommands[i].Command;
+			}
+		}
 		
 		//Add these commands to the backlog to resend unless 
 		// we receive an ack for them.

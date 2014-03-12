@@ -73,7 +73,7 @@ public class BombermanServerMain
 							try 
 							{
 								printer.write("Received movement: " + command.Command.toString() 
-										+ " from player '" + command.PlayerName + "'. Time: " + command.Time + "\n");
+										+ " from player '" + command.PlayerName + "\n");
 								printer.flush();
 							} 
 							catch (IOException e) 

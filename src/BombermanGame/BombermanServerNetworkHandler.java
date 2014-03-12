@@ -1,9 +1,7 @@
 package BombermanGame;
 
 import java.util.ArrayList;
-import java.util.regex.Pattern;
 import java.net.*;
-import java.util.regex.*;
 import Networking.DoubleBuffer;
 
 import Networking.ServerNetworkHandler;
@@ -18,10 +16,6 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 	protected int maxPlayers;
 	
 	protected int currentPlayers;
-	
-	//Parsing expressions for Bomberman communication protocol
-    private String joinRE = "\\|\\|\\|.*?\\|\\|\\|";
-	private Pattern joinPat = Pattern.compile(joinRE);
 	
 	//Constructor
 	
@@ -51,21 +45,29 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 		this.sendData(name, data.getBytes());
 	}
 	
-	protected void handleNewSubscriber(String name, InetAddress ip, int port, boolean playing)
+	protected void handleNewSubscriber(InetAddress ip, int port, boolean playing, int ackC)
 	{
+		String playerName = ""; //TODO: Should add names to spectators also..
+		
     	if ( playing && canAddPlayer() )
     	{
-    		String playerName = PlayerName.values()[this.currentPlayers++].toString();
-    		//Could add logic to use playerName, only if name is taken..
-    		name = playerName;
+    		playerName = PlayerName.values()[this.currentPlayers++].toString();
     		
-    		PlayerCommand c = new PlayerCommand(name, PlayerCommandType.Join, 0, 0);
+    		PlayerCommand c = new PlayerCommand(playerName, PlayerCommandType.Join, 0);
     		
     		//add the join command to the join buffer without swapping after
     		doubleJoinBuffer.write(c, false);
     	}
     	
-		this.addSubscriber(name, ip, port);
+		this.addSubscriber(playerName, ip, port);
+    	
+		//Added subscriber, ack their join
+		Subscriber sub = this.getSubscriberByName(playerName);
+    	if (sub != null)
+    	{
+    		sub.setAckCount(ackC);
+    		this.ackPlayers(new String[] {playerName} );
+    	}    	
     }
     
 	//If this class knows about the world, this should be in there...
@@ -88,9 +90,11 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
     public boolean preProcessPacket(DatagramPacket packet)
     {
 
+    	byte raw_data[] = packet.getData();  
 		String buf = new String( packet.getData() );
+		
     	//Handle any join requests
-    	Matcher m = this.joinPat.matcher(buf);
+		int joinCommand = PlayerCommandType.valueOf("Join").ordinal(); //5
 
 		// Get the subscriber's name from the IP and port or packet.
 		String theName = "";
@@ -106,27 +110,24 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 		}
     			
     	//In here means new player or spectator request
-    	while(m.find())
+		if ((int)raw_data[0] == joinCommand)
     	{
-    		//Confirm not a resend
+    		//Confirm not a resend after adding the player
     		if (theName.equals(""))
     		{
-	    		System.out.println("Processing new player request");
-	    		//send player details to handleNewPlayer()
-	    		String request = m.group().split(",")[0]; //join or watch
-	    		String name = m.group().split(",")[1].trim().toLowerCase();
-	    		if ( request.equals("|||join") ) 
-	    			handleNewSubscriber(name, packet.getAddress(), packet.getPort(), true);
-	    		else if ( request.equals("|||watch") )	
-	    			handleNewSubscriber(name, packet.getAddress(), packet.getPort(), false);
+    			//Get the int for the command id to ack
+    			byte bytesToInt[] = {raw_data[1], raw_data[2], raw_data[3], raw_data[4]};
+    			int ackInt = java.nio.ByteBuffer.wrap(bytesToInt).getInt();
+    			
+	    		if ((int)raw_data[1] == 5)
+	    			handleNewSubscriber(packet.getAddress(), packet.getPort(), false, ackInt);
+	    		else
+	    			handleNewSubscriber(packet.getAddress(), packet.getPort(), true, ackInt);
     		}
+	
     		return false;
     	}
-
-    	//Remove these join messages byte buffer
-		buf = buf.replaceAll(this.joinRE, "");
 		
-		System.out.println("replacing string " + buf);
 		//append this data to the bytes that the client sent.
 		buf = buf.replace(":", ":"+theName+",");
 		
@@ -167,84 +168,89 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
     	for (int i=1; i<playerUpdateStrs.length; i++)
     	{
     		
-    		//check that entire message was not stripped (new player)
-    		if ( playerUpdateStrs[i].trim().equals(",") ){
-    			commands[i-1] = null;
-    			continue;
-    		}
-    		    		    		
-    		String updates[] = playerUpdateStrs[i].split(",");
+    		//Remove the name and delimeters from the buffer, added by preProcessPacket()
+    		String splitS[] = playerUpdateStrs[i].split(",");
+    		playerNames[i-1] = splitS[0];
+
+    		//Deal with the bytes now
+    		byte updateBytes[] = splitS[1].getBytes();
     		
-    		//Get the name from the string, as it was appended by preProcessPacket()
-    		playerNames[i-1] = updates[0];
+    		int updateType = (int)updateBytes[0];
+    		
+    		byte bytesToInt[] = {updateBytes[1], updateBytes[2], updateBytes[3], updateBytes[4]};
+    		//The starting id
+			int currentCommandId = java.nio.ByteBuffer.wrap(bytesToInt).getInt();
     		      		
     		/*
-    		 * Instantiate this player's array. It has length
-    		 * of the update array length/3, as that is the
-    		 * number of updates in the protocol string from
-    		 * this client, after removing the name that
-    		 * we added in preProcessPacket(). 
-    		 * We can assume a multiple of 3 in the
-    		 * string length so long as join games are properly
-    		 * filtered in preProcessPacket()
+    		 * Instantiate this player's array with length 
+    		 * appropriate to this player's update size
     		 */
-    		ArrayList<PlayerCommand> playerCommands = new ArrayList<PlayerCommand>();
-    		
-    		for (int j=1; j<updates.length-1; j+=3)
+    		if (updateType == PlayerCommandType.valueOf("Update").ordinal())
     		{
-    			float time = Float.parseFloat(updates[j]);
-    			int id = Integer.parseInt(updates[j+1]);
-    			PlayerCommandType type = PlayerCommandType.valueOf(updates[j+2].trim());
-    			    			
-    			/*
-    			 * TODO: get the subscriber based on the name in this packet.
-    			 * If the id here is > than the subscriber.getAckCount() then
-    			 * subscriber.setAckCount(id); Ack the subscriber after we
-    			 * inspect each packet from this player to get the maximum
-    			 * ackCount.
-    			 */
-    			
-    			//Unless the id is above out current
-    			// counter for this client, ignore this message,
-    			// it's a resend due to our ack not yet reaching client
-    			PlayerCommand toAdd = null;
-    			Subscriber thisSub = this.getSubscriberByName(playerNames[i-1]);
-    			if (thisSub != null)
-    			{
-    				//Acknowledge highest received id
-    				if (id > thisSub.getAckCount())
-    				{
-    					thisSub.setAckCount(id);
-    	    			toAdd = new PlayerCommand(playerNames[i-1], type, time, id);
-    				}
-    			}
-    			if (toAdd != null) playerCommands.add(toAdd); 
-    			
-    			//System.out.println("created command for player " + commands[i-1][commandsIndex-1].PlayerName);	
+    			ArrayList<PlayerCommand> playerCommands = new ArrayList<PlayerCommand>();
+    		
+	    		for (int j=1; j<updateBytes.length; j++)
+	    		{
+	    			int id = currentCommandId++;
+	    			String commandStr = PlayerCommandType.values()[(int)updateBytes[j]].toString();
+	    			PlayerCommandType type = PlayerCommandType.valueOf(commandStr);
+	    			    			
+	    			//TODO: Ack everyone. Also, make sure joins are not getting here.
+	    			
+	    			//Unless the id is above our current
+	    			// counter for this client, ignore this message,
+	    			// it's a resend due to our ack not yet reaching client
+	    			PlayerCommand toAdd = null;
+	    			Subscriber thisSub = this.getSubscriberByName(playerNames[i-1]);
+	    			if (thisSub != null)
+	    			{
+	    				//Acknowledge highest received id
+	    				if (id > thisSub.getAckCount())
+	    				{
+	    					thisSub.setAckCount(id);
+	    	    			toAdd = new PlayerCommand(playerNames[i-1], type, id);
+	    				}
+	    			}
+	    			
+	    			if (toAdd != null) playerCommands.add(toAdd); 
+	    			
+	    			//System.out.println("created command for player " + commands[i-1][commandsIndex-1].PlayerName);	
+	    		}//End for
+    		
+	    		commands[i-1] = new PlayerCommand[playerCommands.size()];
+	    		playerCommands.toArray(commands[i-1]);
+	    		
+	    		//before returning our parsed update requests, ack all
+	        	ackPlayers(playerNames);
     		}
-    		commands[i-1] = new PlayerCommand[playerCommands.size()];
-    		playerCommands.toArray(commands[i-1]);
     	}
     	
-    	//before returning our parsed update requests, ack all
-    	for (int k=0; k<playerNames.length; k++)
-    	{
+		return commands;
+	}
+	
+	protected void ackPlayers(String players[])
+	{
+		for (int k=0; k<players.length; k++)
+    	{ 
     		//The ack packet will have a header of 7 (PlayerCommandType.Ack)
     		//The payload will be 4 bytes representing the highest command id int
-    		int highAck = this.getSubscriberByName(playerNames[k]).getAckCount();
-    		System.out.println("Server acking player " + playerNames[k]
+    		int highAck = this.getSubscriberByName(players[k]).getAckCount();
+    		
+    		System.out.println("Server acking player " + players[k]
 			          + " for highwatermark: " + highAck);
+    		
     		byte toByte[] = java.nio.ByteBuffer.allocate(4).putInt(highAck).array();
     		byte toSend[] = new byte[toByte.length+1];
+    		
     		toSend[0] = (byte)7; //header
+    		
     		for (int u=1; u<toSend.length; u++){
     			toSend[u] = toByte[u-1];
     		}
-    		this.sendData(playerNames[k], toSend);
+    		
+    		this.sendData(players[k], toSend);
     	}
-		return commands;
 	}
-
 
 	@Override
 	protected byte[] parseSend(World world)

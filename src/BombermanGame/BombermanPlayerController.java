@@ -117,28 +117,28 @@ public class BombermanPlayerController extends BombermanController implements Ke
 		{
 			if(this.world.TryMoveLeft(this.player) == WorldActionOutcome.Approved)
 			{
-				this.commands.add(new PlayerCommand(PlayerCommandType.MoveLeft, time, this.commandIds++));
+				this.commands.add(new PlayerCommand(PlayerCommandType.MoveLeft, this.commandIds++));
 			}
 		}
 		if(this.CheckBool(1))
 		{
 			if(this.world.TryMoveRight(this.player) == WorldActionOutcome.Approved)
 			{
-				this.commands.add(new PlayerCommand(PlayerCommandType.MoveRight, time, this.commandIds++));
+				this.commands.add(new PlayerCommand(PlayerCommandType.MoveRight, this.commandIds++));
 			}
 		}
 		if(this.CheckBool(2))
 		{
 			if(this.world.TryMoveUp(this.player) == WorldActionOutcome.Approved)
 			{
-				this.commands.add(new PlayerCommand(PlayerCommandType.MoveUp, time, this.commandIds++));
+				this.commands.add(new PlayerCommand(PlayerCommandType.MoveUp, this.commandIds++));
 			}
 		}
 		if(this.CheckBool(3))
 		{
 			if(this.world.TryMoveDown(this.player) == WorldActionOutcome.Approved)
 			{
-				this.commands.add(new PlayerCommand(PlayerCommandType.MoveDown, time, this.commandIds++));
+				this.commands.add(new PlayerCommand(PlayerCommandType.MoveDown, this.commandIds++));
 			}
 		}
 	}

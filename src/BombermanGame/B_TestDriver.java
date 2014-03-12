@@ -18,9 +18,11 @@ public class B_TestDriver
 		//-----------------------------
 		
 		//Create a join request and send it
-		PlayerCommand[] commands = new PlayerCommand[] {new PlayerCommand(PlayerCommandType.Join, 0, 0)};
+		PlayerCommand[] commands = new PlayerCommand[] {new PlayerCommand(PlayerCommandType.Join, 0)};
 		
 		network.Send(commands);
+		
+		//TODO wait for join ack containing my player id to include in all new sends
 		
 		//Receive packets into this
 		ArrayList<BomberPacket> packets;
@@ -63,7 +65,7 @@ public class B_TestDriver
 		//Send 10 movements, with a second between them
 		for(int i = 0; i < 10; i++)
 		{
-			commands = new PlayerCommand[] {new PlayerCommand(PlayerCommandType.MoveRight, 0, i)};
+			commands = new PlayerCommand[] {new PlayerCommand(PlayerCommandType.MoveRight, i)};
 			
 			network.Send(commands);
 			

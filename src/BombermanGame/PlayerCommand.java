@@ -7,16 +7,13 @@ public class PlayerCommand implements Sendable<PlayerCommand>
 {
 	public String PlayerName;
 
-	public float Time;
-
 	public PlayerCommandType Command;
 
 	public int Id;
 
-	public PlayerCommand(PlayerCommandType command, float time, int id)
+	public PlayerCommand(PlayerCommandType command, int id)
 	{
 		this.Command = command;
-		this.Time = time;
 		this.Id = id;
 		
 		//name is initially empty to save space in packet
@@ -24,10 +21,9 @@ public class PlayerCommand implements Sendable<PlayerCommand>
 		this.PlayerName = "";
 	}
 	
-	public PlayerCommand(String name, PlayerCommandType command, float time, int id)
+	public PlayerCommand(String name, PlayerCommandType command, int id)
 	{
 		this.Command = command;
-		this.Time = time;
 		this.Id = id;
 		this.PlayerName = name;
 	}
@@ -36,21 +32,20 @@ public class PlayerCommand implements Sendable<PlayerCommand>
 	public byte[] getBytes()
 	{
 		String byteStr = "";
-		byteStr += this.Time + "," + this.Id
-							 + "," + this.Command;
+		byteStr += this.Id + "," + this.Command;
 		return byteStr.getBytes();
 	}
 
 	@Override
 	public PlayerCommand getCopy()
 	{
-		return new PlayerCommand(this.PlayerName, this.Command, this.Time, this.Id);
+		return new PlayerCommand(this.PlayerName, this.Command, this.Id);
 	}
 	
 	@Override
 	public String toString()
 	{
 		return "Player " + this.PlayerName + " request " + this.Id + 
-				" for move " + this.Command	+ " at " + this.Time;
+				" for move " + this.Command;
 	}
 }
