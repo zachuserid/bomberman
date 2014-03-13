@@ -88,6 +88,8 @@ public abstract class ServerNetworkHandler<S, R> extends NetworkHandler<S, R> {
     		if(sub == null) return;
     		
 			//Send this spectator the data
+    		System.out.println("~Server sending data length " + packet_data.length + ": '" + new String(packet_data) + "'");
+    		
 			DatagramPacket sendPacket = new DatagramPacket(packet_data, packet_data.length,
 															sub.getAddr(), sub.getPort());
 				

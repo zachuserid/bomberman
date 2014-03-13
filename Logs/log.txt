@@ -1,0 +1,1 @@
+Received movement: MoveRight from player 'FryGuy

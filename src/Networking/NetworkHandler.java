@@ -98,6 +98,7 @@ public abstract class NetworkHandler<S, R> {
     public void Send(S data)
     {
     	//System.out.println("Send(S data)");
+    	//Thread.dumpStack();
     	
     	this.doubleSendBuffer.write(this.getSendCopy(data), true);
     	
@@ -188,6 +189,7 @@ public abstract class NetworkHandler<S, R> {
 			//if it returns true, we should do continue to process it normally
 			if (packet != null && this.preProcessPacket(packet)) {
 				// Write to the receive buffer
+				System.out.println("Calling parseReceive("+new String(packet.getData())+")");
 				R[] data = this.parseReceive(packet.getData());
 				for (int i = 0; i < data.length; i++) {
 					if (data[i] != null)

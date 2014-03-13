@@ -75,7 +75,15 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 	{	
 		BomberPacket p = new BomberPacket();
 		
-		int commandType = Utils.byteToInt(data[0]);
+		int commandType; 
+
+		try{
+			commandType = Utils.byteToInt(data[0]);
+			System.out.println("Parsing: " + new String(data));
+		} catch (NumberFormatException e){
+			System.out.println("Number format exception parsing: '" + new String(data) + "'");
+			commandType = -1;
+		}
 		
 		/*
 		 * This type is an acknowledgment from 
@@ -92,21 +100,23 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 		{
 			//Handle the ack value nested in the servers response to join game request
 			byte bytesToInt[] = {data[1], data[2], data[3], data[4]};
-			int ackValue = java.nio.ByteBuffer.wrap(bytesToInt).getInt();
+			int ackValue = Utils.byteArrToStrInt(bytesToInt);
+			System.out.println("Ack Value from JoinAck: " + ackValue);
 			handleAck(ackValue);
 			
 			//Build the player
 			
 			char playerChar = (char)data[5];
 			
-			int playerNumber = (int)data[6];
+			int playerNumber = Utils.byteToInt(data[6]);
+			
 			String playerName = PlayerName.values()[playerNumber].toString();
 			
-			int xPos = (int)data[7];
-			int yPos = (int)data[8];
+			int xPos = Utils.byteToInt(data[7]);
+			int yPos = Utils.byteToInt(data[8]);
 			
-			this.grid_width = (int)data[9];
-			this.grid_height = (int)data[10];
+			this.grid_width = Utils.byteToInt(data[9]);
+			this.grid_height = Utils.byteToInt(data[10]);
 			
 			BombermanPlayer player = new BombermanPlayer(playerName, new Point(xPos, yPos), playerChar);
 			
@@ -124,7 +134,7 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 		else if (commandType == 7)
 		{
 			byte bytesToInt[] = {data[1], data[2], data[3], data[4]};
-			int ackValue = java.nio.ByteBuffer.wrap(bytesToInt).getInt();
+			int ackValue = Utils.byteArrToStrInt(bytesToInt);
 			
 			this.handleAck(ackValue);
 			
@@ -137,12 +147,35 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 		 * p.Data = (char[][]):
 		 * 		the character map representing the most recent world
 		 */
-		else if (commandType == 8) //update..
+		else if (commandType == 6) //update..
 		{	
 			if ( this.grid_width == -1 || this.grid_height == -1 )
 			{
+				//TODO: If not handled anywhere else, this indicates game started before
+				// request to join. 
 				System.out.println("ERROR: DID NOT RECEIVE INITIAL JOIN ACK BEFORE UPDATE.. GRID NOT SET");
 				return null;
+			}
+			
+			BombermanPlayer players[] = new BombermanPlayer[4];
+			
+			//Assuming 4 players here..
+			for (int i=0; i<4; i++)
+			{
+				String pName = PlayerName.values()[i].toString();
+				
+				int xPos = Utils.byteToInt(data[(i*4)+1]);
+				
+				int yPos = Utils.byteToInt(data[(i*4)+2]);
+				
+				//TODO: Can change this character based on his location in grid below if desired..
+				players[i] = new BombermanPlayer(pName, new Point(xPos, yPos), '?');
+				
+				int kills = Utils.byteToInt(data[(i*4)+3]);
+				players[i].setKillCount(kills);
+				
+				Powerup powerup = Powerup.values()[Utils.byteToInt(data[(i*4)+4])];
+				players[i].setPowerup(powerup);
 			}
 			
 			char[][] gridArr = new char[this.grid_width][this.grid_height];
@@ -151,10 +184,10 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 			{
 				for (int j=0; j<this.grid_height; j++)
 				{
-					gridArr[i][j] = (char)data[ ( (i * this.grid_width) + j) + 1 ];
+					gridArr[i][j] = (char)data[ ( (i * this.grid_width) + j) + 17 ];
 				}
 			}
-			
+			System.out.println("Client parsing an Update");
 			p.Command = PlayerCommandType.Update;
 			p.Data = gridArr;
 		}

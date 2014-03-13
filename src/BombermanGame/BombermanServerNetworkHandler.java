@@ -7,7 +7,7 @@ import Networking.DoubleBuffer;
 import Networking.ServerNetworkHandler;
 import Networking.Subscriber;
 
-public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, PlayerCommand[]> {
+public class BombermanServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket, PlayerCommand[]> {
 
 	//Members
 	
@@ -51,24 +51,29 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 	public void ackJoinRequest(BombermanPlayer p, int width, int height)
 	{
 		byte ackPacket[] = new byte[11];
-		ackPacket[0] = (byte)PlayerCommandType.valueOf("Join").ordinal(); //[0] = message type
+		ackPacket[0] = Utils.intToByte(PlayerCommandType.valueOf("Join").ordinal()); //[0] = message type
 		
 		int ackC = this.getSubscriberByName(p.getName()).getAckCount();
-		byte commandIdBytes[] = java.nio.ByteBuffer.allocate(4).putInt(ackC).array();
+		
+		byte commandIdBytes[] = Utils.intToStrByteArr(ackC);
+		System.out.println("sending commandId: "+new String(commandIdBytes));
 		for (int i=0; i<commandIdBytes.length; i++) 
 			ackPacket[i+1] = commandIdBytes[i]; //[1,..,4] = highest command to acknowledge
 		
-		int playerNumber = PlayerCommandType.valueOf(p.getName()).ordinal();
-		ackPacket[5] = (byte)playerNumber; //[5] = the player's number
+		int playerNumber = PlayerName.valueOf(p.getName()).ordinal();
 		
-		ackPacket[6] = (byte)p.getCharacter(); //[6] = the player's char representation
+		ackPacket[5] = (byte)p.getCharacter(); //[5] = the player's char representation
 		
-		ackPacket[7] = (byte)p.getX(); //[7] = x position
-		ackPacket[8] = (byte)p.getY(); //[8] = y position
+		ackPacket[6] = Utils.intToByte(playerNumber); //[6] = the player's number
 		
-		ackPacket[9] = (byte)width; //[9] = world object width
-		ackPacket[10] = (byte)height; //[10] = world object height
+		ackPacket[7] = Utils.intToByte(p.getX()); //[7] = x position
+		ackPacket[8] = Utils.intToByte(p.getY()); //[8] = y position
 		
+		ackPacket[9] = Utils.intToByte(width); //[9] = world object width
+		ackPacket[10] = Utils.intToByte(height); //[10] = world object height
+
+		System.out.println("Acking join request for player " + p.getName() + " with data: " + new String(ackPacket));
+
 		this.sendData(p.getName(), ackPacket);
 	}
 	
@@ -149,7 +154,7 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
     		{
     			//Get the int for the command id to ack
     			byte bytesToInt[] = {raw_data[2], raw_data[3], raw_data[4], raw_data[5]};
-    			int ackInt = java.nio.ByteBuffer.wrap(bytesToInt).getInt();
+    			int ackInt = Utils.byteArrToStrInt(bytesToInt);
     			
 	    		if ((new String(new byte[]{raw_data[6]})).equals("1"))
 	    			handleNewSubscriber(packet.getAddress(), packet.getPort(), true, ackInt);
@@ -205,26 +210,30 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
     		playerNames[i-1] = splitS[0];
 
     		//Deal with the bytes now
-    		byte updateBytes[] = splitS[1].getBytes();
+    		byte updateBytes[] = splitS[1].trim().getBytes();
     		
-    		int updateType = (int)updateBytes[0];
+    		int updateType = Utils.byteToInt(updateBytes[0]);
     		
     		byte bytesToInt[] = {updateBytes[1], updateBytes[2], updateBytes[3], updateBytes[4]};
     		//The starting id
-			int currentCommandId = java.nio.ByteBuffer.wrap(bytesToInt).getInt();
-    		      		
+			int currentCommandId = Utils.byteArrToStrInt(bytesToInt);
     		/*
     		 * Instantiate this player's array with length 
     		 * appropriate to this player's update size
     		 */
     		if (updateType == PlayerCommandType.valueOf("Update").ordinal())
     		{
+    			System.out.println("Server: This client's update byte str: " + new String(updateBytes));
     			ArrayList<PlayerCommand> playerCommands = new ArrayList<PlayerCommand>();
     		
-	    		for (int j=1; j<updateBytes.length; j++)
+	    		for (int j=5; j<updateBytes.length; j++)
 	    		{
 	    			int id = currentCommandId++;
-	    			String commandStr = PlayerCommandType.values()[(int)updateBytes[j]].toString();
+
+	    			int messageType = Utils.byteArrToStrInt(new byte[]{ updateBytes[j] });
+	    			
+	    			String commandStr = PlayerCommandType.values()[messageType].toString();
+	    			
 	    			PlayerCommandType type = PlayerCommandType.valueOf(commandStr);
 	    			    			
 	    			//TODO: Ack everyone. Also, make sure joins are not getting here.
@@ -268,13 +277,11 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
     		//The payload will be 4 bytes representing the highest command id int
     		int highAck = this.getSubscriberByName(players[k]).getAckCount();
     		
-    		System.out.println("Server acking player " + players[k]
-			          + " for highwatermark: " + highAck);
+    		byte toByte[] = Utils.intToStrByteArr(highAck);
     		
-    		byte toByte[] = java.nio.ByteBuffer.allocate(4).putInt(highAck).array();
     		byte toSend[] = new byte[toByte.length+1];
     		
-    		toSend[0] = (byte)7; //header
+    		toSend[0] = Utils.intToByte(7); //header
     		
     		for (int u=1; u<toSend.length; u++){
     			toSend[u] = toByte[u-1];
@@ -285,20 +292,30 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 	}
 
 	@Override
-	protected byte[] parseSend(World world)
+	protected byte[] parseSend(B_NetworkPacket data)
 	{
-		byte worldBytes[] = world.getBytes();
+		byte worldBytes[] = data.getWorld().getBytes();
 		
-		byte byteData[] = new byte[worldBytes.length+3];
+		byte byteData[] = new byte[worldBytes.length+17];
 		
-		//comment about this
-		byteData[0] = (byte)0; //header packet type
-		byteData[1] = (byte)world.getGridWidth();
-		byteData[2] = (byte)world.getGridHeight();
+		//[0] = command type
+		byteData[0] = Utils.intToByte(PlayerCommandType.Update.ordinal()); //header packet type
 		
+		//[1..4] [5..8] [9..12] [13..16] is the player[i]s stats:
+		//[xPos, yPox, killCount, Powerup]
+		BombermanPlayer players[] = data.getPlayers();
+		for (int i=0; i<this.maxPlayers; i+=4)
+		{
+			byteData[i+1] = Utils.intToByte(players[i].getX());
+			byteData[i+2] = Utils.intToByte(players[i].getY());
+			byteData[i+3] = Utils.intToByte(players[i].getKillCount());
+			byteData[i+4] = Utils.intToByte(players[i].getPowerup().ordinal());
+		}
+		
+		//[18..n] = world grid array
 		for ( int i=0; i<worldBytes.length; i++ )
 		{
-			byteData[i+3] = worldBytes[i];
+			byteData[i+17] = worldBytes[i];
 		}
 		
 		return byteData;
@@ -306,7 +323,7 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 
 
 	@Override
-	protected World getSendCopy(World original)
+	protected B_NetworkPacket getSendCopy(B_NetworkPacket original)
 	{
 		return original.getCopy();
 	}

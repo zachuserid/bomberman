@@ -162,7 +162,7 @@ public class BombermanServerMain
 				}
 				
 				//w.printGrid();
-				network.Send(w);
+				network.Send(new B_NetworkPacket(w, w.getPlayers()));
 						
 				try { Thread.sleep(milliwait); } 
 				catch (InterruptedException e) { e.printStackTrace(); }

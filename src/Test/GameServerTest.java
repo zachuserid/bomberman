@@ -17,6 +17,8 @@ public class GameServerTest
 	public static Writer printer;
 	public static boolean shutdown = false;
 	
+	public static final int MAX_PLAYERS = 4;
+	
 	public static void main(String[] args)
 	{
 		String logger_path = "Logs/log.txt";
@@ -35,7 +37,7 @@ public class GameServerTest
 		  System.out.println("ERROR: Could not stat file: " + logger_path + ". " + e.getMessage() + f.getAbsolutePath());
 		}
 		
-		BombermanServerNetworkHandler network = new BombermanServerNetworkHandler(8090, 2);
+		BombermanServerNetworkHandler network = new BombermanServerNetworkHandler(8090, MAX_PLAYERS);
 		
 		if(!network.Initialize())
 		{
@@ -114,6 +116,9 @@ public class GameServerTest
 		testLogger.start();
 		
 		int gameState = 1; //{accept joins & start, handle updates, exit}
+		int joinCount = 0;
+		boolean newUpdates = false;
+		ArrayList<BombermanPlayer> playersJoined = new ArrayList<BombermanPlayer>();
 		
 		try
 		{
@@ -121,10 +126,7 @@ public class GameServerTest
 			{	
 				
 				if (gameState == 1)
-				{
-					int joinCount = 0;
-					ArrayList<BombermanPlayer> playersJoined = new ArrayList<BombermanPlayer>();
-										
+				{										
 					PlayerCommand[] joins = network.getJoinRequests();
 					for(PlayerCommand command : joins)
 					{
@@ -136,11 +138,12 @@ public class GameServerTest
 							
 						playersJoined.add(p);
 						
-						System.out.println("~~~~~~~Got join request from " + command.PlayerName);
+						System.out.println("~~~~~~~Got join request from " + command.PlayerName 
+											+ " " + joinCount + " players in game");
 					}
 					
 					//Not enough players to move on to update stage yet
-					if (joinCount > 1)
+					if (joinCount >= MAX_PLAYERS)
 					{
 						//TODO: Note that sending the joinAck should only be done
 						// after we handle the 'start game' signal, since the client
@@ -157,10 +160,16 @@ public class GameServerTest
 				}
 				if (gameState == 2)
 				{
+					newUpdates = false;
 					received = network.getData();
-						
+										
 					for(PlayerCommand[] command : received)
 					{
+						System.out.println("###Server got a player command list of length: " + command.length);
+						
+						//If some error occured and we have empty updates, bail to next
+						if (command.length == 0) continue;
+						
 						synchronized(commands)
 						{
 							for(int i = 0; i < command.length; i++)
@@ -169,15 +178,33 @@ public class GameServerTest
 							
 						ArrayList<PlayerCommand> cs = new ArrayList<PlayerCommand>();
 						for(PlayerCommand pc : command)
+						{
+							newUpdates = true;
+							System.out.println("####Server adding command to update queue. Name: " 
+											+ pc.PlayerName + ", Id: " + pc.Id + ", Type: "
+											+ pc.Command.toString());
 							cs.add(pc);
+						}
+						
 						c.AddCommands(command[0].PlayerName, cs);
+						
+						c.Update(time);
+						v.Draw();
+						
+						//Send out new state
+						if (newUpdates)
+						{
+							network.Send(new B_NetworkPacket(w, w.getPlayers()));
+						}
+						
 					}
 					
 					//if (some endgame condition)
 					//	gameState++;
+					
+					// w.printGrid();
 				}
 				
-				c.Update(time);
 				v.Draw();
 
 				updates = true;
@@ -188,9 +215,6 @@ public class GameServerTest
 						commands.notify();
 					}
 				}
-
-				// w.printGrid();
-				network.Send(w);
 					
 						
 				try { Thread.sleep(milliwait); } 

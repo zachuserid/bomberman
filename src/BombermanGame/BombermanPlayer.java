@@ -31,12 +31,12 @@ public class BombermanPlayer extends Entity
 		this.killCount = k;
 	}
 	
-	public Powerup setPowerup()
+	public Powerup getPowerup()
 	{
 		return this.powerup;
 	}
 	
-	public int setKillCount()
+	public int getKillCount()
 	{
 		return this.killCount;
 	}
@@ -48,5 +48,10 @@ public class BombermanPlayer extends Entity
 		//TODO: however the PlayerCommands modifications are
 		// being processed on this object, ensure the kills and powerup
 		// are updated accordingly.
+	}
+	
+	public BombermanPlayer getCopy()
+	{
+		return new BombermanPlayer(this.getName(), this.getLocation(), this.getCharacter());
 	}
 }

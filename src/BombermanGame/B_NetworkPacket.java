@@ -24,4 +24,15 @@ public class B_NetworkPacket {
 		return this.players;
 	}
 	
+	public B_NetworkPacket getCopy()
+	{
+		BombermanPlayer copyPlayers[] = new BombermanPlayer[this.players.length];
+		for (int i=0; i<copyPlayers.length; i++)
+			copyPlayers[i] = this.players[i].getCopy();
+		
+		World copyWorld = this.world.getCopy();
+		
+		return new B_NetworkPacket(copyWorld, copyPlayers);
+	}
+	
 }

@@ -15,6 +15,9 @@ public class World implements Sendable<World>
 
 	//list of entities in the world
 	protected ArrayList<Entity> entities;
+	
+	//list of players in the world for creating networkpacket
+	protected ArrayList<BombermanPlayer> players;
 
 	//the width of the world in "squares" (not pixels)
 	public int getGridWidth() {return grid.length;}
@@ -54,6 +57,7 @@ public class World implements Sendable<World>
 		this.grid = grid;
 
 		this.entities = new ArrayList<Entity>();
+		this.players = new ArrayList<BombermanPlayer>();
 	}
 
 	//adds an entity to world (should be mapped to an outside controller to be dynamic)
@@ -71,6 +75,7 @@ public class World implements Sendable<World>
 		BombermanPlayer p = new BombermanPlayer(name, this.getNextPlayerLocation(), this.getNextChar());
 		
 		this.AddEntity(p);
+		this.players.add(p);
 		
 		return p;
 	}
@@ -147,6 +152,13 @@ public class World implements Sendable<World>
 		System.out.println(e.name + " plants bomb.");
 
 		return WorldActionOutcome.Approved;
+	}
+	
+	public BombermanPlayer[] getPlayers()
+	{
+		BombermanPlayer playerArr[] = new BombermanPlayer[this.players.size()];
+		this.players.toArray(playerArr);
+		return playerArr;
 	}
 	
 	@Override
