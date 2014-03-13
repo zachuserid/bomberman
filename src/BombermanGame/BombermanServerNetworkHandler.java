@@ -45,6 +45,33 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 		this.sendData(name, data.getBytes());
 	}
 	
+	//After the server sorts out player position, character and jazz,
+	// send the player specific data to the client in an ack
+	//TODO: remember to get the server to call all these after receiving join requests
+	public void ackJoinRequest(BombermanPlayer p, int width, int height)
+	{
+		byte ackPacket[] = new byte[11];
+		ackPacket[0] = (byte)PlayerCommandType.valueOf("Join").ordinal(); //[0] = message type
+		
+		int ackC = this.getSubscriberByName(p.getName()).getAckCount();
+		byte commandIdBytes[] = java.nio.ByteBuffer.allocate(4).putInt(ackC).array();
+		for (int i=0; i<commandIdBytes.length; i++) 
+			ackPacket[i+1] = commandIdBytes[i]; //[1,..,4] = highest command to acknowledge
+		
+		int playerNumber = PlayerCommandType.valueOf(p.getName()).ordinal();
+		ackPacket[5] = (byte)playerNumber; //[5] = the player's number
+		
+		ackPacket[6] = (byte)p.getCharacter(); //[6] = the player's char representation
+		
+		ackPacket[7] = (byte)p.getX(); //[7] = x position
+		ackPacket[8] = (byte)p.getY(); //[8] = y position
+		
+		ackPacket[9] = (byte)width; //[9] = world object width
+		ackPacket[10] = (byte)height; //[10] = world object height
+		
+		this.sendData(p.getName(), ackPacket);
+	}
+	
 	protected void handleNewSubscriber(InetAddress ip, int port, boolean playing, int ackC)
 	{
 		String playerName = ""; //TODO: Should add names to spectators also..
@@ -65,8 +92,8 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 		Subscriber sub = this.getSubscriberByName(playerName);
     	if (sub != null)
     	{
+    		//Update the count, acknowledging receving join request..
     		sub.setAckCount(ackC);
-    		this.ackPlayers(new String[] {playerName} );
     	}    	
     }
     
@@ -93,8 +120,8 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
     	byte raw_data[] = packet.getData();  
 		String buf = new String( packet.getData() );
 		
-    	//Handle any join requests
-		int joinCommand = PlayerCommandType.valueOf("Join").ordinal(); //5
+		int cNum = Utils.byteToInt(raw_data[1]);
+		PlayerCommandType thisCommand = PlayerCommandType.values()[cNum];
 
 		// Get the subscriber's name from the IP and port or packet.
 		String theName = "";
@@ -108,21 +135,26 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<World, P
 				break;
 			}
 		}
+		
+		//TODO: Must be a better way to do casts from byte
     			
+		//Note: ignoring byte[0] because it is the player delimeter (:)
+		
     	//In here means new player or spectator request
-		if ((int)raw_data[0] == joinCommand)
+		if (thisCommand == PlayerCommandType.Join)
     	{
+			System.out.println("Pre processing a join!");
     		//Confirm not a resend after adding the player
     		if (theName.equals(""))
     		{
     			//Get the int for the command id to ack
-    			byte bytesToInt[] = {raw_data[1], raw_data[2], raw_data[3], raw_data[4]};
+    			byte bytesToInt[] = {raw_data[2], raw_data[3], raw_data[4], raw_data[5]};
     			int ackInt = java.nio.ByteBuffer.wrap(bytesToInt).getInt();
     			
-	    		if ((int)raw_data[1] == 5)
-	    			handleNewSubscriber(packet.getAddress(), packet.getPort(), false, ackInt);
-	    		else
+	    		if ((new String(new byte[]{raw_data[6]})).equals("1"))
 	    			handleNewSubscriber(packet.getAddress(), packet.getPort(), true, ackInt);
+	    		else
+	    			handleNewSubscriber(packet.getAddress(), packet.getPort(), false, ackInt);
     		}
 	
     		return false;

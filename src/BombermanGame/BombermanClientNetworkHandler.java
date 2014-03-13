@@ -39,6 +39,30 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 		this.Send(joinCom);
 	}
     
+	//Remove messages from our backlog buffer that have been confirmed by the server
+	protected void handleAck(int highAck)
+	{
+		System.out.println("~~~Client received ack count: " + highAck);
+		
+		//Received the ack, remove all from the backlog that
+		// are <= highAck.
+		ArrayList<PlayerCommand> backlog = this.commandBacklog.readAll(true);
+		
+		ArrayList<PlayerCommand> newBacklog = new ArrayList<PlayerCommand>();
+		for (PlayerCommand pc: backlog)
+		{
+			if (pc.Id > highAck)
+				newBacklog.add(pc);
+			else
+				System.out.println("~~~~Removing acked packet: " + pc.Id);
+		}
+		
+		PlayerCommand newBacklogArray[] = new PlayerCommand[newBacklog.size()];
+		newBacklog.toArray(newBacklogArray);
+		
+		this.commandBacklog.writeAll(newBacklogArray, false);
+	}
+	
 	/*
 	 * Note: The first two bytes sent to us
 	 * for each grid update will represent the
@@ -51,24 +75,45 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 	{	
 		BomberPacket p = new BomberPacket();
 		
+		int commandType = Utils.byteToInt(data[0]);
+		
 		/*
+		 * This type is an acknowledgment from 
+		 * the server to our join request. It will
+		 * contain details regarding our character and
+		 * starting position
+		 * 
 		 * PlayerCommandType[5] = Join
 		 * p.Command = PlayerCommandType.Join
 		 * p.Data = (BombermanPlayer):
 		 * 		the player that is joining the game
 		 */
-		if((int)data[0] == 5)
+		if(commandType == 5)
 		{
-			String s = new String(data);
-			s = s.substring(1);
-			String[] ss = s.split(",");
-			s = ss[0];
-			char c = ss[1].charAt(0);
-			int x = (int)ss[2].getBytes()[0];
-			int y = (int)ss[3].getBytes()[0];
-			BombermanPlayer player = new BombermanPlayer(s, new Point(x, y), c);
+			//Handle the ack value nested in the servers response to join game request
+			byte bytesToInt[] = {data[1], data[2], data[3], data[4]};
+			int ackValue = java.nio.ByteBuffer.wrap(bytesToInt).getInt();
+			handleAck(ackValue);
+			
+			//Build the player
+			
+			char playerChar = (char)data[5];
+			
+			int playerNumber = (int)data[6];
+			String playerName = PlayerName.values()[playerNumber].toString();
+			
+			int xPos = (int)data[7];
+			int yPos = (int)data[8];
+			
+			this.grid_width = (int)data[9];
+			this.grid_height = (int)data[10];
+			
+			BombermanPlayer player = new BombermanPlayer(playerName, new Point(xPos, yPos), playerChar);
+			
 			p.Data = player;
+			
 			p.Command = PlayerCommandType.Join;
+
 		}
 		/*
 		 * PlayerCommandType[7] = Ack
@@ -76,28 +121,12 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 		 * p.Data = (int): 
 		 * 		highest acknowledged update request by server.
 		 */
-		else if ((int)data[0] == 7)
+		else if (commandType == 7)
 		{
 			byte bytesToInt[] = {data[1], data[2], data[3], data[4]};
-			int highAck = java.nio.ByteBuffer.wrap(bytesToInt).getInt();
-			System.out.println("~~~Client received ack count: " + highAck);
+			int ackValue = java.nio.ByteBuffer.wrap(bytesToInt).getInt();
 			
-			//Received the ack, remove all from the backlog that
-			// are <= highAck.
-			ArrayList<PlayerCommand> backlog = this.commandBacklog.readAll(true);
-			
-			ArrayList<PlayerCommand> newBacklog = new ArrayList<PlayerCommand>();
-			for (PlayerCommand pc: backlog)
-			{
-				if (pc.Id > highAck)
-					newBacklog.add(pc);
-				else
-					System.out.println("~~~~Removing acked packet: " + pc.Id);
-			}
-			PlayerCommand newBacklogArray[] = new PlayerCommand[newBacklog.size()];
-			newBacklog.toArray(newBacklogArray);
-			
-			this.commandBacklog.writeAll(newBacklogArray, false);
+			this.handleAck(ackValue);
 			
 			//Already handled the Ack, don't buffer this Packet
 			p = null;
@@ -108,17 +137,12 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 		 * p.Data = (char[][]):
 		 * 		the character map representing the most recent world
 		 */
-		else
-		{
-			//get the first two bytes out of the data
-			int w = data[1];
-			int h = data[2];
-			
-			if ( this.grid_width != w || this.grid_height != h )
+		else if (commandType == 8) //update..
+		{	
+			if ( this.grid_width == -1 || this.grid_height == -1 )
 			{
-				System.out.println("Changing grid dimensions to ["+w+"]["+h+"]");
-				this.grid_width = w;
-				this.grid_height = h;
+				System.out.println("ERROR: DID NOT RECEIVE INITIAL JOIN ACK BEFORE UPDATE.. GRID NOT SET");
+				return null;
 			}
 			
 			char[][] gridArr = new char[this.grid_width][this.grid_height];
@@ -127,7 +151,7 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 			{
 				for (int j=0; j<this.grid_height; j++)
 				{
-					gridArr[i][j] = (char)data[ ( (i * this.grid_width) + j) + 3 ];
+					gridArr[i][j] = (char)data[ ( (i * this.grid_width) + j) + 1 ];
 				}
 			}
 			
@@ -193,7 +217,7 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 			for (int i=0; i<allCommands.length; i++)
 			{
 				System.out.println("Sending update command");
-				toSend += allCommands[i].Command;
+				toSend += allCommands[i].Command.ordinal();
 			}
 		}
 		

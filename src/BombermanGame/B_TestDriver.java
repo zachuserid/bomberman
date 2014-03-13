@@ -31,38 +31,49 @@ public class B_TestDriver
 		try { Thread.sleep(1000); } 
 		catch (InterruptedException e) { e.printStackTrace(); }
 		
-		//Create packet array to receive messages from network handler
-		packets = network.getData();
+		boolean haveJoinAck = false;
 		
-		//Iterate over each received BombermanPacket, handle it accordingly
 		System.out.println("First wave of get data");
-		for(BomberPacket p : packets)
+		while (!haveJoinAck)
 		{
-			if(p.Command == PlayerCommandType.Join)
+			//TODO: Replace this while (not have initial join ack) to a
+			// clientBlocksForFirstUpdate() overriding receiverThread in network handler...
+			
+			//Create packet array to receive messages from network handler
+			packets = network.getData();
+			//Iterate over each received BombermanPacket, handle it accordingly
+			for(BomberPacket p : packets)
 			{
-				System.out.println("Received player " + ((BombermanPlayer)p.Data).name + " join from server");
-			} 
-			else if (p.Command == PlayerCommandType.Update)
-			{
-				System.out.println("Received update command from server:");
-				char payload[][] = (char[][])p.Data;
-				for (int i=0; i<payload.length; i++)
+				System.out.println("--Type: " + p.Command.toString());
+				if(p.Command == PlayerCommandType.Join)
 				{
-					for (int j=0; j<payload[0].length; j++)
+					System.out.println("Received player " + ((BombermanPlayer)p.Data).name + " join from server");
+					haveJoinAck = true;
+				} 
+				else if (p.Command == PlayerCommandType.Update)
+				{
+					System.out.println("Received update command from server:");
+					char payload[][] = (char[][])p.Data;
+					for (int i=0; i<payload.length; i++)
 					{
-						System.out.print(payload[i][j]);
+						for (int j=0; j<payload[0].length; j++)
+						{
+							System.out.print(payload[i][j]);
+						}
+						System.out.println("");
 					}
-					System.out.println("");
+				} 
+				else if (p.Command == PlayerCommandType.Ack)
+				{
+					//NOTE: SHOULD NEVER GET IN HERE >> REMOVE ONCE CONFIRMED
+					int highAck = (int)p.Data;
+					System.out.println("~~~BADBADBAD Received ack from server for id: " + highAck);
 				}
-			} 
-			else if (p.Command == PlayerCommandType.Ack)
-			{
-				int highAck = (int)p.Data;
-				System.out.println("~~~Received ack from server for id: " + highAck);
 			}
 		}
 		
 		//Send 10 movements, with a second between them
+		System.out.println("Client sending some updates for the player (MoveRight x 10)");
 		for(int i = 0; i < 10; i++)
 		{
 			commands = new PlayerCommand[] {new PlayerCommand(PlayerCommandType.MoveRight, i)};
@@ -81,8 +92,10 @@ public class B_TestDriver
 		{
 			if(p.Command == PlayerCommandType.Join)
 			{
-				System.out.println("Received player " + ((BombermanPlayer)p.Data).name + " join from server");
-			} else if (p.Command == PlayerCommandType.Update)
+				//NOTE SHOULD NEVER GET IN HERE >> REMOVE ONCE CONFIRMED
+				System.out.println("BADBADBAD Received player " + ((BombermanPlayer)p.Data).name + " join from server");
+			} 
+			else if (p.Command == PlayerCommandType.Update)
 			{
 				System.out.println("Received update command from server:");
 				char payload[][] = (char[][])p.Data;
@@ -97,8 +110,9 @@ public class B_TestDriver
 			}
 			else if (p.Command == PlayerCommandType.Ack)
 			{
+				//NOTE SHOULD NEVER GET IN HERE >> REMOVE ONCE CONFIRMED (same as above)
 				int highAck = (int)p.Data;
-				System.out.println("~~~Received ack from server for id: " + highAck);
+				System.out.println("~~~BADBABA Received ack from server for id: " + highAck);
 			}
 		}
 

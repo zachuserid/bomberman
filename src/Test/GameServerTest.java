@@ -1,98 +1,219 @@
 package Test;
 
+import java.io.*;
 import java.util.ArrayList;
-
 import BombermanGame.*;
 
 public class GameServerTest
 {
+	
+	public static ArrayList<PlayerCommand[]> received = new ArrayList<PlayerCommand[]>();
+	public static ArrayList<PlayerCommand> commands = new ArrayList<PlayerCommand>();
+	public static World w = new World(GridGenerator.FromFile("Worlds/w1.txt"));
 
-	public static void main(String[] args) throws InterruptedException
+
+	public static boolean updates = false;
+	public static boolean parsing = false;
+	public static Writer printer;
+	public static boolean shutdown = false;
+	
+	public static void main(String[] args)
 	{
-    	
-		BombermanServerNetworkHandler server = new BombermanServerNetworkHandler(8080);
+		String logger_path = "Logs/log.txt";
+		if ( args.length >= 1 ) logger_path = args[0];
 		
-		System.out.println("--Starting (Test) Game Server--");
-		
-		//Start up the services
-		if ( !server.Initialize() )
+		File f= null;
+		try 
 		{
-			System.out.println("Could not initialize game server");
+			f = new File(logger_path);
+			FileOutputStream st = new FileOutputStream(f);
+			///st = new FileOutputStream(logger_path);
+		    printer = new BufferedWriter(new OutputStreamWriter(st, "utf-8"));
+		} 
+		catch (IOException e) 
+		{
+		  System.out.println("ERROR: Could not stat file: " + logger_path + ". " + e.getMessage() + f.getAbsolutePath());
+		}
+		
+		BombermanServerNetworkHandler network = new BombermanServerNetworkHandler(8090, 2);
+		
+		if(!network.Initialize())
+		{
+			System.out.println("Server Fail");
 			return;
 		}
-			
-		//TODO: build objects and test send and get data
-		ArrayList<PlayerCommand[]> received;
-		int h=0;
-		while ( true )
-		{
-			Thread.sleep(1000);
-			received = server.getData();
-			h++;
-			for ( int i=0; i<received.size(); i++ )
+		
+		ViewRenderer v = new BombermanView(w, 50);
+		
+		BombermanNetworkPlayerController c = new BombermanNetworkPlayerController(w);
+		
+		long milliwait = 100;
+
+		long time = 0;
+		
+		//Create the logger
+		Thread testLogger = new Thread(new Runnable(){
+			public void run()
 			{
-				PlayerCommand coms[] = received.get(i);
-				for (int j=0; j<coms.length; j++)
+				while (true)
 				{
-					System.out.println("command received: " + coms[j].toString() + ", with name " + coms[j].PlayerName);
+					synchronized (commands)
+					{					
+					
+						while (commands.size() == 0)
+						{
+							if(shutdown) return;
+							try { commands.wait(); } catch (InterruptedException e) {}
+						}
+						
+						//Log commands made by player
+						
+						for(PlayerCommand command : commands)
+						{
+							try 
+							{
+								printer.write("Received movement: " + command.Command.toString() 
+										+ " from player '" + command.PlayerName + "\n");
+								printer.flush();
+							} 
+							catch (IOException e) 
+							{
+								System.out.println("ERROR: Could not write to file: " + e.getMessage());
+							}
+						}
+						
+						commands.clear();
+						
+						//Check for any collisions on the map
+						int playersOnMap = 0;
+						for (int i=0; i<w.getGridWidth(); i++)
+						{
+							for (int j=0; j<w.getGridHeight(); j++)
+							{
+								if (w.getElementAt(i, j) != '.' && w.getElementAt(i, j) != 'D'){
+									playersOnMap++;
+								}
+							}
+						}
+						System.out.println("found " + playersOnMap + "/" + w.getPlayerCount());						
+						if ( playersOnMap < w.getPlayerCount() ){
+							try {
+								printer.write("WARNING: COLLISSIONS DETECTED\n");
+								printer.flush();
+							} catch (IOException e) {
+								System.out.println("ERROR: Could not write to file: " + e.getMessage());
+							}
+						}
+						
+					}
 				}
 			}
-			if ( h == 20 ) break;
+
+		}); //End thread
+		
+		testLogger.start();
+		
+		int gameState = 1; //{accept joins & start, handle updates, exit}
+		
+		try
+		{
+			while(!v.exitPrompt())
+			{	
+				
+				if (gameState == 1)
+				{
+					int joinCount = 0;
+					ArrayList<BombermanPlayer> playersJoined = new ArrayList<BombermanPlayer>();
+										
+					PlayerCommand[] joins = network.getJoinRequests();
+					for(PlayerCommand command : joins)
+					{
+						joinCount++;
+							
+						BombermanPlayer p = w.AddPlayer(command.PlayerName);
+							
+						c.AddPlayer(p);
+							
+						playersJoined.add(p);
+						
+						System.out.println("~~~~~~~Got join request from " + command.PlayerName);
+					}
+					
+					//Not enough players to move on to update stage yet
+					if (joinCount > 1)
+					{
+						//TODO: Note that sending the joinAck should only be done
+						// after we handle the 'start game' signal, since the client
+						// will imediately begin the update loop after a join ack
+						
+						//ack all joins
+						for (BombermanPlayer p: playersJoined)
+						{
+							network.ackJoinRequest(p,  w.getGridWidth(), w.getGridHeight());
+						}
+						
+						gameState++;
+					}
+				}
+				if (gameState == 2)
+				{
+					received = network.getData();
+						
+					for(PlayerCommand[] command : received)
+					{
+						synchronized(commands)
+						{
+							for(int i = 0; i < command.length; i++)
+								commands.add(command[i].getCopy());
+						}
+							
+						ArrayList<PlayerCommand> cs = new ArrayList<PlayerCommand>();
+						for(PlayerCommand pc : command)
+							cs.add(pc);
+						c.AddCommands(command[0].PlayerName, cs);
+					}
+					
+					//if (some endgame condition)
+					//	gameState++;
+				}
+				
+				c.Update(time);
+				v.Draw();
+
+				updates = true;
+				if (commands.size() > 0) 
+				{
+					synchronized (commands) 
+					{
+						commands.notify();
+					}
+				}
+
+				// w.printGrid();
+				network.Send(w);
+					
+						
+				try { Thread.sleep(milliwait); } 
+				catch (InterruptedException e) { e.printStackTrace(); }
+				
+			} //End while not view terminating
+		} catch(Exception e)
+		{
+			System.out.println("Exception in server main: " + e.getMessage());
+			e.printStackTrace();
+			if (v != null) v.Dispose(); 
 		}
-		
-		//Send out a map update
-		
-		char wGrid[][] = 
-			{  
-				{'.', '.', '.', 'c', '.'},
-			    {'.', 'e', '.', 'D', '.'},
-				{'.', '.', '.', '.', '.'},
-				{'.', '.', 'e', '.', '.'},
-				{'P', '.', '.', '.', '.'}
-			};
-		
-		//Send another world
-		
-		char wGrid2[][] = 
-			{  
-				{'.', 'E', 'O', 'c', '.'},
-			    {'.', 'e', 'P', 'D', '.'},
-				{'.', 'P', 'O', '.', '.'},
-				{'.', '.', 'O', 'B', '.'},
-				{'P', '.', '.', '.', '.'},
-			};
-		
-		System.out.println("Grid[0][1]: " + wGrid2[0][1]);
-		
-		ArrayList<World> worldList = new ArrayList<World>();
-		
-		World world = new World(wGrid);
-
-		System.out.println("Server, sending grid:");
-		
-		world.printGrid();
-		
-		worldList.add(world);
-		
-		server.sendData(worldList);
-		
-		
-		worldList = new ArrayList<World>();
-		
-		world = new World(wGrid2);
-
-		System.out.println("Server, sending grid:");
-		
-		world.printGrid();
-		
-		worldList.add(world);
-		
-		server.sendData(worldList);
-		
-		
-		Thread.sleep(5000);
-		
-		server.Stop();
-		
+		finally
+		{
+			System.out.println("Stopping server");
+			
+			network.Stop();
+			
+			synchronized(commands)
+			{
+				shutdown = true;
+				commands.notify();
+			}
+		}
 	}
 }
