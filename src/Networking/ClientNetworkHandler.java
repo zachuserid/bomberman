@@ -65,16 +65,13 @@ public abstract class ClientNetworkHandler<S, R> extends NetworkHandler<S, R> {
 			DatagramPacket sendPacket = new DatagramPacket(packet_data,
 								packet_data.length, address, port);
 
-			try {
-				
-				System.out.println("Client Sending data: " + new String(packet_data) + " to " + port );
-				
+			try 
+			{
 				socket.send(sendPacket);
-				
-			} catch(Exception e){
-				
+			} 
+			catch(Exception e)
+			{
 				System.out.println("Failed to send data of length " + packet_data.length + ": " + e.getMessage());
-				
 			}
     }
 

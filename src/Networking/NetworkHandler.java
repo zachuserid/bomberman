@@ -48,7 +48,7 @@ public abstract class NetworkHandler<S, R> {
 
     
     //initializes the threads and starts the server
-    public boolean Initialize()
+    public boolean Initialize(boolean startReceiver, boolean startSender)
     {
     	try
     	{
@@ -60,13 +60,59 @@ public abstract class NetworkHandler<S, R> {
     	}
 
     	this.active = true;
-
-    	this.recieveThread.start();
-    	this.sendThread.start();
+    	
+    	if (startReceiver)
+    		this.recieveThread.start();
+    	
+    	if (startSender)
+    		this.sendThread.start();
     	
     	return true;
     }
 
+    public boolean Initialize()
+    {
+    	return this.Initialize(true, true);
+    }
+    
+    //methods to start the threads seperately if one is delayed
+    public boolean startSender()
+    {
+    	if (!this.active)
+    		return false;
+    	
+    	this.sendThread.start();
+    	return true;
+    }
+    
+    public boolean startReceiver()
+    {
+    	if (!this.active)
+    		return false;
+    	
+    	this.recieveThread.start();
+    	return true;
+    }
+    
+    //A blocking receive to override natural threaded control
+    public R[] blockAndReceive()
+    {
+    	if (this.socket == null)
+    		return null;
+    	
+    	DatagramPacket packet = new DatagramPacket(new byte[64000], 64000);
+    	R toReturn[] = null;
+    	
+		try {
+			this.socket.receive(packet);
+			toReturn = this.parseReceive(packet.getData());
+		} catch (Exception e) { 
+			System.out.println("Socket exception: " + e.getMessage()); 
+			return null;
+		}
+		
+    	return toReturn;
+    }
     
     //stops the handler
     public void Stop()
@@ -120,7 +166,6 @@ public abstract class NetworkHandler<S, R> {
     {
     	while(this.active)
     	{
-    		//System.out.println("reading all from sendBuffer");
 			ArrayList<S> b = doubleSendBuffer.readAll(false);
 			
 			if (!b.isEmpty())
@@ -188,14 +233,14 @@ public abstract class NetworkHandler<S, R> {
     		//Allow handling of datagram packet before we strip the data
 			//if it returns true, we should do continue to process it normally
 			if (packet != null && this.preProcessPacket(packet)) {
-				// Write to the receive buffer
-				System.out.println("Calling parseReceive("+new String(packet.getData())+")");
+				//System.out.println("Calling parseReceive("+new String(packet.getData())+")");
 				R[] data = this.parseReceive(packet.getData());
+				
+				// Write to the receive buffer
 				for (int i = 0; i < data.length; i++) {
 					if (data[i] != null)
-						this.doubleReceiveBuffer.write(data[i], false);
+						this.doubleReceiveBuffer.write(this.getReceiveCopy(data[i]), false);
 				}
-
 				 //System.out.println(data.length +" element(s) added to receive buffer");
 			}
     	}

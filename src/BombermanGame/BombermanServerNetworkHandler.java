@@ -56,7 +56,7 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<B_Networ
 		int ackC = this.getSubscriberByName(p.getName()).getAckCount();
 		
 		byte commandIdBytes[] = Utils.intToStrByteArr(ackC);
-		System.out.println("sending commandId: "+new String(commandIdBytes));
+
 		for (int i=0; i<commandIdBytes.length; i++) 
 			ackPacket[i+1] = commandIdBytes[i]; //[1,..,4] = highest command to acknowledge
 		
@@ -72,7 +72,7 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<B_Networ
 		ackPacket[9] = Utils.intToByte(width); //[9] = world object width
 		ackPacket[10] = Utils.intToByte(height); //[10] = world object height
 
-		System.out.println("Acking join request for player " + p.getName() + " with data: " + new String(ackPacket));
+		//System.out.println("Acking join request for player " + p.getName() + " with data: " + new String(ackPacket));
 
 		this.sendData(p.getName(), ackPacket);
 	}
@@ -168,7 +168,7 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<B_Networ
 		//append this data to the bytes that the client sent.
 		buf = buf.replace(":", ":"+theName+",");
 		
-		System.out.println("We are receiving a message from '" + theName + "', updating payload to " + buf);
+		//System.out.println("We are receiving a message from '" + theName + "', updating payload to " + buf);
 
 		packet.setData( buf.getBytes() );
 
@@ -190,7 +190,7 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<B_Networ
 		 */		
 		String protoStr = new String(data);
 		
-		System.out.println("Parsing string: "+protoStr);
+		//System.out.println("Parsing string: "+protoStr);
 		
 		String playerUpdateStrs[] = protoStr.split(":");
 
@@ -223,7 +223,7 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<B_Networ
     		 */
     		if (updateType == PlayerCommandType.valueOf("Update").ordinal())
     		{
-    			System.out.println("Server: This client's update byte str: " + new String(updateBytes));
+    			//System.out.println("Server: This client's update byte str: " + new String(updateBytes));
     			ArrayList<PlayerCommand> playerCommands = new ArrayList<PlayerCommand>();
     		
 	    		for (int j=5; j<updateBytes.length; j++)
@@ -304,12 +304,12 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<B_Networ
 		//[1..4] [5..8] [9..12] [13..16] is the player[i]s stats:
 		//[xPos, yPox, killCount, Powerup]
 		BombermanPlayer players[] = data.getPlayers();
-		for (int i=0; i<this.maxPlayers; i+=4)
+		for (int i=0; i<this.maxPlayers*4; i+=4)
 		{
-			byteData[i+1] = Utils.intToByte(players[i].getX());
-			byteData[i+2] = Utils.intToByte(players[i].getY());
-			byteData[i+3] = Utils.intToByte(players[i].getKillCount());
-			byteData[i+4] = Utils.intToByte(players[i].getPowerup().ordinal());
+			byteData[i+1] = Utils.intToByte(players[i/4].getX());
+			byteData[i+2] = Utils.intToByte(players[i/4].getY());
+			byteData[i+3] = Utils.intToByte(players[i/4].getKillCount());
+			byteData[i+4] = Utils.intToByte(players[i/4].getPowerup().ordinal());
 		}
 		
 		//[18..n] = world grid array

@@ -17,6 +17,8 @@ public class BombermanPlayer extends Entity
 	public BombermanPlayer(String name, Point location, char character)
 	{
 		super(name, location, character);
+		killCount = 0;
+		powerup = Powerup.None;
 	}
 	
 	//getters/settets

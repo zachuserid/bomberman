@@ -41,9 +41,7 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
     
 	//Remove messages from our backlog buffer that have been confirmed by the server
 	protected void handleAck(int highAck)
-	{
-		System.out.println("~~~Client received ack count: " + highAck);
-		
+	{		
 		//Received the ack, remove all from the backlog that
 		// are <= highAck.
 		ArrayList<PlayerCommand> backlog = this.commandBacklog.readAll(true);
@@ -79,7 +77,7 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 
 		try{
 			commandType = Utils.byteToInt(data[0]);
-			System.out.println("Parsing: " + new String(data));
+			//System.out.println("Parsing: " + new String(data));
 		} catch (NumberFormatException e){
 			System.out.println("Number format exception parsing: '" + new String(data) + "'");
 			commandType = -1;
@@ -101,7 +99,6 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 			//Handle the ack value nested in the servers response to join game request
 			byte bytesToInt[] = {data[1], data[2], data[3], data[4]};
 			int ackValue = Utils.byteArrToStrInt(bytesToInt);
-			System.out.println("Ack Value from JoinAck: " + ackValue);
 			handleAck(ackValue);
 			
 			//Build the player
@@ -187,8 +184,9 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 					gridArr[i][j] = (char)data[ ( (i * this.grid_width) + j) + 17 ];
 				}
 			}
-			System.out.println("Client parsing an Update");
+			
 			p.Command = PlayerCommandType.Update;
+			p.MetaData = players;
 			p.Data = gridArr;
 		}
 		
@@ -249,7 +247,6 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 		{
 			for (int i=0; i<allCommands.length; i++)
 			{
-				System.out.println("Sending update command");
 				toSend += allCommands[i].Command.ordinal();
 			}
 		}
@@ -281,9 +278,10 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 	@Override
 	protected BomberPacket getReceiveCopy(BomberPacket original)
 	{
+		BomberPacket p = new BomberPacket();
+		
 		if(original.Command == PlayerCommandType.Join)
 		{
-			BomberPacket p = new BomberPacket();
 			p.Command = PlayerCommandType.Join;
 			
 			BombermanPlayer or = (BombermanPlayer)original.Data;
@@ -294,27 +292,37 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 			
 			return p;
 		}
-		else
+		else if(original.Command == PlayerCommandType.Update)
 		{
-			BomberPacket p = new BomberPacket();
 			p.Command = original.Command;
 			
-			char[][] or = (char[][])original.Data;
+			char[][] orig = (char[][])original.Data;
 			
-			int w = or.length;
-			int h = or[0].length;
+			int w = orig.length;
+			int h = orig[0].length;
+			
 			char[][] gridCopy = new char[w][h];
+			
 			for (int i=0; i<w; i++)
 			{
 				for (int j=0; j<h; j++)
 				{
-					gridCopy[i][j] = or[i][j];
+					gridCopy[i][j] = orig[i][j];
 				}
 			}
 			
 			p.Data = gridCopy;
 			
-			return p;
+			BombermanPlayer[] players = (BombermanPlayer[])original.MetaData;
+			
+			BombermanPlayer copyPlayers[] = new BombermanPlayer[players.length];
+			for (int i=0; i<copyPlayers.length; i++)
+				copyPlayers[i] = players[i].getCopy();
+			
+			p.MetaData = copyPlayers;
+			
 		}
+		
+		return p;
 	}
 }

@@ -10,7 +10,7 @@ public class B_TestDriver
 		//----Init network handler----
 		BombermanClientNetworkHandler network = new BombermanClientNetworkHandler("127.0.0.1", 8090);
 		
-		if(!network.Initialize())
+		if(!network.Initialize(false, true))
 		{
 			System.out.println("Client network fail");
 			return;
@@ -39,21 +39,26 @@ public class B_TestDriver
 		System.out.println("First wave of get data");
 		while (!haveJoinAck)
 		{
-			//TODO: Replace this while (not have initial join ack) to a
-			// clientBlocksForFirstUpdate() overriding receiverThread in network handler...
+			//Client blocks for first update() overriding receiverThread in network handler...
+			BomberPacket firstPacket[] = network.blockAndReceive();
 			
-			//Create packet array to receive messages from network handler
-			packets = network.getData();
 			//Iterate over each received BombermanPacket, handle it accordingly
-			for(BomberPacket p : packets)
+			for(BomberPacket p : firstPacket)
 			{
-				System.out.println("--Type: " + p.Command.toString());
 				if(p.Command == PlayerCommandType.Join)
 				{
-					System.out.println("Received player " + ((BombermanPlayer)p.Data).name + " join from server");
+					System.out.println("**Received player " + ((BombermanPlayer)p.Data).name + " join from server. Moving on to game.");
 					haveJoinAck = true;
 				} 
 			}
+		}
+		
+		//Start the network's receiver thread
+		if (!network.startReceiver())
+		{
+			System.out.println("Could not start receiver thread");
+			network.Stop();
+			return;
 		}
 		
 		//Move and receive();
@@ -70,23 +75,20 @@ public class B_TestDriver
 			// handle it accordingly
 			for(BomberPacket p : packets)
 			{
-				System.out.println("~~Client update from server. Type: " + p.Command.toString());
-				if(p.Command == PlayerCommandType.Join)
-				{
-					//NOTE SHOULD NEVER GET IN HERE >> REMOVE ONCE CONFIRMED
-					System.out.println("BADBADBAD Received player " + ((BombermanPlayer)p.Data).name + " join from server");
-				} 
-				else if (p.Command == PlayerCommandType.Update)
+				System.out.println("~~Client update from server. Type: " + p.Command.toString()); 
+				if (p.Command == PlayerCommandType.Update)
 				{
 					System.out.println("Received update command from server:");
 					char payload[][] = (char[][])p.Data;
 					(new World(payload)).printGrid();
-				}
-				else if (p.Command == PlayerCommandType.Ack)
-				{
-					//NOTE SHOULD NEVER GET IN HERE >> REMOVE ONCE CONFIRMED (same as above)
-					int highAck = (int)p.Data;
-					System.out.println("~~~BADBABA Received ack from server for id: " + highAck);
+					
+					BombermanPlayer playerArray[] = (BombermanPlayer[])p.MetaData;
+					for (BombermanPlayer pl: playerArray)
+					{
+						System.out.println("Received player: " + pl.getName() + " at " + pl.getX() +","+ pl.getY()
+								+" powerup: " + pl.getPowerup() + " kills: " + pl.getKillCount());
+					}
+					
 				}
 			}
 			

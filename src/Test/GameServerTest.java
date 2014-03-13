@@ -97,7 +97,7 @@ public class GameServerTest
 								}
 							}
 						}
-						System.out.println("found " + playersOnMap + "/" + w.getPlayerCount());						
+						//System.out.println("found " + playersOnMap + "/" + w.getPlayerCount());						
 						if ( playersOnMap < w.getPlayerCount() ){
 							try {
 								printer.write("WARNING: COLLISSIONS DETECTED\n");
@@ -138,7 +138,7 @@ public class GameServerTest
 							
 						playersJoined.add(p);
 						
-						System.out.println("~~~~~~~Got join request from " + command.PlayerName 
+						System.out.println("~~~~Got join request from " + command.PlayerName 
 											+ " " + joinCount + " players in game");
 					}
 					
@@ -164,9 +164,7 @@ public class GameServerTest
 					received = network.getData();
 										
 					for(PlayerCommand[] command : received)
-					{
-						System.out.println("###Server got a player command list of length: " + command.length);
-						
+					{						
 						//If some error occured and we have empty updates, bail to next
 						if (command.length == 0) continue;
 						
@@ -180,9 +178,6 @@ public class GameServerTest
 						for(PlayerCommand pc : command)
 						{
 							newUpdates = true;
-							System.out.println("####Server adding command to update queue. Name: " 
-											+ pc.PlayerName + ", Id: " + pc.Id + ", Type: "
-											+ pc.Command.toString());
 							cs.add(pc);
 						}
 						
@@ -201,8 +196,6 @@ public class GameServerTest
 					
 					//if (some endgame condition)
 					//	gameState++;
-					
-					// w.printGrid();
 				}
 				
 				v.Draw();
