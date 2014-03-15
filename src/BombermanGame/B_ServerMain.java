@@ -3,7 +3,7 @@ package BombermanGame;
 import java.io.*;
 import java.util.ArrayList;
 
-public class BombermanServerMain
+public class B_ServerMain
 {
 	
 	public static ArrayList<PlayerCommand[]> received = new ArrayList<PlayerCommand[]>();
@@ -34,7 +34,7 @@ public class BombermanServerMain
 		  System.out.println("ERROR: Could not stat file: " + logger_path + ". " + e.getMessage() + f.getAbsolutePath());
 		}
 		
-		BombermanServerNetworkHandler network = new BombermanServerNetworkHandler(8090, 2);
+		B_ServerNetworkHandler network = new B_ServerNetworkHandler(8090, 2);
 		
 		if(!network.Initialize())
 		{
@@ -42,9 +42,9 @@ public class BombermanServerMain
 			return;
 		}
 		
-		ViewRenderer v = new BombermanView(w, 50);
+		ViewRenderer v = new B_View(w, 50);
 		
-		BombermanNetworkPlayerController c = new BombermanNetworkPlayerController(w);
+		B_NetworkPlayerController c = new B_NetworkPlayerController(w);
 		
 		long milliwait = 100;
 		
@@ -121,7 +121,7 @@ public class BombermanServerMain
 				PlayerCommand[] joins = network.getJoinRequests();
 				for(PlayerCommand command : joins)
 				{
-					BombermanPlayer p =w.AddPlayer(command.PlayerName);
+					B_Player p =w.AddPlayer(command.PlayerName);
 					
 					c.AddPlayer(p);
 					

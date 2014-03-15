@@ -5,13 +5,13 @@ import java.util.Collection;
 import java.util.Hashtable;
 
 //this class controls the player(s) that are over a network
-public class BombermanNetworkPlayerController extends BombermanController
+public class B_NetworkPlayerController extends B_Controller
 {
 	protected Hashtable<String,PlayerMovePair> players;
 	
 	protected World world;
 	
-	public BombermanNetworkPlayerController(World w)
+	public B_NetworkPlayerController(World w)
 	{
 		this.players = new Hashtable<String, PlayerMovePair>();
 		
@@ -19,7 +19,7 @@ public class BombermanNetworkPlayerController extends BombermanController
 	}
 	
 	
-	public void AddPlayer(BombermanPlayer player)
+	public void AddPlayer(B_Player player)
 	{
 		this.players.put(player.name, new PlayerMovePair(player));
 	}
@@ -53,11 +53,11 @@ public class BombermanNetworkPlayerController extends BombermanController
 
 class PlayerMovePair
 {
-	public BombermanPlayer Player;
+	public B_Player Player;
 	
 	public ArrayList<PlayerCommand> Commands;
 	
-	public PlayerMovePair(BombermanPlayer player)
+	public PlayerMovePair(B_Player player)
 	{
 		this.Player = player;
 		this.Commands = new ArrayList<PlayerCommand>();

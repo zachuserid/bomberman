@@ -11,10 +11,10 @@ import java.util.ArrayList;
  * on update these key states are compared to determine if the player is trying to do something
  * if an action is performed, it is added to an action log for this controller
  */
-public class BombermanPlayerController extends BombermanController implements KeyEventDispatcher
+public class B_PlayerController extends B_Controller implements KeyEventDispatcher
 {
 	//creates a default player controller with WASD keys
-	public static BombermanPlayerController Default(BombermanPlayer player, World w) {return new BombermanPlayerController(player, w, 'a', 'd', 'w', 's', ' ');}
+	public static B_PlayerController Default(B_Player player, World w) {return new B_PlayerController(player, w, 'a', 'd', 'w', 's', ' ');}
 	
 	//the amount of controls (this is to make adding/removing them easier)
 	protected int controlCount;
@@ -27,7 +27,7 @@ public class BombermanPlayerController extends BombermanController implements Ke
 	protected char[] cKeys;
 	
 	//the player entity mapped to this control
-	protected BombermanPlayer player;
+	protected B_Player player;
 	
 	//the world mapped to this control
 	protected World world;
@@ -49,7 +49,7 @@ public class BombermanPlayerController extends BombermanController implements Ke
 	}
 	
 	
-	public BombermanPlayerController(BombermanPlayer player, World w, char left, char right, char up, char down, char bomb)
+	public B_PlayerController(B_Player player, World w, char left, char right, char up, char down, char bomb)
 	{
 		this.player = player;
 		this.world = w;

@@ -5,7 +5,7 @@ import Networking.ClientNetworkHandler;
 import Networking.DoubleBuffer;
 import java.util.ArrayList;
 
-public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[], BomberPacket>{
+public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[], B_Packet>{
 
 	//Members
 	
@@ -16,7 +16,7 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 	
 	//Constructor
 	
-	public BombermanClientNetworkHandler(String ip, int port)
+	public B_ClientNetworkHandler(String ip, int port)
 	{
 		super(ip, port);
 		//Initialize dimensions as "unknown" until we receive some packets
@@ -69,9 +69,9 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 	 * each value can be represented as one byte.
 	 */
 	@Override
-	protected BomberPacket[] parseReceive(byte[] data) 
+	protected B_Packet[] parseReceive(byte[] data) 
 	{	
-		BomberPacket p = new BomberPacket();
+		B_Packet p = new B_Packet();
 		
 		int commandType; 
 
@@ -115,7 +115,7 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 			this.grid_width = Utils.byteToInt(data[9]);
 			this.grid_height = Utils.byteToInt(data[10]);
 			
-			BombermanPlayer player = new BombermanPlayer(playerName, new Point(xPos, yPos), playerChar);
+			B_Player player = new B_Player(playerName, new Point(xPos, yPos), playerChar);
 			
 			p.Data = player;
 			
@@ -154,7 +154,7 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 				return null;
 			}
 			
-			BombermanPlayer players[] = new BombermanPlayer[4];
+			B_Player players[] = new B_Player[4];
 			
 			//Assuming 4 players here..
 			for (int i=0; i<4; i++)
@@ -166,7 +166,7 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 				int yPos = Utils.byteToInt(data[(i*4)+2]);
 				
 				//TODO: Can change this character based on his location in grid below if desired..
-				players[i] = new BombermanPlayer(pName, new Point(xPos, yPos), '?');
+				players[i] = new B_Player(pName, new Point(xPos, yPos), '?');
 				
 				int kills = Utils.byteToInt(data[(i*4)+3]);
 				players[i].setKillCount(kills);
@@ -190,7 +190,7 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 			p.Data = gridArr;
 		}
 		
-		return new BomberPacket[] {p};
+		return new B_Packet[] {p};
 	}
 
 
@@ -276,17 +276,17 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 
 
 	@Override
-	protected BomberPacket getReceiveCopy(BomberPacket original)
+	protected B_Packet getReceiveCopy(B_Packet original)
 	{
-		BomberPacket p = new BomberPacket();
+		B_Packet p = new B_Packet();
 		
 		if(original.Command == PlayerCommandType.Join)
 		{
 			p.Command = PlayerCommandType.Join;
 			
-			BombermanPlayer or = (BombermanPlayer)original.Data;
+			B_Player or = (B_Player)original.Data;
 			
-			BombermanPlayer player = new BombermanPlayer(or.getName(), new Point(or.getX(), or.getY()), or.getCharacter());
+			B_Player player = new B_Player(or.getName(), new Point(or.getX(), or.getY()), or.getCharacter());
 			
 			p.Data = player;
 			
@@ -313,9 +313,9 @@ public class BombermanClientNetworkHandler extends ClientNetworkHandler<PlayerCo
 			
 			p.Data = gridCopy;
 			
-			BombermanPlayer[] players = (BombermanPlayer[])original.MetaData;
+			B_Player[] players = (B_Player[])original.MetaData;
 			
-			BombermanPlayer copyPlayers[] = new BombermanPlayer[players.length];
+			B_Player copyPlayers[] = new B_Player[players.length];
 			for (int i=0; i<copyPlayers.length; i++)
 				copyPlayers[i] = players[i].getCopy();
 			

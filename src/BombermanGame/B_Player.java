@@ -4,7 +4,7 @@ package BombermanGame;
  * this class will eventually have a bunch of data associated with
  * a bomberman player (kills, powerups etc...)
  */
-public class BombermanPlayer extends Entity
+public class B_Player extends Entity
 {
 	//members
 	
@@ -14,7 +14,7 @@ public class BombermanPlayer extends Entity
 	
 	//constructor
 	
-	public BombermanPlayer(String name, Point location, char character)
+	public B_Player(String name, Point location, char character)
 	{
 		super(name, location, character);
 		killCount = 0;
@@ -52,8 +52,8 @@ public class BombermanPlayer extends Entity
 		// are updated accordingly.
 	}
 	
-	public BombermanPlayer getCopy()
+	public B_Player getCopy()
 	{
-		return new BombermanPlayer(this.getName(), this.getLocation(), this.getCharacter());
+		return new B_Player(this.getName(), this.getLocation(), this.getCharacter());
 	}
 }

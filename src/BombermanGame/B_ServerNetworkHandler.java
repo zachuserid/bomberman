@@ -7,7 +7,7 @@ import Networking.DoubleBuffer;
 import Networking.ServerNetworkHandler;
 import Networking.Subscriber;
 
-public class BombermanServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket, PlayerCommand[]> {
+public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket, PlayerCommand[]> {
 
 	//Members
 	
@@ -19,7 +19,7 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<B_Networ
 	
 	//Constructor
 	
-	public BombermanServerNetworkHandler(int port, int maxPlayers) {
+	public B_ServerNetworkHandler(int port, int maxPlayers) {
 		super(port);
 		
 		this.maxPlayers = maxPlayers;
@@ -48,7 +48,7 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<B_Networ
 	//After the server sorts out player position, character and jazz,
 	// send the player specific data to the client in an ack
 	//TODO: remember to get the server to call all these after receiving join requests
-	public void ackJoinRequest(BombermanPlayer p, int width, int height)
+	public void ackJoinRequest(B_Player p, int width, int height)
 	{
 		byte ackPacket[] = new byte[11];
 		ackPacket[0] = Utils.intToByte(PlayerCommandType.valueOf("Join").ordinal()); //[0] = message type
@@ -303,7 +303,7 @@ public class BombermanServerNetworkHandler extends ServerNetworkHandler<B_Networ
 		
 		//[1..4] [5..8] [9..12] [13..16] is the player[i]s stats:
 		//[xPos, yPox, killCount, Powerup]
-		BombermanPlayer players[] = data.getPlayers();
+		B_Player players[] = data.getPlayers();
 		for (int i=0; i<this.maxPlayers*4; i+=4)
 		{
 			byteData[i+1] = Utils.intToByte(players[i/4].getX());

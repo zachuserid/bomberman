@@ -8,7 +8,7 @@ public class B_TestDriver
 	public static void main(String[] args) 
 	{
 		//----Init network handler----
-		BombermanClientNetworkHandler network = new BombermanClientNetworkHandler("127.0.0.1", 8090);
+		B_ClientNetworkHandler network = new B_ClientNetworkHandler("127.0.0.1", 8090);
 		
 		if(!network.Initialize(false, true))
 		{
@@ -28,7 +28,7 @@ public class B_TestDriver
 		//TODO wait for join ack containing my player id to include in all new sends
 		
 		//Receive packets into this
-		ArrayList<BomberPacket> packets;
+		ArrayList<B_Packet> packets;
 		
 		//Sleep for a second..
 		try { Thread.sleep(1000); } 
@@ -40,14 +40,14 @@ public class B_TestDriver
 		while (!haveJoinAck)
 		{
 			//Client blocks for first update() overriding receiverThread in network handler...
-			BomberPacket firstPacket[] = network.blockAndReceive();
+			B_Packet firstPacket[] = network.blockAndReceive();
 			
-			//Iterate over each received BombermanPacket, handle it accordingly
-			for(BomberPacket p : firstPacket)
+			//Iterate over each received B_Packet, handle it accordingly
+			for(B_Packet p : firstPacket)
 			{
 				if(p.Command == PlayerCommandType.Join)
 				{
-					System.out.println("**Received player " + ((BombermanPlayer)p.Data).name + " join from server. Moving on to game.");
+					System.out.println("**Received player " + ((B_Player)p.Data).name + " join from server. Moving on to game.");
 					haveJoinAck = true;
 				} 
 			}
@@ -71,9 +71,9 @@ public class B_TestDriver
 			network.Send(commands);
 		
 			packets = network.getData();
-			//Once more, Iterate over each received BombermanPacket, 
+			//Once more, Iterate over each received B_Packet, 
 			// handle it accordingly
-			for(BomberPacket p : packets)
+			for(B_Packet p : packets)
 			{
 				System.out.println("~~Client update from server. Type: " + p.Command.toString()); 
 				if (p.Command == PlayerCommandType.Update)
@@ -82,8 +82,8 @@ public class B_TestDriver
 					char payload[][] = (char[][])p.Data;
 					(new World(payload)).printGrid();
 					
-					BombermanPlayer playerArray[] = (BombermanPlayer[])p.MetaData;
-					for (BombermanPlayer pl: playerArray)
+					B_Player playerArray[] = (B_Player[])p.MetaData;
+					for (B_Player pl: playerArray)
 					{
 						System.out.println("Received player: " + pl.getName() + " at " + pl.getX() +","+ pl.getY()
 								+" powerup: " + pl.getPowerup() + " kills: " + pl.getKillCount());

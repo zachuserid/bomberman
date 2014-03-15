@@ -7,7 +7,7 @@ import java.awt.Graphics2D;
  * this class renders a bomberman world
  * it has simple loops to represent entities and such as shapes
  */
-public class BombermanView extends ViewRenderer
+public class B_View extends ViewRenderer
 {
 	protected int gridX, gridY, gridDim;
 	
@@ -16,7 +16,7 @@ public class BombermanView extends ViewRenderer
 	protected Color[] playerColors;
 	
 
-	public BombermanView(World w, int gridDim)
+	public B_View(World w, int gridDim)
 	{
 		super("Bomberman", w.getGridWidth() * gridDim, w.getGridHeight() * gridDim);
 		

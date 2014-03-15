@@ -1,6 +1,6 @@
 package BombermanGame;
 
-public class BomberPacket
+public class B_Packet
 {
 	public PlayerCommandType Command;
 	

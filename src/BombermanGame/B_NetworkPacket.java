@@ -6,9 +6,9 @@ public class B_NetworkPacket {
 	
 	private World world;
 	
-	private BombermanPlayer players[];
+	private B_Player players[];
 	
-	public B_NetworkPacket(World w, BombermanPlayer[] players)
+	public B_NetworkPacket(World w, B_Player[] players)
 	{
 		this.world = w;
 		this.players = players;
@@ -19,14 +19,14 @@ public class B_NetworkPacket {
 		return this.world;
 	}
 	
-	public BombermanPlayer[] getPlayers()
+	public B_Player[] getPlayers()
 	{
 		return this.players;
 	}
 	
 	public B_NetworkPacket getCopy()
 	{
-		BombermanPlayer copyPlayers[] = new BombermanPlayer[this.players.length];
+		B_Player copyPlayers[] = new B_Player[this.players.length];
 		for (int i=0; i<copyPlayers.length; i++)
 			copyPlayers[i] = this.players[i].getCopy();
 		
