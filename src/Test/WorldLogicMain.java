@@ -38,6 +38,10 @@ public class WorldLogicMain
 		{	
 			float elapsedSeconds = (time-prevTime)/1000f;
 			c.Update(elapsedSeconds);
+			
+			//to get list of commands from player controller
+			//c.getCommandsClear();
+			
 			w.Update(elapsedSeconds);
 			v.Draw();
 						

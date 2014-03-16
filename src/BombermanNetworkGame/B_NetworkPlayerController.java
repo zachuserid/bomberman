@@ -27,7 +27,7 @@ public class B_NetworkPlayerController extends B_Controller
 	
 	public void AddPlayer(B_Player player)
 	{
-		this.players.put(player.name, new PlayerMovePair(player));
+		this.players.put(player.getName(), new PlayerMovePair(player));
 	}
 	
 	public void AddCommands(String name, ArrayList<PlayerCommand> commands)
@@ -51,6 +51,7 @@ public class B_NetworkPlayerController extends B_Controller
 				else if (c.Command == PlayerCommandType.MoveLeft) this.world.TryMoveLeft(p.Player);
 				else if (c.Command == PlayerCommandType.MoveRight) this.world.TryMoveRight(p.Player);
 				else if (c.Command == PlayerCommandType.MoveUp) this.world.TryMoveUp(p.Player);
+				else if(c.Command == PlayerCommandType.PlantBomb) this.world.TryPlantBomb(p.Player);
 			}
 		}
 			
