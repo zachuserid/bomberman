@@ -89,7 +89,7 @@ public class World implements Sendable<World>
 	@Override
 	public byte[] getBytes()
 	{
-		/*int width = this.getGridWidth();
+		int width = this.getGridWidth();
 		int height = this.getGridHeight();
 		
 		byte worldBytes[] = new byte[width * height];
@@ -97,12 +97,9 @@ public class World implements Sendable<World>
 		{
 			for (int j=0; j<height; j++)
 			{
-				worldBytes[ (j * height) + i ] = (byte)this.grid[j][i];
+				worldBytes[ (j * height) + i ] = this.grid[j][i].getByte();
 			}
-		}*/
-		
-		byte[] worldBytes = new String("THIS NEEDS TO BE WRITTEN TO FOLLOW WHATEVER PROTOCOL IS NEEDED").getBytes();
-		
+		}
 		return worldBytes;
 	}
 	
@@ -118,6 +115,12 @@ public class World implements Sendable<World>
 	}
 	
 	public boolean isGameOver() {return this.playersDead >= this.players.size() -1 || this.atDoor;}
+	
+	//add more stuff here
+	public void setUpdatedData(GridObject[][] o)
+	{
+		this.grid = o;
+	}
 	
 	//returns the (currently)char elements at x,y
 	public GridObject getElementAt(int x, int y)
