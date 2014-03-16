@@ -1,6 +1,7 @@
 package BombermanGame;
 
 import java.util.ArrayList;
+
 import Networking.Sendable;
 
 /*
@@ -11,147 +12,43 @@ import Networking.Sendable;
 public class World implements Sendable<World>
 {
 	//this is the backing character grid
-	protected char[][] grid;
-
-	//list of entities in the world
-	protected ArrayList<Entity> entities;
+	protected GridObject[][] grid;
 	
 	//list of players in the world for creating networkpacket
 	protected ArrayList<B_Player> players;
+	
+	protected ArrayList<Bomb> bombs;
+	
+	protected int playersDead = 0;
+	
+	protected boolean atDoor = false;
 
 	//the width of the world in "squares" (not pixels)
-	public int getGridWidth() {return grid.length;}
-	public int getGridHeight() {return grid[0].length;}
+	public int getGridWidth() {return grid[0].length;}
+	public int getGridHeight() {return grid.length;}
 	
 	public int getPlayerCount()
 	{
-		return this.entities.size();
+		return this.players.size();
 	}
 	
 	protected Point getNextPlayerLocation() 
 	{ 
 		for(int x = 0; x < this.getGridWidth(); x++) 
 			for(int y = 0; y < this.getGridHeight(); y++)
-				if(this.getElementAt(x, y)=='.') return new Point(x,y);
+				if(this.getElementAt(x, y)==GridObject.Empty)
+					{
+						boolean valid = true;
+						
+						for(B_Player p : this.players)
+						{
+							if(p.getX() == x && p.getY() == y) valid = false;
+						}
+						
+						if(valid)return new Point(x,y);
+					}
 		
 		return Point.Zero();
-	}
-	
-	protected char getNextChar()
-	{
-		return Characters.values()[this.entities.size()].toString().toCharArray()[0];
-	}
-	
-	//returns the (currently)char elements at x,y
-	public char getElementAt(int x, int y)
-	{
-		return this.grid[x][y];
-	}
-
-	public ArrayList<Entity> getEntities() {return this.entities;}
-
-
-	//creates a new world with a grid
-	public World(char[][] grid)
-	{
-		this.grid = grid;
-
-		this.entities = new ArrayList<Entity>();
-		this.players = new ArrayList<B_Player>();
-	}
-
-	//adds an entity to world (should be mapped to an outside controller to be dynamic)
-	public boolean AddEntity(Entity e)
-	{
-		this.grid[e.getX()][e.getY()] = this.getNextChar();
-		System.out.println("adding character " + this.grid[e.getX()][e.getY()] + " at "+e.getX()+","+e.getY() + "size: "+ this.entities.size());
-		this.entities.add(e);
-		
-		return true;
-	}
-
-	public B_Player AddPlayer(String name)
-	{
-		B_Player p = new B_Player(name, this.getNextPlayerLocation(), this.getNextChar());
-		
-		this.AddEntity(p);
-		this.players.add(p);
-		
-		return p;
-	}
-	
-	//currently unused, may be needed for "static" object updates (animations or something)
-	public void Update(float time)
-	{
-
-	}
-
-	//these are all the requests for an entity to try and do something
-	public WorldActionOutcome TryMoveLeft(Entity e)
-	{
-		int x = e.getX() - 1;
-		if(x >= 0)
-		{
-			char c = this.getElementAt(e.getX(), e.getY());
-			this.grid[e.getX()][e.getY()] = '.';
-			e.setX(x);
-			this.grid[e.getX()][e.getY()] = c;
-			return WorldActionOutcome.Approved;
-		}
-
-		return WorldActionOutcome.DeniedStatic;
-	}
-
-	public WorldActionOutcome TryMoveRight(Entity e)
-	{
-		int x = e.getX() + 1;
-		if(x < this.getGridWidth())
-		{
-			char c = this.getElementAt(e.getX(), e.getY());
-			this.grid[e.getX()][e.getY()] = '.';	
-			e.setX(x);
-			this.grid[e.getX()][e.getY()] = c;
-			return WorldActionOutcome.Approved;
-		}
-
-		return WorldActionOutcome.DeniedStatic;
-	}
-
-	public WorldActionOutcome TryMoveUp(Entity e)
-	{
-		int y = e.getY() - 1;
-		if(y >= 0)
-		{
-			char c = this.getElementAt(e.getX(), e.getY());
-			this.grid[e.getX()][e.getY()] = '.';
-			e.setY(y);
-			this.grid[e.getX()][e.getY()] = c;
-			return WorldActionOutcome.Approved;
-		}
-
-		return WorldActionOutcome.DeniedStatic;
-	}
-
-	public WorldActionOutcome TryMoveDown(Entity e)
-	{
-		int y = e.getY() + 1;
-		if(y < this.getGridHeight())
-		{
-			char c = this.getElementAt(e.getX(), e.getY());
-			this.grid[e.getX()][e.getY()] = '.';
-			e.setY(y);
-			this.grid[e.getX()][e.getY()] = c;
-			return WorldActionOutcome.Approved;
-		}
-
-		return WorldActionOutcome.DeniedStatic;
-	}
-
-	public WorldActionOutcome TryPlantBomb(Entity e)
-	{
-		System.out.println(e.name + " plants bomb.");
-
-		return WorldActionOutcome.Approved;
 	}
 	
 	public B_Player[] getPlayers()
@@ -161,10 +58,38 @@ public class World implements Sendable<World>
 		return playerArr;
 	}
 	
+	public B_Player getWinner()
+	{
+		if(!this.isGameOver()) return null;
+		
+		if(players.size() == this.playersDead) return null;
+		
+		if(this.players.size() - this.playersDead == 1)
+		{
+			for(B_Player p : this.players)
+			{
+				if(p.isAlive()) return p;
+			}
+		}
+		
+		for(B_Player p : this.players)
+		{
+			if(this.getElementAt(p.getLocation()) == GridObject.Door)
+				return p;
+		}
+		
+		return null;
+	}
+	
+	public ArrayList<Bomb> getBombs()
+	{
+		return this.bombs;
+	}
+	
 	@Override
 	public byte[] getBytes()
 	{
-		int width = this.getGridWidth();
+		/*int width = this.getGridWidth();
 		int height = this.getGridHeight();
 		
 		byte worldBytes[] = new byte[width * height];
@@ -174,7 +99,9 @@ public class World implements Sendable<World>
 			{
 				worldBytes[ (j * height) + i ] = (byte)this.grid[j][i];
 			}
-		}
+		}*/
+		
+		byte[] worldBytes = new String("THIS NEEDS TO BE WRITTEN TO FOLLOW WHATEVER PROTOCOL IS NEEDED").getBytes();
 		
 		return worldBytes;
 	}
@@ -182,10 +109,268 @@ public class World implements Sendable<World>
 	@Override
 	public World getCopy()
 	{
-		//add actual copy
+		World w = new World(this.grid);
 		
-		return new World(this.grid);
+		for(B_Player p : this.players) 
+			w.AddExistingPlayer(p);
+		
+		return w;
 	}
+	
+	public boolean isGameOver() {return this.playersDead >= this.players.size() -1 || this.atDoor;}
+	
+	//returns the (currently)char elements at x,y
+	public GridObject getElementAt(int x, int y)
+	{
+		return this.grid[y][x];
+	}
+	
+	public GridObject getElementAt(Point p)
+	{
+		return this.grid[p.Y][p.X];
+	}
+	
+	protected void SetElementAt(int x, int y, GridObject o)
+	{
+		this.grid[y][x] = o;
+	}
+	
+	protected void SetElementAt(Point p, GridObject o)
+	{
+		this.SetElementAt(p.X, p.Y, o);
+	}
+
+
+	//creates a new world with a grid
+	public World(GridObject[][] grid)
+	{
+		this.grid = grid;
+
+		this.players = new ArrayList<B_Player>();
+		this.bombs = new ArrayList<Bomb>();
+	}
+
+	//adds an entity to world (should be mapped to an outside controller to be dynamic)
+	public B_Player AddPlayer(String name)
+	{
+		if(this.players.size() >= 4) return null;
+		
+		B_Player p = new B_Player(name, this.getNextPlayerLocation());
+		
+		this.players.add(p);
+		
+		return p;
+	}
+	
+	public void Update(float time)
+	{
+		if(this.isGameOver()) return;
+		
+		//removes bombs that have exploded
+		for(int i = 0; i < this.bombs.size(); i++)
+			if(this.bombs.get(i).isDetonated())
+				this.bombs.remove(i);
+		
+		for(Bomb b : this.bombs)
+		{
+			b.Update(time, this);
+			
+			if(b.isDetonated())
+				this.explode(b);
+		}
+	}
+	
+	protected void explode(Bomb b)
+	{
+		this.SetElementAt(b.getLocation(), GridObject.Empty);
+		
+		B_Player player = null;
+		
+		for(B_Player p : this.players)
+			if(b.name == p.name)
+			{
+				player = p;
+				break;
+			}
+		
+		//right
+		for(int i = 0; i < 5; i++)
+		{
+			int x = b.getX() + i;
+			if(x > this.getGridWidth() - 1) i = 5;
+			else
+			{
+				if(this.explodeLocation(new Point(x, b.getY()), player)) i = 5;
+			}
+		}
+		//left
+		for(int i = 0; i < 5; i++)
+		{
+			int x = b.getX() - i;
+			if(x < 0) i = 5;
+			else
+			{
+				if(this.explodeLocation(new Point(x, b.getY()), player)) i = 5;
+			}
+		}
+		//up
+		for(int i = 0; i < 5; i++)
+		{
+			int y = b.getY() - i;
+			if(y < 0) i = 5;
+			else
+			{
+				if(this.explodeLocation(new Point(b.getX(),y), player)) i = 5;
+			}
+		}
+		//up
+		for(int i = 0; i < 5; i++)
+		{
+			int y = b.getY() + i;
+			if(y > this.getGridHeight() - 1) i = 5;
+			else
+			{
+				if(this.explodeLocation(new Point(b.getX(),y), player)) i = 5;
+			}
+		}
+	}
+	
+	protected boolean explodeLocation(Point p, B_Player player)
+	{
+		GridObject o = this.getElementAt(p.X, p.Y);
+		if(o == GridObject.Wall)
+		{
+			this.SetElementAt(new Point(p.X, p.Y), GridObject.Empty);
+			return true;
+		}
+		else if(o == GridObject.HiddenDoor)
+		{
+			this.SetElementAt(new Point(p.X, p.Y), GridObject.Door);
+			return true;
+		}
+		else if(o == GridObject.HiddenPowerUp1)
+		{
+			this.SetElementAt(new Point(p.X, p.Y), GridObject.PowerUp1);
+			return true;
+		}
+		else if(o == GridObject.HiddenPowerUp2)
+		{
+			this.SetElementAt(new Point(p.X, p.Y), GridObject.PowerUp2);
+			return true;
+		}
+		else if(o == GridObject.HiddenPowerUp3)
+		{
+			this.SetElementAt(new Point(p.X, p.Y), GridObject.PowerUp3);
+			return true;
+		}
+		else
+		{
+			for(B_Player other : this.players)
+				if(other.isAlive())
+				{
+					if(p.X == other.getX() && p.Y == other.getY())
+					{
+						player.setKillCount(player.getKillCount() + 1);
+						other.Kill();
+						this.playersDead++;
+						return true;
+					}
+				}
+		}
+		
+		return false;
+	}
+
+	//these are all the requests for an entity to try and do something
+	public WorldActionOutcome TryMoveLeft(B_Player e)
+	{
+		int x = e.getX() - 1;
+		if(x >= 0) return this.TryMove(new Point(x, e.getY()), e);
+
+		return WorldActionOutcome.DeniedStatic;
+	}
+
+	public WorldActionOutcome TryMoveRight(B_Player e)
+	{
+		int x = e.getX() + 1;
+		if(x < this.getGridWidth()) return this.TryMove(new Point(x, e.getY()), e);
+
+		return WorldActionOutcome.DeniedStatic;
+	}
+
+	public WorldActionOutcome TryMoveUp(B_Player e)
+	{
+		int y = e.getY() - 1;
+		if(y >= 0) return this.TryMove(new Point(e.getX(), y), e);
+
+		return WorldActionOutcome.DeniedStatic;
+	}
+
+	public WorldActionOutcome TryMoveDown(B_Player e)
+	{
+		int y = e.getY() + 1;
+		if(y < this.getGridHeight()) return this.TryMove(new Point(e.getX(), y), e);
+
+		return WorldActionOutcome.DeniedStatic;
+	}
+
+	protected WorldActionOutcome TryMove(Point pos, B_Player e)
+	{
+		GridObject o = this.getElementAt(pos);
+		
+		switch(o)
+		{
+			case Empty:
+				e.setLocation(pos);
+				return WorldActionOutcome.Approved;
+			case PowerUp1:
+				e.setLocation(pos);
+				e.setPowerup(Powerup.PowerupA);
+				this.SetElementAt(pos, GridObject.Empty);
+				break;
+			case PowerUp2:
+				e.setLocation(pos);
+				e.setPowerup(Powerup.PowerupB);
+				this.SetElementAt(pos, GridObject.Empty);
+				break;
+			case PowerUp3:
+				e.setLocation(pos);
+				e.setPowerup(Powerup.PowerupC);
+				this.SetElementAt(pos, GridObject.Empty);
+				break;
+			case Door:
+				e.setLocation(pos);
+				this.atDoor = true;
+				break;
+		case HiddenDoor:
+			break;
+		case Wall:
+			break;
+		default:
+			break;
+		}
+		return WorldActionOutcome.DeniedStatic;
+	}
+	
+	protected void SwapObjects(Point a, Point b)
+	{
+		GridObject o1 = this.getElementAt(a);
+		GridObject o2 = this.getElementAt(b);
+		
+		this.SetElementAt(a, o2);
+		this.SetElementAt(b, o1);
+	}
+	
+	public WorldActionOutcome TryPlantBomb(Entity e)
+	{
+		if(this.getElementAt(e.getLocation()) == GridObject.Bomb) return WorldActionOutcome.DeniedDynamic;
+		
+		this.SetElementAt(e.getLocation(), GridObject.Bomb);
+		this.bombs.add(new Bomb(e.name, e.getLocation(), 5, 5));
+		
+		return WorldActionOutcome.Approved;
+	}
+
 	
 	public void printGrid()
 	{
@@ -199,19 +384,14 @@ public class World implements Sendable<World>
 			}
 			System.out.println("");
 		}
-		
-	}
+	}	
 	
-}
-
-enum Characters {
-	a,
-	b,
-	c,
-	e,
-	f,
-	g,
-	h,
-	i,
-	j
+	protected void AddExistingPlayer(B_Player p)
+	{
+		B_Player copy = p.getCopy();
+		
+		this.players.add(copy);
+		
+		this.SetElementAt(copy.getLocation(), copy.getGridObject());
+	}
 }

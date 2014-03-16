@@ -1,8 +1,14 @@
-package BombermanGame;
+package BombermanNetworkGame;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
+
+import BombermanGame.B_Controller;
+import BombermanGame.B_Player;
+import BombermanGame.PlayerCommand;
+import BombermanGame.PlayerCommandType;
+import BombermanGame.World;
 
 //this class controls the player(s) that are over a network
 public class B_NetworkPlayerController extends B_Controller

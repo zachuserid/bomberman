@@ -1,8 +1,17 @@
-package BombermanGame;
+package BombermanNetworkGame;
 
 
+import BombermanGame.B_Packet;
+import BombermanGame.B_Player;
+import BombermanGame.PlayerCommand;
+import BombermanGame.PlayerCommandType;
+import BombermanGame.PlayerName;
+import BombermanGame.Point;
+import BombermanGame.Powerup;
+import BombermanGame.Utils;
 import Networking.ClientNetworkHandler;
 import Networking.DoubleBuffer;
+
 import java.util.ArrayList;
 
 public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[], B_Packet>{

@@ -1,9 +1,14 @@
-package BombermanGame;
+package BombermanNetworkGame;
 
 import java.util.ArrayList;
 import java.net.*;
-import Networking.DoubleBuffer;
 
+import BombermanGame.B_Player;
+import BombermanGame.PlayerCommand;
+import BombermanGame.PlayerCommandType;
+import BombermanGame.PlayerName;
+import BombermanGame.Utils;
+import Networking.DoubleBuffer;
 import Networking.ServerNetworkHandler;
 import Networking.Subscriber;
 

@@ -10,7 +10,7 @@ public abstract class Entity
 
 	protected Point location;
 	
-	protected char character;
+	protected GridObject gridObject;
 
 	//Properties
 	public String getName(){return this.name;}
@@ -24,13 +24,13 @@ public abstract class Entity
 	public Point getLocation() {return this.location;}
 	public void setLocation(Point l) {this.location = l;}
 	
-	public char getCharacter(){return this.character;}
+	public GridObject getGridObject(){return this.gridObject;}
 
-	public Entity(String name, Point location, char character)
+	public Entity(String name, Point location, GridObject gObject)
 	{
 		this.name = name;
 		this.location = location;
-		this.character = character;
+		this.gridObject = gObject;
 	}
 
 	public abstract void Update(float elapsed, World w);

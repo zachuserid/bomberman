@@ -8,20 +8,23 @@ public class B_Player extends Entity
 {
 	//members
 	
-	private Powerup powerup;
+	protected Powerup powerup;
 	
-	private int killCount;
+	protected int killCount;
+	
+	protected boolean alive;
 	
 	//constructor
 	
-	public B_Player(String name, Point location, char character)
+	public B_Player(String name, Point location)
 	{
-		super(name, location, character);
+		super(name, location, GridObject.Player);
 		killCount = 0;
 		powerup = Powerup.None;
+		this.alive = true;
 	}
 	
-	//getters/settets
+	//getters/setters
 	
 	public void setPowerup(Powerup p)
 	{
@@ -43,6 +46,10 @@ public class B_Player extends Entity
 		return this.killCount;
 	}
 	
+	public boolean isAlive() {return this.alive;}
+	
+	public void Kill() {this.alive = false;}
+	
 	//methods
 	
 	public void Update(float elapsed, World world)
@@ -54,6 +61,9 @@ public class B_Player extends Entity
 	
 	public B_Player getCopy()
 	{
-		return new B_Player(this.getName(), this.getLocation(), this.getCharacter());
+		B_Player p = new B_Player(this.getName(), this.getLocation());
+		p.setKillCount(this.killCount);
+		p.setPowerup(this.powerup);
+		return p;
 	}
 }

@@ -111,6 +111,8 @@ public class B_PlayerController extends B_Controller implements KeyEventDispatch
 	@Override
 	public void Update(float time)
 	{
+		if(!this.player.isAlive()) return;
+		
 		//checks the states of the commands and updates if necessary
 		//if an an action is valid (according to the world) it is added to the list of commands	
 		if(this.CheckBool(0))
@@ -139,6 +141,13 @@ public class B_PlayerController extends B_Controller implements KeyEventDispatch
 			if(this.world.TryMoveDown(this.player) == WorldActionOutcome.Approved)
 			{
 				this.commands.add(new PlayerCommand(PlayerCommandType.MoveDown, this.commandIds++));
+			}
+		}
+		if(this.CheckBool(4))
+		{
+			if(this.world.TryPlantBomb(this.player) == WorldActionOutcome.Approved)
+			{
+				this.commands.add(new PlayerCommand(PlayerCommandType.PlantBomb, this.commandIds++));
 			}
 		}
 	}

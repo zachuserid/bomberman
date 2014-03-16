@@ -1,6 +1,12 @@
-package BombermanGame;
+package BombermanNetworkGame;
 
 import java.util.ArrayList;
+
+import BombermanGame.B_Packet;
+import BombermanGame.B_Player;
+import BombermanGame.PlayerCommand;
+import BombermanGame.PlayerCommandType;
+import BombermanGame.World;
 
 public class B_TestDriver 
 {

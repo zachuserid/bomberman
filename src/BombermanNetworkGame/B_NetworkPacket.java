@@ -1,4 +1,7 @@
-package BombermanGame;
+package BombermanNetworkGame;
+
+import BombermanGame.B_Player;
+import BombermanGame.World;
 
 public class B_NetworkPacket {
 	
