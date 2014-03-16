@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import BombermanGame.B_Player;
 import BombermanGame.B_View;
 import BombermanGame.GridGenerator;
+import BombermanGame.GridObject;
 import BombermanGame.PlayerCommand;
 import BombermanGame.ViewRenderer;
 import BombermanGame.World;
@@ -15,7 +16,17 @@ public class B_ServerMain
 	
 	public static ArrayList<PlayerCommand[]> received = new ArrayList<PlayerCommand[]>();
 	public static ArrayList<PlayerCommand> commands = new ArrayList<PlayerCommand>();
-	public static World w = new World(GridGenerator.FromFile("Worlds/w1.txt"));
+	
+	public static GridObject[][] grid = new GridObject[][]
+			{
+				new GridObject[] { GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty }, 
+				new GridObject[] { GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Wall, GridObject.HiddenPowerUp1 }, 
+				new GridObject[] { GridObject.Empty, GridObject.Empty, GridObject.Wall, GridObject.Wall, GridObject.Empty }, 
+				new GridObject[] { GridObject.Empty, GridObject.Empty, GridObject.Wall, GridObject.HiddenPowerUp2, GridObject.Empty }, 
+				new GridObject[] { GridObject.Wall, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Wall }
+			};
+	
+	public static World w = new World(grid);
 
 
 	public static boolean updates = false;
@@ -97,7 +108,7 @@ public class B_ServerMain
 						{
 							for (int j=0; j<w.getGridHeight(); j++)
 							{
-								if (w.getElementAt(i, j) != '.' && w.getElementAt(i, j) != 'D'){
+								if (w.getElementAt(i, j) == GridObject.Player){
 									playersOnMap++;
 								}
 							}
@@ -134,10 +145,10 @@ public class B_ServerMain
 					
 					System.out.println("~~~~~~~Got join request from " + command.PlayerName);
 					
-					String joinString = new String(new String(new byte[]{(byte)5}) + p.getName() + "," + p.getCharacter() + ","
-							+p.getX() + "," + p.getY());
+					//String joinString = new String(new String(new byte[]{(byte)5}) + p.getName() + "," + p.getCharacter() + ","
+					//		+p.getX() + "," + p.getY());
 										
-					network.Send(command.PlayerName, joinString);
+					//network.Send(command.PlayerName, joinString);
 				}
 					
 				

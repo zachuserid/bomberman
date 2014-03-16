@@ -3,6 +3,7 @@ package BombermanNetworkGame;
 
 import BombermanGame.B_Packet;
 import BombermanGame.B_Player;
+import BombermanGame.GridObject;
 import BombermanGame.PlayerCommand;
 import BombermanGame.PlayerCommandType;
 import BombermanGame.PlayerName;
@@ -112,19 +113,17 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 			
 			//Build the player
 			
-			char playerChar = (char)data[5];
-			
-			int playerNumber = Utils.byteToInt(data[6]);
+			int playerNumber = Utils.byteToInt(data[5]);
 			
 			String playerName = PlayerName.values()[playerNumber].toString();
 			
-			int xPos = Utils.byteToInt(data[7]);
-			int yPos = Utils.byteToInt(data[8]);
+			int xPos = Utils.byteToInt(data[6]);
+			int yPos = Utils.byteToInt(data[7]);
 			
-			this.grid_width = Utils.byteToInt(data[9]);
-			this.grid_height = Utils.byteToInt(data[10]);
+			this.grid_width = Utils.byteToInt(data[8]);
+			this.grid_height = Utils.byteToInt(data[9]);
 			
-			B_Player player = new B_Player(playerName, new Point(xPos, yPos), playerChar);
+			B_Player player = new B_Player(playerName, new Point(xPos, yPos));
 			
 			p.Data = player;
 			
@@ -174,8 +173,7 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 				
 				int yPos = Utils.byteToInt(data[(i*4)+2]);
 				
-				//TODO: Can change this character based on his location in grid below if desired..
-				players[i] = new B_Player(pName, new Point(xPos, yPos), '?');
+				players[i] = new B_Player(pName, new Point(xPos, yPos));
 				
 				int kills = Utils.byteToInt(data[(i*4)+3]);
 				players[i].setKillCount(kills);
@@ -184,13 +182,13 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 				players[i].setPowerup(powerup);
 			}
 			
-			char[][] gridArr = new char[this.grid_width][this.grid_height];
+			GridObject[][] gridArr = new GridObject[this.grid_width][this.grid_height];
 			
 			for (int i=0; i<this.grid_width; i++)
 			{
 				for (int j=0; j<this.grid_height; j++)
 				{
-					gridArr[i][j] = (char)data[ ( (i * this.grid_width) + j) + 17 ];
+					gridArr[i][j] = GridObject.values()[ data[ ( (i * this.grid_width) + j) + 17 ] ];
 				}
 			}
 			
@@ -295,7 +293,7 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 			
 			B_Player or = (B_Player)original.Data;
 			
-			B_Player player = new B_Player(or.getName(), new Point(or.getX(), or.getY()), or.getCharacter());
+			B_Player player = new B_Player(or.getName(), new Point(or.getX(), or.getY()));
 			
 			p.Data = player;
 			
@@ -305,12 +303,12 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 		{
 			p.Command = original.Command;
 			
-			char[][] orig = (char[][])original.Data;
+			GridObject[][] orig = (GridObject[][])original.Data;
 			
 			int w = orig.length;
 			int h = orig[0].length;
 			
-			char[][] gridCopy = new char[w][h];
+			GridObject[][] gridCopy = new GridObject[w][h];
 			
 			for (int i=0; i<w; i++)
 			{

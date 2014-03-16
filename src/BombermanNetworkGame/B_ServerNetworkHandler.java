@@ -55,7 +55,7 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 	//TODO: remember to get the server to call all these after receiving join requests
 	public void ackJoinRequest(B_Player p, int width, int height)
 	{
-		byte ackPacket[] = new byte[11];
+		byte ackPacket[] = new byte[10];
 		ackPacket[0] = Utils.intToByte(PlayerCommandType.valueOf("Join").ordinal()); //[0] = message type
 		
 		int ackC = this.getSubscriberByName(p.getName()).getAckCount();
@@ -67,15 +67,13 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 		
 		int playerNumber = PlayerName.valueOf(p.getName()).ordinal();
 		
-		ackPacket[5] = (byte)p.getCharacter(); //[5] = the player's char representation
+		ackPacket[5] = Utils.intToByte(playerNumber); //[5] = the player's number
 		
-		ackPacket[6] = Utils.intToByte(playerNumber); //[6] = the player's number
+		ackPacket[6] = Utils.intToByte(p.getX()); //[6] = x position
+		ackPacket[7] = Utils.intToByte(p.getY()); //[7] = y position
 		
-		ackPacket[7] = Utils.intToByte(p.getX()); //[7] = x position
-		ackPacket[8] = Utils.intToByte(p.getY()); //[8] = y position
-		
-		ackPacket[9] = Utils.intToByte(width); //[9] = world object width
-		ackPacket[10] = Utils.intToByte(height); //[10] = world object height
+		ackPacket[8] = Utils.intToByte(width); //[8] = world object width
+		ackPacket[9] = Utils.intToByte(height); //[9] = world object height
 
 		//System.out.println("Acking join request for player " + p.getName() + " with data: " + new String(ackPacket));
 
