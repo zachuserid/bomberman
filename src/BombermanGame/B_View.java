@@ -57,6 +57,7 @@ public class B_View extends ViewRenderer
 				else if(c == GridObject.PowerUp2) this.DrawPowerUp(g, p, 1);
 				else if(c == GridObject.PowerUp3) this.DrawPowerUp(g, p, 2);
 				else if(c == GridObject.Door) this.DrawDoor(g, p);
+				else if(c == GridObject.Bomb) this.DrawBomb(g, p, -1, 0);
 			}
 		
 		//draws the grid
@@ -127,11 +128,20 @@ public class B_View extends ViewRenderer
 	
 	protected void DrawBomb(Graphics2D g, Point p, int index, float time)
 	{
-		g.setColor(this.playerColors[index]);
-		
-		if(time % 2 >= 1) g.fillOval(p.X + 16, p.Y + 16, this.gridDim - 32, this.gridDim - 32);
-		else if( time < 0) g.fillOval(p.X, p.Y, this.gridDim, this.gridDim);
-		else g.fillOval(p.X + 10, p.Y + 10, this.gridDim - 20, this.gridDim - 20);
+		if(index == -1)
+		{
+			g.setColor(Color.LIGHT_GRAY);
+
+			g.fillOval(p.X + 10, p.Y + 10, this.gridDim - 20, this.gridDim - 20);
+		}
+		else
+		{
+			g.setColor(this.playerColors[index]);
+			
+			if(time % 2 >= 1) g.fillOval(p.X + 16, p.Y + 16, this.gridDim - 32, this.gridDim - 32);
+			else if( time < 0) g.fillOval(p.X, p.Y, this.gridDim, this.gridDim);
+			else g.fillOval(p.X + 10, p.Y + 10, this.gridDim - 20, this.gridDim - 20);
+		}
 	}
 	
 	protected void DrawPlayer(Graphics2D g, Point p, int index)
