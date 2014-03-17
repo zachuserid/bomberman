@@ -9,7 +9,7 @@ import java.awt.Graphics2D;
  */
 public class B_View extends ViewRenderer
 {
-	protected int gridX, gridY, gridDim;
+	protected int gridDim;
 	
 	protected World world;
 	
@@ -21,8 +21,6 @@ public class B_View extends ViewRenderer
 		super("Bomberman", w.getGridWidth() * gridDim, w.getGridHeight() * gridDim);
 		
 		this.world = w;
-		this.gridX = w.getGridWidth();
-		this.gridY = w.getGridHeight();
 		this.gridDim = gridDim;
 		
 		//default player colors for now
@@ -57,8 +55,8 @@ public class B_View extends ViewRenderer
 		//draws the board elements
 		//System.out.println("~~char[0][0] is " + this.world.getElementAt(0, 0) );
 		g.setColor(Color.LIGHT_GRAY);
-		for(int x = 0; x < this.gridX; x++)
-			for(int y = 0; y < this.gridY; y++)
+		for(int x = 0; x < this.world.getGridWidth(); x++)
+			for(int y = 0; y < this.world.getGridHeight(); y++)
 			{
 				GridObject c = this.world.getElementAt(x, y);
 				
@@ -82,10 +80,10 @@ public class B_View extends ViewRenderer
 		//draws the grid
 		g.setColor(Color.GRAY);
 				
-		for(int x = 1; x < this.gridX; x++)
+		for(int x = 1; x < this.world.getGridWidth(); x++)
 			g.drawLine(x * this.gridDim, 0, x * this.gridDim, this.getRenderHeight());
 				
-		for(int y = 1; y < this.gridY; y++)
+		for(int y = 1; y < this.world.getGridHeight(); y++)
 			g.drawLine(0, y * this.gridDim, this.getRenderWidth(), y * this.gridDim);
 		
 		//draws the entities

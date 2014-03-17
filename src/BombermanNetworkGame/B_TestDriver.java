@@ -60,7 +60,6 @@ public class B_TestDriver
 			}
 		}
 		
-		
 		//Start the network's receiver thread
 		if (!network.startReceiver())
 		{

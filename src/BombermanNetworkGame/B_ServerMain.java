@@ -5,9 +5,9 @@ import java.util.ArrayList;
 
 import BombermanGame.B_Player;
 import BombermanGame.B_View;
-import BombermanGame.GridGenerator;
 import BombermanGame.GridObject;
 import BombermanGame.PlayerCommand;
+import BombermanGame.PlayerCommandType;
 import BombermanGame.ViewRenderer;
 import BombermanGame.World;
 
@@ -19,11 +19,13 @@ public class B_ServerMain
 	
 	public static GridObject[][] grid = new GridObject[][]
 			{
-				new GridObject[] { GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty }, 
-				new GridObject[] { GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Wall, GridObject.HiddenPowerUp1 }, 
-				new GridObject[] { GridObject.Empty, GridObject.Empty, GridObject.Wall, GridObject.Wall, GridObject.Empty }, 
-				new GridObject[] { GridObject.Empty, GridObject.Empty, GridObject.Wall, GridObject.HiddenPowerUp2, GridObject.Empty }, 
-				new GridObject[] { GridObject.Wall, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Wall }
+				new GridObject[] { GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty }, 
+				new GridObject[] { GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Wall, GridObject.HiddenPowerUp1, GridObject.Empty, GridObject.Empty }, 
+				new GridObject[] { GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty }, 
+				new GridObject[] { GridObject.HiddenDoor, GridObject.Empty, GridObject.Empty, GridObject.HiddenPowerUp2, GridObject.Empty, GridObject.Empty, GridObject.Empty }, 
+				new GridObject[] { GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty },
+				new GridObject[] { GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Wall, GridObject.Empty, GridObject.Empty },
+				new GridObject[] { GridObject.Wall, GridObject.Wall, GridObject.Empty, GridObject.Empty, GridObject.Wall, GridObject.Empty, GridObject.Empty }
 			};
 	
 	public static World w = new World(grid);
@@ -33,6 +35,8 @@ public class B_ServerMain
 	public static boolean parsing = false;
 	public static Writer printer;
 	public static boolean shutdown = false;
+	
+	public static final int MAX_PLAYERS = 4;
 	
 	public static void main(String[] args)
 	{
@@ -52,7 +56,7 @@ public class B_ServerMain
 		  System.out.println("ERROR: Could not stat file: " + logger_path + ". " + e.getMessage() + f.getAbsolutePath());
 		}
 		
-		B_ServerNetworkHandler network = new B_ServerNetworkHandler(8090, 2);
+		B_ServerNetworkHandler network = new B_ServerNetworkHandler(8090, MAX_PLAYERS);
 		
 		if(!network.Initialize())
 		{
@@ -113,7 +117,7 @@ public class B_ServerMain
 								}
 							}
 						}
-						System.out.println("found " + playersOnMap + "/" + w.getPlayerCount());						
+						//System.out.println("found " + playersOnMap + "/" + w.getPlayerCount());						
 						if ( playersOnMap < w.getPlayerCount() ){
 							try {
 								printer.write("WARNING: COLLISSIONS DETECTED\n");
@@ -130,62 +134,120 @@ public class B_ServerMain
 		}); //End thread
 		
 		testLogger.start();
-		
+
+		boolean startGame = false;
+		int playerjoinCount = 0;
+		boolean newUpdates = false;
+		ArrayList<B_Player> playersJoined = new ArrayList<B_Player>();
+		long prevTime = 0;
 		
 		try
 		{
+			v.Draw();
 			while(!v.exitPrompt())
 			{	
-				PlayerCommand[] joins = network.getJoinRequests();
-				for(PlayerCommand command : joins)
-				{
-					B_Player p =w.AddPlayer(command.PlayerName);
-					
-					c.AddPlayer(p);
-					
-					System.out.println("~~~~~~~Got join request from " + command.PlayerName);
-					
-					//String joinString = new String(new String(new byte[]{(byte)5}) + p.getName() + "," + p.getCharacter() + ","
-					//		+p.getX() + "," + p.getY());
-										
-					//network.Send(command.PlayerName, joinString);
-				}
-					
+				float elapsedSeconds = (time-prevTime)/1000f;
 				
-				received = network.getData();
+				
+				if (!startGame){
 					
-				for(PlayerCommand[] command : received)
-				{
-					synchronized(commands)
+					PlayerCommand[] joins = network.getJoinRequests();
+					for(PlayerCommand command : joins)
 					{
-						for(int i = 0; i < command.length; i++)
-							commands.add(command[i].getCopy());
+						//System.out.println("This: " + command.Command);
+						
+						if ((command.Command == PlayerCommandType.Join) && (playerjoinCount < MAX_PLAYERS)){
+							
+							B_Player p = w.AddPlayer(command.PlayerName);
+							
+							c.AddPlayer(p);
+							
+							playersJoined.add(p);
+							
+							playerjoinCount ++;
+							
+							System.out.println("~~~~~~~Got join request from " + command.PlayerName + " " + playerjoinCount + " players in game");
+							
+							v.Draw();
+							//String joinString = new String(new String(new byte[]{(byte)5}) + p.getName() + "," + p.getCharacter() + ","
+							//		+p.getX() + "," + p.getY());
+												
+							//network.Send(command.PlayerName, joinString);
+							
+						}
+						if ((command.Command == PlayerCommandType.Start) || (playerjoinCount==MAX_PLAYERS)){
+						 					
+							for (B_Player p: playersJoined)
+							{
+								network.ackJoinRequest(p,  w.getGridWidth(), w.getGridHeight());
+							}
+							
+							
+							startGame = true;
+							network.Send(new B_NetworkPacket(w, w.getPlayers()));					
+						}
 					}
+				}else{
+					newUpdates = false;
+					received = network.getData();
 						
-					ArrayList<PlayerCommand> cs = new ArrayList<PlayerCommand>();
-					for(PlayerCommand pc : command)
-						cs.add(pc);
-					c.AddCommands(command[0].PlayerName, cs);
-				}
+					for(PlayerCommand[] command : received)
+					{
+						//If some error occurred and we have empty updates, bail to next
+						if (command.length == 0) continue;
+						
+						//Test logger stuff
+						synchronized(commands)
+						{
+							for(int i = 0; i < command.length; i++)
+								commands.add(command[i].getCopy());
+						}
+							
+						ArrayList<PlayerCommand> cs = new ArrayList<PlayerCommand>();
+						System.out.println("Player: " + command[0].PlayerName);
+						for(PlayerCommand pc : command){
+							newUpdates = true;
+							cs.add(pc);
+							System.out.println("Command " + pc.Id +": " + pc.Command);
+						}
+							
+						c.AddCommands(command[0].PlayerName, cs);
+						
+					}
+					
+					c.Update(elapsedSeconds);
+					w.Update(elapsedSeconds);
+					
+					network.Send(new B_NetworkPacket(w, w.getPlayers()));
 
-				c.Update(time);
-				v.Draw();
-
-				updates = true;
-				if ( commands.size() > 0 )
-				{
-					synchronized(commands){
-						commands.notify();
+					
+					v.Draw();					
+	
+					updates = true;
+					if ( commands.size() > 0 )
+					{
+						synchronized(commands){
+							commands.notify();
+						}
+					}
+					
+					//w.printGrid();
+					//network.Send(new B_NetworkPacket(w, w.getPlayers()));
+							
+					try { Thread.sleep(milliwait); } 
+					catch (InterruptedException e) { e.printStackTrace(); }
+					
+					prevTime = time;
+					time = System.currentTimeMillis() - start;
+					
+					
+					
+					if (w.isGameOver()){
+						//network.Send(new B_NetworkPacket(w, w.getPlayers()));
+						
+						break;
 					}
 				}
-				
-				//w.printGrid();
-				network.Send(new B_NetworkPacket(w, w.getPlayers()));
-						
-				try { Thread.sleep(milliwait); } 
-				catch (InterruptedException e) { e.printStackTrace(); }
-						
-				time = System.currentTimeMillis() - start;
 			}
 		} catch(Exception e)
 		{
@@ -205,5 +267,15 @@ public class B_ServerMain
 				commands.notify();
 			}
 		}
+		
+		//The game is over. Compute winner, end prompt
+				B_Player winner = w.getWinner();
+				if(winner != null) 
+					System.out.println("Winner is " + winner.getName());
+				else 
+					System.out.println("No Winner");
+
+				for(B_Player currPlayer : w.getPlayers())
+					System.out.println(currPlayer.getName() + " killcount: " + currPlayer.getKillCount());
 	}
 }

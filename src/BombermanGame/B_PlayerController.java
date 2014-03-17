@@ -56,7 +56,7 @@ public class B_PlayerController extends B_Controller implements KeyEventDispatch
 		this.player = player;
 		this.world = w;
 		this.commands = new ArrayList<PlayerCommand>();
-		this.commandIds = 0;
+		this.commandIds = 1;
 		
 		//adds this object as a listener to the key dispatch event
 		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(this);
