@@ -22,7 +22,7 @@ public class Z_Client
 		World theWorld = null;
 		
 		//the view
-		ViewRenderer view = null;
+		B_View view = null;
 		
 		//Controller for key events to PlayerCommand updates
 		B_PlayerController controller = null;
@@ -90,18 +90,19 @@ public class Z_Client
 						{
 							if (theWorld.getElementAt(i, j) == GridObject.Door)
 								doorLocations.add(new Point(i, j));
+							if (theWorld.getElementAt(i, j) == GridObject.Player)
+								System.out.println("Initially player at "+i+","+j);
 						}
 					}
 					
 					//Take the player list out of the packet
+					ArrayList<B_Player> pToAdd = new ArrayList<B_Player>();
 					B_Player players[] = (B_Player[])packet.MetaData;
 					for (B_Player p: players)
 					{
-						if (p.getName().equals(player.getName()))
-							player = theWorld.AddPlayer(p.getName());
-						else
-							theWorld.AddPlayer(p.getName());
+						pToAdd.add(p);
 					}
+					theWorld.setPlayers(pToAdd);
 					
 					//Intialize the view with the world
 					view = new B_View(theWorld, 50);
@@ -139,19 +140,42 @@ public class Z_Client
 			
 			//Get list of commands from player controller
 			PlayerCommand myUpdates[] = controller.getCommandsClear();
-			if (myUpdates != null)
-				if (myUpdates[0] != null)
+			//System.out.println("myUpdates length: " + myUpdates.length);
+			if (myUpdates.length > 0)
 					network.Send(myUpdates);
 			
 			//Update view with any world update from server
 			updatePackets = network.getData();
 			for(B_Packet packet : updatePackets)
 			{
-				//System.out.println("~~Client update from server. Type: " + p.Command.toString()); 
 				if (packet.Command == PlayerCommandType.Update)
 				{
 					//Set the world grid
-					theWorld.setGrid((GridObject[][])packet.Data);
+					//theWorld.setGrid((GridObject[][])packet.Data);
+					//view.setWorld(theWorld);
+					
+					//Add players to the world again
+					B_Player players[] = (B_Player[])packet.MetaData;
+					String debugNames = "";
+					ArrayList<B_Player> pToAdd = new ArrayList<B_Player>();
+					for (B_Player p: players)
+					{
+						pToAdd.add(p);
+						debugNames+= p.getName() +": " + p.getX() +", " + p.getY() +" ";
+					}
+					System.out.println(debugNames);
+					theWorld.setPlayers(pToAdd);
+					
+					//debug stuff
+					for (int i=0; i<theWorld.getGridWidth(); i++)
+					{
+						for (int j=0; j<theWorld.getGridHeight(); j++)
+						{
+							System.out.print((char)(theWorld.getElementAt(i, j).ordinal()+97));
+						}
+						System.out.println("");
+					}
+					System.out.println("Same worlds? " + view.sameWorld(theWorld));
 					
 					//Check endgame condition
 					int kills = 0;
@@ -174,7 +198,7 @@ public class Z_Client
 			float elapsedSeconds = (time-prevTime)/1000f;
 			controller.Update(elapsedSeconds);
 			
-			theWorld.Update(elapsedSeconds);
+			//theWorld.Update(elapsedSeconds);
 			view.Draw();
 						
 			try { Thread.sleep(milliwait); } 
@@ -194,9 +218,6 @@ public class Z_Client
 		
 		for(B_Player currPlayer : theWorld.getPlayers())
 			System.out.println(currPlayer.getName() + " killcount: " + currPlayer.getKillCount());
-		
-		//Finish up clean up
-		if (view != null)
-			view.Dispose();
+
 	}
 }

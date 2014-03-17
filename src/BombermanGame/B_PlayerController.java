@@ -45,6 +45,8 @@ public class B_PlayerController extends B_Controller implements KeyEventDispatch
 		
 		this.commands.toArray(com);
 		
+		this.commands.clear();
+		
 		return com;
 	}
 	

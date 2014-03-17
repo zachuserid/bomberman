@@ -33,10 +33,29 @@ public class B_View extends ViewRenderer
 		this.playerColors[3] = Color.YELLOW;
 	}
 	
+	public void setWorld(World w)
+	{
+		this.world = w;
+	}
+	
+	public boolean sameWorld(World w)
+	{
+		for (int i=0; i<this.world.getGridWidth(); i++)
+		{
+			for (int j=0; j<this.world.getGridHeight(); j++)
+			{
+				if (this.world.getElementAt(i, j) != w.getElementAt(i, j))
+					return false;
+			}
+		}
+		return true;
+	}
+	
 	@Override
 	public void CustomDraw(Graphics2D g)
 	{
 		//draws the board elements
+		//System.out.println("~~char[0][0] is " + this.world.getElementAt(0, 0) );
 		g.setColor(Color.LIGHT_GRAY);
 		for(int x = 0; x < this.gridX; x++)
 			for(int y = 0; y < this.gridY; y++)

@@ -56,6 +56,11 @@ public class World implements Sendable<World>
 		this.grid = newGrid;
 	}
 	
+	public void setPlayers(ArrayList<B_Player> players)
+	{
+		this.players = players;
+	}
+	
 	public B_Player[] getPlayers()
 	{
 		B_Player playerArr[] = new B_Player[this.players.size()];
@@ -138,7 +143,7 @@ public class World implements Sendable<World>
 		return this.grid[p.Y][p.X];
 	}
 	
-	protected void SetElementAt(int x, int y, GridObject o)
+	public void SetElementAt(int x, int y, GridObject o)
 	{
 		this.grid[y][x] = o;
 	}

@@ -235,6 +235,9 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 
 	    			int messageType = Utils.byteArrToStrInt(new byte[]{ updateBytes[j] });
 	    			
+	    			if (messageType >= PlayerCommandType.values().length) 
+	    				return new PlayerCommand[][] { { null } };
+	    			
 	    			String commandStr = PlayerCommandType.values()[messageType].toString();
 	    			
 	    			PlayerCommandType type = PlayerCommandType.valueOf(commandStr);

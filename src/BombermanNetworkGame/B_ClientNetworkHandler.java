@@ -61,8 +61,8 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 		{
 			if (pc.Id > highAck)
 				newBacklog.add(pc);
-			else
-				System.out.println("~~~~Removing acked packet: " + pc.Id);
+			//else
+			//	System.out.println("~~~~Removing acked packet: " + pc.Id);
 		}
 		
 		PlayerCommand newBacklogArray[] = new PlayerCommand[newBacklog.size()];
