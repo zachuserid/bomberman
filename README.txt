@@ -27,3 +27,9 @@ Execute the compiled server followed by the client four times, using the followi
 java -Dfile.encoding=US-ASCII -classpath path/to/bomberman/bin /path/to/bomberman/src/BombermanGame.B_ServerMain
 and:
 java -Dfile.encoding=US-ASCII -classpath path/to/bomberman/bin /path/to/bomberman/src/BombermanGame.B_ClientMain
+
+Things to note:
+	-Due to a small bug in the conversion from byte to int of acked command id, we are ignoring packets after the 10th client command update on the server. This is because it is converted to an int that has already been acknowledged. A simple fix for this will come in the next milestone.
+	-When running the four client programs, you will initially see a grey window until all four players have joined the game.
+
+The test framework is located in the Testframe directory in this root bomberman directory. In Testframe you will find the INSTRUCTIONS.pdf documentation for testing. You will find the code for test cases in the corresponding sub directories.
