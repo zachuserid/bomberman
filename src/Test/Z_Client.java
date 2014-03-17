@@ -77,12 +77,10 @@ public class Z_Client
 			{
 				if(packet.Command == PlayerCommandType.Update)
 				{
-					System.out.println("Got initial world...");
-					//Take the grid out of packet
-					GridObject payload[][] = (GridObject[][])packet.Data;
+					System.out.println("Got initial world... Starting client");
 					
 					//Intialize the world
-					theWorld = new World(payload);
+					theWorld = (World)packet.Data;
 					
 					for (int i=0; i<theWorld.getGridWidth(); i++)
 					{
@@ -90,19 +88,8 @@ public class Z_Client
 						{
 							if (theWorld.getElementAt(i, j) == GridObject.Door)
 								doorLocations.add(new Point(i, j));
-							if (theWorld.getElementAt(i, j) == GridObject.Player)
-								System.out.println("Initially player at "+i+","+j);
 						}
 					}
-					
-					//Take the player list out of the packet
-					ArrayList<B_Player> pToAdd = new ArrayList<B_Player>();
-					B_Player players[] = (B_Player[])packet.MetaData;
-					for (B_Player p: players)
-					{
-						pToAdd.add(p);
-					}
-					theWorld.setPlayers(pToAdd);
 					
 					//Intialize the view with the world
 					view = new B_View(theWorld, 50);
@@ -137,10 +124,8 @@ public class Z_Client
 		//Main client game loop.. While window open and game not over.
 		while(!view.exitPrompt() && !gameOver)
 		{	
-			
 			//Get list of commands from player controller
 			PlayerCommand myUpdates[] = controller.getCommandsClear();
-			//System.out.println("myUpdates length: " + myUpdates.length);
 			if (myUpdates.length > 0)
 					network.Send(myUpdates);
 			
@@ -150,36 +135,13 @@ public class Z_Client
 			{
 				if (packet.Command == PlayerCommandType.Update)
 				{
-					//Set the world grid
-					//theWorld.setGrid((GridObject[][])packet.Data);
-					//view.setWorld(theWorld);
 					
-					//Add players to the world again
-					B_Player players[] = (B_Player[])packet.MetaData;
-					String debugNames = "";
-					ArrayList<B_Player> pToAdd = new ArrayList<B_Player>();
-					for (B_Player p: players)
-					{
-						pToAdd.add(p);
-						debugNames+= p.getName() +": " + p.getX() +", " + p.getY() +" ";
-					}
-					System.out.println(debugNames);
-					theWorld.setPlayers(pToAdd);
-					
-					//debug stuff
-					for (int i=0; i<theWorld.getGridWidth(); i++)
-					{
-						for (int j=0; j<theWorld.getGridHeight(); j++)
-						{
-							System.out.print((char)(theWorld.getElementAt(i, j).ordinal()+97));
-						}
-						System.out.println("");
-					}
-					System.out.println("Same worlds? " + view.sameWorld(theWorld));
+					theWorld = (World)packet.Data;
+					view.setWorld(theWorld);
 					
 					//Check endgame condition
 					int kills = 0;
-					for (B_Player pl: (B_Player[])packet.MetaData)
+					for (B_Player pl: theWorld.getPlayers())
 					{
 						kills += pl.getKillCount();
 						//Check if this player is on a door
@@ -218,6 +180,5 @@ public class Z_Client
 		
 		for(B_Player currPlayer : theWorld.getPlayers())
 			System.out.println(currPlayer.getName() + " killcount: " + currPlayer.getKillCount());
-
 	}
 }

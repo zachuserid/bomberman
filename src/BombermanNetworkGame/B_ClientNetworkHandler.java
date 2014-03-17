@@ -3,6 +3,7 @@ package BombermanNetworkGame;
 
 import BombermanGame.B_Packet;
 import BombermanGame.B_Player;
+import BombermanGame.Bomb;
 import BombermanGame.GridObject;
 import BombermanGame.PlayerCommand;
 import BombermanGame.PlayerCommandType;
@@ -10,9 +11,11 @@ import BombermanGame.PlayerName;
 import BombermanGame.Point;
 import BombermanGame.Powerup;
 import BombermanGame.Utils;
+import BombermanGame.World;
 import Networking.ClientNetworkHandler;
 import Networking.DoubleBuffer;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[], B_Packet>{
@@ -163,6 +166,7 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 			}
 			
 			B_Player players[] = new B_Player[4];
+			ArrayList<B_Player> playerList = new ArrayList<B_Player>();
 			
 			//Assuming 4 players here..
 			for (int i=0; i<4; i++)
@@ -173,28 +177,55 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 				
 				int yPos = Utils.byteToInt(data[(i*4)+2]);
 				
-				players[i] = new B_Player(pName, new Point(xPos, yPos));
+				B_Player pl = new B_Player(pName, new Point(xPos, yPos));
 				
 				int kills = Utils.byteToInt(data[(i*4)+3]);
-				players[i].setKillCount(kills);
+				pl.setKillCount(kills);
 				
 				Powerup powerup = Powerup.values()[Utils.byteToInt(data[(i*4)+4])];
-				players[i].setPowerup(powerup);
+				pl.setPowerup(powerup);
+				
+				players[i] = pl;
+				playerList.add(pl);
 			}
 			
 			GridObject[][] gridArr = new GridObject[this.grid_width][this.grid_height];
 			
-			for (int i=0; i<this.grid_width; i++)
+			int i=0, j=0;
+			for (i=0; i<this.grid_width; i++)
 			{
-				for (int j=0; j<this.grid_height; j++)
+				for (j=0; j<this.grid_height; j++)
 				{
 					gridArr[i][j] = GridObject.values()[ data[ ( (i * this.grid_width) + j) + 17 ] ];
 				}
 			}
 			
+			int startB = (i*j)+17;
+			
+			int numBombs = Utils.byteToInt(data[startB++]);
+			ArrayList<Bomb> worldBombs = new ArrayList<Bomb>();
+			
+			for (int k=0; k<numBombs; k++)
+			{
+				int playerNum = Utils.byteToInt(data[startB++]);
+				String bombName = PlayerName.values()[playerNum].toString();
+				
+				int bX = Utils.byteToInt(data[startB++]);
+				int bY = Utils.byteToInt(data[startB++]);
+				
+				byte timeBytes[] = new byte[]{ data[startB++], data[startB++], data[startB++], data[startB++] };
+				float bTime = ByteBuffer.wrap(timeBytes).getFloat();
+				
+				int bPower = Utils.byteToInt(data[startB++]);
+				worldBombs.add(new Bomb(bombName, new Point(bX, bY), bPower, bTime));
+			}
+			
 			p.Command = PlayerCommandType.Update;
+			World world = new World(gridArr);
+			world.setPlayers(playerList);
+			world.setBombs(worldBombs);
 			p.MetaData = players;
-			p.Data = gridArr;
+			p.Data = world;
 		}
 		
 		return new B_Packet[] {p};
@@ -211,9 +242,9 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 		
 		//To store the new and backlogged commands
 		PlayerCommand allCommands[] = new PlayerCommand[commands.length + backlog.size()];
-		System.out.println("commands.length: " + commands.length + 
-				". backlog.size: " + backlog.size() + 
-				". all.length: " + allCommands.length);
+		//System.out.println("commands.length: " + commands.length + 
+		//		". backlog.size: " + backlog.size() + 
+		//		". all.length: " + allCommands.length);
 		//populate all
 		int count;
 		for (count=0; count<backlog.size(); count++)
@@ -303,10 +334,10 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 		{
 			p.Command = original.Command;
 			
-			GridObject[][] orig = (GridObject[][])original.Data;
+			World orig = (World)original.Data;
 			
-			int w = orig.length;
-			int h = orig[0].length;
+			int w = orig.getGridWidth();
+			int h = orig.getGridHeight();
 			
 			GridObject[][] gridCopy = new GridObject[w][h];
 			
@@ -314,18 +345,33 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 			{
 				for (int j=0; j<h; j++)
 				{
-					gridCopy[i][j] = orig[i][j];
+					gridCopy[i][j] = orig.getElementAt(j, i);
 				}
 			}
 			
-			p.Data = gridCopy;
+			World wCopy = new World(gridCopy);			
 			
 			B_Player[] players = (B_Player[])original.MetaData;
 			
 			B_Player copyPlayers[] = new B_Player[players.length];
+			ArrayList<B_Player> copyPlayersList = new ArrayList<B_Player>();
 			for (int i=0; i<copyPlayers.length; i++)
-				copyPlayers[i] = players[i].getCopy();
+			{
+				B_Player tmp = players[i].getCopy();
+				copyPlayersList.add(tmp);
+				copyPlayers[i] = tmp;
+			}
 			
+			ArrayList<Bomb> copyBombs = new ArrayList<Bomb>();
+			for (Bomb b: orig.getBombs())
+				copyBombs.add(new Bomb(b.getName(), b.getLocation(), b.getPower(), b.getTime()));
+			
+			wCopy.setPlayers(copyPlayersList);
+			
+			wCopy.setBombs(copyBombs);
+
+			p.Data = wCopy;
+
 			p.MetaData = copyPlayers;
 			
 		}

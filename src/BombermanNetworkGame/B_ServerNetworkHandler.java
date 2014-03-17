@@ -2,8 +2,10 @@ package BombermanNetworkGame;
 
 import java.util.ArrayList;
 import java.net.*;
+import java.nio.ByteBuffer;
 
 import BombermanGame.B_Player;
+import BombermanGame.Bomb;
 import BombermanGame.PlayerCommand;
 import BombermanGame.PlayerCommandType;
 import BombermanGame.PlayerName;
@@ -151,7 +153,7 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
     	//In here means new player or spectator request
 		if (thisCommand == PlayerCommandType.Join)
     	{
-			System.out.println("Pre processing a join!");
+			//System.out.println("Pre processing a join!");
     		//Confirm not a resend after adding the player
     		if (theName.equals(""))
     		{
@@ -302,14 +304,18 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 	{
 		byte worldBytes[] = data.getWorld().getBytes();
 		
-		byte byteData[] = new byte[worldBytes.length+17];
+		int numBombs = data.getWorld().getBombs().size();
+		
+		//breakdown of payload size:
+		//num bytes in world [][] + 4*4+1 forall player information + numBombs*4+1 for bombs info
+		byte byteData[] = new byte[worldBytes.length+17+(numBombs*8)+1];
 		
 		//[0] = command type
 		byteData[0] = Utils.intToByte(PlayerCommandType.Update.ordinal()); //header packet type
 		
+		B_Player players[] = data.getPlayers();
 		//[1..4] [5..8] [9..12] [13..16] is the player[i]s stats:
 		//[xPos, yPox, killCount, Powerup]
-		B_Player players[] = data.getPlayers();
 		for (int i=0; i<this.maxPlayers*4; i+=4)
 		{
 			byteData[i+1] = Utils.intToByte(players[i/4].getX());
@@ -322,6 +328,35 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 		for ( int i=0; i<worldBytes.length; i++ )
 		{
 			byteData[i+17] = worldBytes[i];
+		}
+		
+		
+		
+		//number of bombs
+		int start = worldBytes.length + 17;
+		ArrayList<Bomb> bombs = data.getWorld().getBombs();
+		
+		//Place all bomb information in the packet
+		byteData[start++] = Utils.intToByte(numBombs);
+		for (int i=0; i<numBombs; i++)
+		{
+			Bomb bomb = bombs.get(i);
+			int playerNum = PlayerName.valueOf(bomb.getName()).ordinal();
+			byteData[start++] = Utils.intToByte(playerNum);
+			int bX = bomb.getX();
+			byteData[start++] = Utils.intToByte(bX);
+			int bY = bomb.getY();
+			byteData[start++] = Utils.intToByte(bY);
+			
+			//4bytes for bomb time as float
+			byte timeBytes[] = ByteBuffer.allocate(4).putFloat(bomb.getTime()).array();
+			byteData[start++] = timeBytes[0];
+			byteData[start++] = timeBytes[1];
+			byteData[start++] = timeBytes[2];
+			byteData[start++] = timeBytes[3];
+			
+			int power = bomb.getPower();
+			byteData[start++] = Utils.intToByte(power);
 		}
 		
 		return byteData;
@@ -338,12 +373,17 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 	@Override
 	protected PlayerCommand[] getReceiveCopy(PlayerCommand[] original) 
 	{
-		PlayerCommand cp[] = new PlayerCommand[original.length];
+		ArrayList<PlayerCommand> cpList = new ArrayList<PlayerCommand>();
 		
 		for (int i=0; i<original.length; i++)
 		{
-			cp[i] = original[i].getCopy();
+			try {
+				cpList.add(original[i].getCopy());
+			} catch(Exception e){}
 		}
+		
+		PlayerCommand cp[] = new PlayerCommand[cpList.size()];
+		cpList.toArray(cp);
 		
 		return cp;
 	}

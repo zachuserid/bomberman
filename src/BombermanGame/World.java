@@ -61,6 +61,11 @@ public class World implements Sendable<World>
 		this.players = players;
 	}
 	
+	public void setBombs(ArrayList<Bomb> bombs)
+	{
+		this.bombs = bombs;
+	}
+	
 	public B_Player[] getPlayers()
 	{
 		B_Player playerArr[] = new B_Player[this.players.size()];
