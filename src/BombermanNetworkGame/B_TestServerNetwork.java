@@ -173,8 +173,10 @@ public class B_TestServerNetwork
 						}
 						
 						gameState++;
+						network.Send(new B_NetworkPacket(w, w.getPlayers()));
 					}
 				}
+				
 				if (gameState == 2)
 				{
 					newUpdates = false;

@@ -51,6 +51,11 @@ public class World implements Sendable<World>
 		return Point.Zero();
 	}
 	
+	public void setGrid(GridObject[][] newGrid)
+	{
+		this.grid = newGrid;
+	}
+	
 	public B_Player[] getPlayers()
 	{
 		B_Player playerArr[] = new B_Player[this.players.size()];
