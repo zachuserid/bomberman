@@ -10,5 +10,6 @@ public enum PlayerCommandType
 	PlantBomb,
 	Join,
 	Update,
-	Ack
+	Ack,
+	Start
 }

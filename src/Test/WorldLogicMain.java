@@ -34,13 +34,16 @@ public class WorldLogicMain
 		long time = 0;
 		long prevTime = 0;
 		
+		PlayerCommand updates[];
+		
 		while(!v.exitPrompt() && !w.isGameOver())
 		{	
 			float elapsedSeconds = (time-prevTime)/1000f;
 			c.Update(elapsedSeconds);
 			
 			//to get list of commands from player controller
-			//c.getCommandsClear();
+			updates = c.getCommandsClear();
+			System.out.println("Updates length: " + updates.length);
 			
 			w.Update(elapsedSeconds);
 			v.Draw();

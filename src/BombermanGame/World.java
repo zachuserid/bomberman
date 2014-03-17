@@ -13,25 +13,25 @@ public class World implements Sendable<World>
 {
 	//this is the backing character grid
 	protected GridObject[][] grid;
-	
+
 	//list of players in the world for creating networkpacket
 	protected ArrayList<B_Player> players;
-	
+
 	protected ArrayList<Bomb> bombs;
-	
+
 	protected int playersDead = 0;
-	
+
 	protected boolean atDoor = false;
 
 	//the width of the world in "squares" (not pixels)
 	public int getGridWidth() {return grid[0].length;}
 	public int getGridHeight() {return grid.length;}
-	
+
 	public int getPlayerCount()
 	{
 		return this.players.size();
 	}
-	
+
 	protected Point getNextPlayerLocation() 
 	{ 
 		for(int x = 0; x < this.getGridWidth(); x++) 
@@ -39,31 +39,51 @@ public class World implements Sendable<World>
 				if(this.getElementAt(x, y)==GridObject.Empty)
 					{
 						boolean valid = true;
-						
+
 						for(B_Player p : this.players)
 						{
 							if(p.getX() == x && p.getY() == y) valid = false;
 						}
-						
+
 						if(valid)return new Point(x,y);
 					}
-		
+
 		return Point.Zero();
 	}
+
+	public void setGrid(GridObject[][] newGrid)
+	{
+		this.grid = newGrid;
+	}
+
+	public void setPlayers(ArrayList<B_Player> players)
+	{
+		this.players = players;
+	}
+
+	public void setBombs(ArrayList<Bomb> bombs)
+	{
+		this.bombs = bombs;
+	}
 	
+	public GridObject[][] getGrid()
+	{
+		return this.grid;
+	}
+
 	public B_Player[] getPlayers()
 	{
 		B_Player playerArr[] = new B_Player[this.players.size()];
 		this.players.toArray(playerArr);
 		return playerArr;
 	}
-	
+
 	public B_Player getWinner()
 	{
 		if(!this.isGameOver()) return null;
-		
+
 		if(players.size() == this.playersDead) return null;
-		
+
 		if(this.players.size() - this.playersDead == 1)
 		{
 			for(B_Player p : this.players)
@@ -71,27 +91,27 @@ public class World implements Sendable<World>
 				if(p.isAlive()) return p;
 			}
 		}
-		
+
 		for(B_Player p : this.players)
 		{
 			if(this.getElementAt(p.getLocation()) == GridObject.Door)
 				return p;
 		}
-		
+
 		return null;
 	}
-	
+
 	public ArrayList<Bomb> getBombs()
 	{
 		return this.bombs;
 	}
-	
+
 	@Override
 	public byte[] getBytes()
 	{
 		int width = this.getGridWidth();
 		int height = this.getGridHeight();
-		
+
 		byte worldBytes[] = new byte[width * height];
 		for (int i=0; i<width; i++)
 		{
@@ -102,42 +122,50 @@ public class World implements Sendable<World>
 		}
 		return worldBytes;
 	}
-	
+
 	@Override
 	public World getCopy()
 	{
 		World w = new World(this.grid);
-		
+
 		for(B_Player p : this.players) 
 			w.AddExistingPlayer(p);
-		
+
 		return w;
 	}
-	
+
 	public boolean isGameOver() {return this.playersDead >= this.players.size() -1 || this.atDoor;}
-	
+
 	//add more stuff here
-	public void setUpdatedData(GridObject[][] o)
+	public void setUpdatedData(GridObject[][] grid, B_Player[] playerList)
 	{
-		this.grid = o;
+		this.playersDead = 0;
+		this.grid = grid;
+		for (int i=0; i<playerList.length; i++)
+		{
+			this.players.get(i).setLocation(playerList[i].getLocation());
+			this.playersDead += playerList[i].getKillCount();
+		}
+		
+		this.bombs.clear();
 	}
-	
+
 	//returns the (currently)char elements at x,y
 	public GridObject getElementAt(int x, int y)
 	{
 		return this.grid[y][x];
 	}
-	
+
 	public GridObject getElementAt(Point p)
 	{
 		return this.grid[p.Y][p.X];
 	}
-	
-	protected void SetElementAt(int x, int y, GridObject o)
+
+	public void SetElementAt(int x, int y, GridObject o)
 	{
 		this.grid[y][x] = o;
 	}
-	
+
 	protected void SetElementAt(Point p, GridObject o)
 	{
 		this.SetElementAt(p.X, p.Y, o);
@@ -157,45 +185,45 @@ public class World implements Sendable<World>
 	public B_Player AddPlayer(String name)
 	{
 		if(this.players.size() >= 4) return null;
-		
+
 		B_Player p = new B_Player(name, this.getNextPlayerLocation());
-		
+
 		this.players.add(p);
-		
+
 		return p;
 	}
-	
+
 	public void Update(float time)
 	{
 		if(this.isGameOver()) return;
-		
+
 		//removes bombs that have exploded
 		for(int i = 0; i < this.bombs.size(); i++)
 			if(this.bombs.get(i).isDetonated())
 				this.bombs.remove(i);
-		
+
 		for(Bomb b : this.bombs)
 		{
 			b.Update(time, this);
-			
+
 			if(b.isDetonated())
 				this.explode(b);
 		}
 	}
-	
+
 	protected void explode(Bomb b)
 	{
 		this.SetElementAt(b.getLocation(), GridObject.Empty);
-		
+
 		B_Player player = null;
-		
+
 		for(B_Player p : this.players)
 			if(b.name == p.name)
 			{
 				player = p;
 				break;
 			}
-		
+
 		//right
 		for(int i = 0; i < 5; i++)
 		{
@@ -237,7 +265,7 @@ public class World implements Sendable<World>
 			}
 		}
 	}
-	
+
 	protected boolean explodeLocation(Point p, B_Player player)
 	{
 		GridObject o = this.getElementAt(p.X, p.Y);
@@ -280,7 +308,7 @@ public class World implements Sendable<World>
 					}
 				}
 		}
-		
+
 		return false;
 	}
 
@@ -320,7 +348,7 @@ public class World implements Sendable<World>
 	protected WorldActionOutcome TryMove(Point pos, B_Player e)
 	{
 		GridObject o = this.getElementAt(pos);
-		
+
 		switch(o)
 		{
 			case Empty:
@@ -354,27 +382,27 @@ public class World implements Sendable<World>
 		}
 		return WorldActionOutcome.DeniedStatic;
 	}
-	
+
 	protected void SwapObjects(Point a, Point b)
 	{
 		GridObject o1 = this.getElementAt(a);
 		GridObject o2 = this.getElementAt(b);
-		
+
 		this.SetElementAt(a, o2);
 		this.SetElementAt(b, o1);
 	}
-	
+
 	public WorldActionOutcome TryPlantBomb(Entity e)
 	{
 		if(this.getElementAt(e.getLocation()) == GridObject.Bomb) return WorldActionOutcome.DeniedDynamic;
-		
+
 		this.SetElementAt(e.getLocation(), GridObject.Bomb);
 		this.bombs.add(new Bomb(e.name, e.getLocation(), 5, 5));
-		
+
 		return WorldActionOutcome.Approved;
 	}
 
-	
+
 	public void printGrid()
 	{
 		int w = this.getGridWidth();
@@ -383,18 +411,18 @@ public class World implements Sendable<World>
 		{
 			for (int j=0; j<h; j++)
 			{
-				System.out.print(this.grid[i][j]);
+				System.out.print(this.getElementAt(i, j));
 			}
 			System.out.println("");
 		}
 	}	
-	
+
 	protected void AddExistingPlayer(B_Player p)
 	{
 		B_Player copy = p.getCopy();
-		
+
 		this.players.add(copy);
-		
-		this.SetElementAt(copy.getLocation(), copy.getGridObject());
+
+		//this.SetElementAt(copy.getLocation(), copy.getGridObject());
 	}
 }

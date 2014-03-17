@@ -10,6 +10,8 @@ package Networking;
 
 import java.net.*;
 
+import BombermanGame.Utils;
+
 public abstract class ClientNetworkHandler<S, R> extends NetworkHandler<S, R> {
 
 	//Data members
@@ -67,6 +69,8 @@ public abstract class ClientNetworkHandler<S, R> extends NetworkHandler<S, R> {
 
 			try 
 			{
+				//int highAck = Utils.byteArrayToInt(new byte[]{packet_data[1], packet_data[2], packet_data[3], packet_data[4]});
+				//System.out.println("Sending: " + highAck);
 				socket.send(sendPacket);
 			} 
 			catch(Exception e)

@@ -2,8 +2,10 @@ package BombermanNetworkGame;
 
 import java.util.ArrayList;
 import java.net.*;
+import java.nio.ByteBuffer;
 
 import BombermanGame.B_Player;
+import BombermanGame.Bomb;
 import BombermanGame.PlayerCommand;
 import BombermanGame.PlayerCommandType;
 import BombermanGame.PlayerName;
@@ -15,25 +17,25 @@ import Networking.Subscriber;
 public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket, PlayerCommand[]> {
 
 	//Members
-	
+
 	protected DoubleBuffer<PlayerCommand> doubleJoinBuffer;
-	
+
 	protected int maxPlayers;
-	
+
 	protected int currentPlayers;
-	
+
 	//Constructor
-	
+
 	public B_ServerNetworkHandler(int port, int maxPlayers) {
 		super(port);
-		
+
 		this.maxPlayers = maxPlayers;
-		
+
 		this.doubleJoinBuffer = new DoubleBuffer<PlayerCommand>();
 	}
-	
+
 	//Methods
-	
+
 	public PlayerCommand[] getJoinRequests()
     {
     	ArrayList<PlayerCommand> joins = this.doubleJoinBuffer.readAll(true);
@@ -44,12 +46,12 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
     	
     	return joinCommands;
     }
-	
+
 	public void Send(String name, String data)
 	{
 		this.sendData(name, data.getBytes());
 	}
-	
+
 	//After the server sorts out player position, character and jazz,
 	// send the player specific data to the client in an ack
 	//TODO: remember to get the server to call all these after receiving join requests
@@ -57,21 +59,21 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 	{
 		byte ackPacket[] = new byte[10];
 		ackPacket[0] = Utils.intToByte(PlayerCommandType.valueOf("Join").ordinal()); //[0] = message type
-		
+
 		int ackC = this.getSubscriberByName(p.getName()).getAckCount();
-		
+
 		byte commandIdBytes[] = Utils.intToStrByteArr(ackC);
 
 		for (int i=0; i<commandIdBytes.length; i++) 
 			ackPacket[i+1] = commandIdBytes[i]; //[1,..,4] = highest command to acknowledge
-		
+
 		int playerNumber = PlayerName.valueOf(p.getName()).ordinal();
-		
+
 		ackPacket[5] = Utils.intToByte(playerNumber); //[5] = the player's number
-		
+
 		ackPacket[6] = Utils.intToByte(p.getX()); //[6] = x position
 		ackPacket[7] = Utils.intToByte(p.getY()); //[7] = y position
-		
+
 		ackPacket[8] = Utils.intToByte(width); //[8] = world object width
 		ackPacket[9] = Utils.intToByte(height); //[9] = world object height
 
@@ -79,11 +81,11 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 
 		this.sendData(p.getName(), ackPacket);
 	}
-	
+
 	protected void handleNewSubscriber(InetAddress ip, int port, boolean playing, int ackC)
 	{
 		String playerName = ""; //TODO: Should add names to spectators also..
-		
+
     	if ( playing && canAddPlayer() )
     	{
     		playerName = PlayerName.values()[this.currentPlayers++].toString();
@@ -127,7 +129,7 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 
     	byte raw_data[] = packet.getData();  
 		String buf = new String( packet.getData() );
-		
+
 		int cNum = Utils.byteToInt(raw_data[1]);
 		PlayerCommandType thisCommand = PlayerCommandType.values()[cNum];
 
@@ -143,15 +145,15 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 				break;
 			}
 		}
-		
+
 		//TODO: Must be a better way to do casts from byte
     			
 		//Note: ignoring byte[0] because it is the player delimeter (:)
-		
+
     	//In here means new player or spectator request
 		if (thisCommand == PlayerCommandType.Join)
     	{
-			System.out.println("Pre processing a join!");
+			//System.out.println("Pre processing a join!");
     		//Confirm not a resend after adding the player
     		if (theName.equals(""))
     		{
@@ -164,19 +166,19 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 	    		else
 	    			handleNewSubscriber(packet.getAddress(), packet.getPort(), false, ackInt);
     		}
-	
+
     		return false;
     	}
-		
+
 		//append this data to the bytes that the client sent.
 		buf = buf.replace(":", ":"+theName+",");
-		
+
 		//System.out.println("We are receiving a message from '" + theName + "', updating payload to " + buf);
 
 		packet.setData( buf.getBytes() );
 
 		return true;
-		
+
     }
 
 	@Override
@@ -192,15 +194,15 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 		 * <PlayerCommandType> is the type of movement or bomb drop (enum).
 		 */		
 		String protoStr = new String(data);
-		
+
 		//System.out.println("Parsing string: "+protoStr);
-		
+
 		String playerUpdateStrs[] = protoStr.split(":");
 
 		//Give space for an array for each player. Note length - 1 since the split
 		// will give empty String since it is the first character in the protocol
 		PlayerCommand commands[][] = new PlayerCommand[playerUpdateStrs.length-1][];
-		
+
 		//maintain a list of all player names to ack after we build update requests
 		String playerNames[] = new String[playerUpdateStrs.length-1];
 
@@ -220,6 +222,7 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
     		byte bytesToInt[] = {updateBytes[1], updateBytes[2], updateBytes[3], updateBytes[4]};
     		//The starting id
 			int currentCommandId = Utils.byteArrToStrInt(bytesToInt);
+			System.out.println("Current id (bytes): " + currentCommandId);
     		/*
     		 * Instantiate this player's array with length 
     		 * appropriate to this player's update size
@@ -234,13 +237,16 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 	    			int id = currentCommandId++;
 
 	    			int messageType = Utils.byteArrToStrInt(new byte[]{ updateBytes[j] });
-	    			
+
+	    			if (messageType >= PlayerCommandType.values().length) 
+	    				return new PlayerCommand[][] { { null } };
+
 	    			String commandStr = PlayerCommandType.values()[messageType].toString();
-	    			
+
 	    			PlayerCommandType type = PlayerCommandType.valueOf(commandStr);
-	    			    			
+
 	    			//TODO: Ack everyone. Also, make sure joins are not getting here.
-	    			
+
 	    			//Unless the id is above our current
 	    			// counter for this client, ignore this message,
 	    			// it's a resend due to our ack not yet reaching client
@@ -255,15 +261,15 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 	    	    			toAdd = new PlayerCommand(playerNames[i-1], type, id);
 	    				}
 	    			}
-	    			
+
 	    			if (toAdd != null) playerCommands.add(toAdd); 
-	    			
+
 	    			//System.out.println("created command for player " + commands[i-1][commandsIndex-1].PlayerName);	
 	    		}//End for
     		
 	    		commands[i-1] = new PlayerCommand[playerCommands.size()];
 	    		playerCommands.toArray(commands[i-1]);
-	    		
+
 	    		//before returning our parsed update requests, ack all
 	        	ackPlayers(playerNames);
     		}
@@ -271,7 +277,7 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
     	
 		return commands;
 	}
-	
+
 	protected void ackPlayers(String players[])
 	{
 		for (int k=0; k<players.length; k++)
@@ -298,15 +304,19 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 	protected byte[] parseSend(B_NetworkPacket data)
 	{
 		byte worldBytes[] = data.getWorld().getBytes();
-		
-		byte byteData[] = new byte[worldBytes.length+17];
-		
+
+		int numBombs = data.getWorld().getBombs().size();
+
+		//breakdown of payload size:
+		//num bytes in world [][] + 4*4+1 forall player information + numBombs*4+1 for bombs info
+		byte byteData[] = new byte[worldBytes.length+17+(numBombs*8)+1];
+
 		//[0] = command type
 		byteData[0] = Utils.intToByte(PlayerCommandType.Update.ordinal()); //header packet type
-		
+
+		B_Player players[] = data.getPlayers();
 		//[1..4] [5..8] [9..12] [13..16] is the player[i]s stats:
 		//[xPos, yPox, killCount, Powerup]
-		B_Player players[] = data.getPlayers();
 		for (int i=0; i<this.maxPlayers*4; i+=4)
 		{
 			byteData[i+1] = Utils.intToByte(players[i/4].getX());
@@ -314,13 +324,42 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 			byteData[i+3] = Utils.intToByte(players[i/4].getKillCount());
 			byteData[i+4] = Utils.intToByte(players[i/4].getPowerup().ordinal());
 		}
-		
+
 		//[18..n] = world grid array
 		for ( int i=0; i<worldBytes.length; i++ )
 		{
 			byteData[i+17] = worldBytes[i];
 		}
-		
+
+
+
+		//number of bombs
+		int start = worldBytes.length + 17;
+		ArrayList<Bomb> bombs = data.getWorld().getBombs();
+
+		//Place all bomb information in the packet
+		byteData[start++] = Utils.intToByte(numBombs);
+		for (int i=0; i<numBombs; i++)
+		{
+			Bomb bomb = bombs.get(i);
+			int playerNum = PlayerName.valueOf(bomb.getName()).ordinal();
+			byteData[start++] = Utils.intToByte(playerNum);
+			int bX = bomb.getX();
+			byteData[start++] = Utils.intToByte(bX);
+			int bY = bomb.getY();
+			byteData[start++] = Utils.intToByte(bY);
+
+			//4bytes for bomb time as float
+			byte timeBytes[] = ByteBuffer.allocate(4).putFloat(bomb.getTime()).array();
+			byteData[start++] = timeBytes[0];
+			byteData[start++] = timeBytes[1];
+			byteData[start++] = timeBytes[2];
+			byteData[start++] = timeBytes[3];
+
+			int power = bomb.getPower();
+			byteData[start++] = Utils.intToByte(power);
+		}
+
 		return byteData;
 	}
 
@@ -335,13 +374,18 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 	@Override
 	protected PlayerCommand[] getReceiveCopy(PlayerCommand[] original) 
 	{
-		PlayerCommand cp[] = new PlayerCommand[original.length];
-		
+		ArrayList<PlayerCommand> cpList = new ArrayList<PlayerCommand>();
+
 		for (int i=0; i<original.length; i++)
 		{
-			cp[i] = original[i].getCopy();
+			try {
+				cpList.add(original[i].getCopy());
+			} catch(Exception e){}
 		}
-		
+
+		PlayerCommand cp[] = new PlayerCommand[cpList.size()];
+		cpList.toArray(cp);
+
 		return cp;
 	}
 }
