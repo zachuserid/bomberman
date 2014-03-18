@@ -144,7 +144,18 @@ public class World implements Sendable<World>
 		for (int i=0; i<playerList.length; i++)
 		{
 			this.players.get(i).setLocation(playerList[i].getLocation());
+			
+			if (this.getElementAt(this.players.get(i).getLocation()) == GridObject.Door)
+				this.atDoor = true;
+			
+			this.players.get(i).setKillCount(playerList[i].getKillCount());
+			
+			if (!playerList[i].isAlive())
+				this.players.get(i).Kill();
+			
 			this.playersDead += playerList[i].getKillCount();
+			
+			this.players.get(i).setPowerup(playerList[i].getPowerup());
 		}
 		
 		this.bombs.clear();
@@ -225,43 +236,43 @@ public class World implements Sendable<World>
 			}
 
 		//right
-		for(int i = 0; i < 5; i++)
+		for(int i = 0; i < b.getRange(); i++)
 		{
 			int x = b.getX() + i;
-			if(x > this.getGridWidth() - 1) i = 5;
+			if(x > this.getGridWidth() - 1) break;
 			else
 			{
-				if(this.explodeLocation(new Point(x, b.getY()), player)) i = 5;
+				if(this.explodeLocation(new Point(x, b.getY()), player)) break;
 			}
 		}
 		//left
-		for(int i = 0; i < 5; i++)
+		for(int i = 0; i < b.getRange(); i++)
 		{
 			int x = b.getX() - i;
-			if(x < 0) i = 5;
+			if(x < 0) break;
 			else
 			{
-				if(this.explodeLocation(new Point(x, b.getY()), player)) i = 5;
+				if(this.explodeLocation(new Point(x, b.getY()), player)) break;
 			}
 		}
 		//up
-		for(int i = 0; i < 5; i++)
+		for(int i = 0; i < b.getRange(); i++)
 		{
 			int y = b.getY() - i;
-			if(y < 0) i = 5;
+			if(y < 0) break;
 			else
 			{
-				if(this.explodeLocation(new Point(b.getX(),y), player)) i = 5;
+				if(this.explodeLocation(new Point(b.getX(),y), player)) break;
 			}
 		}
 		//up
-		for(int i = 0; i < 5; i++)
+		for(int i = 0; i < b.getRange(); i++)
 		{
 			int y = b.getY() + i;
-			if(y > this.getGridHeight() - 1) i = 5;
+			if(y > this.getGridHeight() - 1) break;
 			else
 			{
-				if(this.explodeLocation(new Point(b.getX(),y), player)) i = 5;
+				if(this.explodeLocation(new Point(b.getX(),y), player)) break;
 			}
 		}
 	}
@@ -358,21 +369,21 @@ public class World implements Sendable<World>
 				e.setLocation(pos);
 				e.setPowerup(Powerup.PowerupA);
 				this.SetElementAt(pos, GridObject.Empty);
-				break;
+				return WorldActionOutcome.Approved;
 			case PowerUp2:
 				e.setLocation(pos);
 				e.setPowerup(Powerup.PowerupB);
 				this.SetElementAt(pos, GridObject.Empty);
-				break;
+				return WorldActionOutcome.Approved;
 			case PowerUp3:
 				e.setLocation(pos);
 				e.setPowerup(Powerup.PowerupC);
 				this.SetElementAt(pos, GridObject.Empty);
-				break;
+				return WorldActionOutcome.Approved;
 			case Door:
 				e.setLocation(pos);
 				this.atDoor = true;
-				break;
+				return WorldActionOutcome.Approved;
 		case HiddenDoor:
 			break;
 		case Wall:
@@ -399,6 +410,19 @@ public class World implements Sendable<World>
 		this.SetElementAt(e.getLocation(), GridObject.Bomb);
 		this.bombs.add(new Bomb(e.name, e.getLocation(), 5, 5));
 
+		return WorldActionOutcome.Approved;
+	}
+	
+	public WorldActionOutcome TryUsePowerup(B_Player p)
+	{
+		if (!p.isAlive() || p.getPowerup() == Powerup.None) 
+			return WorldActionOutcome.DeniedStatic;
+		
+		//TODO: Perform powerup specific attribute change to p or world..
+		System.out.println(p.getName()+" is using powerup " + p.getPowerup());
+		
+		p.setPowerup(Powerup.None);
+		
 		return WorldActionOutcome.Approved;
 	}
 

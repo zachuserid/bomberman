@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class B_PlayerController extends B_Controller implements KeyEventDispatcher
 {
 	//creates a default player controller with WASD keys
-	public static B_PlayerController Default(B_Player player, World w) {return new B_PlayerController(player, w, 'a', 'd', 'w', 's', ' ');}
+	public static B_PlayerController Default(B_Player player, World w) {return new B_PlayerController(player, w, 'a', 'd', 'w', 's', ' ', 'p');}
 	
 	//the amount of controls (this is to make adding/removing them easier)
 	protected int controlCount;
@@ -51,7 +51,7 @@ public class B_PlayerController extends B_Controller implements KeyEventDispatch
 	}
 	
 	
-	public B_PlayerController(B_Player player, World w, char left, char right, char up, char down, char bomb)
+	public B_PlayerController(B_Player player, World w, char left, char right, char up, char down, char bomb, char powerup)
 	{
 		this.player = player;
 		this.world = w;
@@ -61,7 +61,7 @@ public class B_PlayerController extends B_Controller implements KeyEventDispatch
 		//adds this object as a listener to the key dispatch event
 		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(this);
 		
-		this.controlCount = 5;
+		this.controlCount = 6;
 		
 		this.boolsDown = new boolean[this.controlCount];
 		
@@ -77,6 +77,7 @@ public class B_PlayerController extends B_Controller implements KeyEventDispatch
 		this.cKeys[2] = up;
 		this.cKeys[3] = down;
 		this.cKeys[4] = bomb;
+		this.cKeys[5] = powerup;
 	}
 	
 	//this is what happens every time a dispatch key even occurs
@@ -150,6 +151,13 @@ public class B_PlayerController extends B_Controller implements KeyEventDispatch
 			if(this.world.TryPlantBomb(this.player) == WorldActionOutcome.Approved)
 			{
 				this.commands.add(new PlayerCommand(PlayerCommandType.PlantBomb, this.commandIds++));
+			}
+		}
+		if (this.CheckBool(5))
+		{
+			if(this.world.TryUsePowerup(this.player) == WorldActionOutcome.Approved)
+			{
+				this.commands.add(new PlayerCommand(PlayerCommandType.UsePowerup, this.commandIds++));
 			}
 		}
 	}

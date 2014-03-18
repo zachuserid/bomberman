@@ -113,10 +113,8 @@ public class B_ClientMain
 			{
 				if (packet.Command == PlayerCommandType.Update)
 				{
-
 					World tmpW = (World)packet.Data;
 					theWorld.setUpdatedData(tmpW.getGrid(), tmpW.getPlayers());
-					//view.setWorld(theWorld);
 				}
 			}
 			
@@ -126,12 +124,9 @@ public class B_ClientMain
 			//Get list of commands from player controller
 			PlayerCommand myUpdates[] = controller.getCommandsClear();
 			
-			//System.out.println();
 			if (myUpdates.length > 0)
-			{
-				//System.out.println("sending " + myUpdates.length);
-					network.Send(myUpdates);
-			}
+				network.Send(myUpdates);
+			
 
 			//theWorld.Update(elapsedSeconds);
 			view.Draw();
@@ -154,6 +149,13 @@ public class B_ClientMain
 			System.out.println("No Winner");
 
 		for(B_Player currPlayer : theWorld.getPlayers())
-			System.out.println(currPlayer.getName() + " killcount: " + currPlayer.getKillCount());
+			System.out.println(currPlayer.getName() + " killcount: " 
+		                       + currPlayer.getKillCount() + " powerup: "
+		                       + currPlayer.getPowerup());
+		
+		//TODO: Maybe display an end screen with winner information,
+		// rather than closing window
+		if (view != null)
+			view.Dispose();
 	}
 }

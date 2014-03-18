@@ -2,19 +2,33 @@ Received movement: MoveRight from player 'Frank
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveRight from player 'Frank
 WARNING: COLLISSIONS DETECTED
+Received movement: MoveUp from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveUp from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveUp from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveRight from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveRight from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: PlantBomb from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveRight from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveUp from player 'Frank
+WARNING: COLLISSIONS DETECTED
 Received movement: MoveDown from player 'Frank
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveDown from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'Frank
+Received movement: MoveDown from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'Frank
+Received movement: MoveDown from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'Frank
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'Frank
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'Frank
+Received movement: PlantBomb from player 'Frank
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveUp from player 'Frank
 WARNING: COLLISSIONS DETECTED
@@ -24,14 +38,68 @@ Received movement: MoveLeft from player 'Frank
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveLeft from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'Frank
+Received movement: MoveRight from player 'FryGuy
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'Frank
+Received movement: MoveRight from player 'FryGuy
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'FryGuy
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveRight from player 'FryGuy
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveRight from player 'FryGuy
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveUp from player 'FryGuy
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveUp from player 'FryGuy
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveRight from player 'FryGuy
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveRight from player 'FryGuy
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'FryGuy
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'FryGuy
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'FryGuy
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveLeft from player 'FryGuy
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'FryGuy
+WARNING: COLLISSIONS DETECTED
+Received movement: UsePowerup from player 'FryGuy
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'FryGuy
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'FryGuy
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveUp from player 'FryGuy
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveUp from player 'FryGuy
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'FryGuy
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveLeft from player 'FryGuy
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveLeft from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveLeft from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: PlantBomb from player 'Frank
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveRight from player 'Frank
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveRight from player 'Frank
 WARNING: COLLISSIONS DETECTED
+Received movement: MoveUp from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveUp from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveUp from player 'FryGuy
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveUp from player 'FryGuy
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'FryGuy
+WARNING: COLLISSIONS DETECTED
 Received movement: MoveRight from player 'Zelda
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveRight from player 'Zelda
@@ -40,267 +108,25 @@ Received movement: MoveUp from player 'Zelda
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveUp from player 'Zelda
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'Zelda
+Received movement: MoveRight from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveRight from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveRight from player 'Zelda
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveDown from player 'Zelda
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveDown from player 'Zelda
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'Zelda
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'Zelda
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'Zelda
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'Zelda
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'Zelda
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'Zelda
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: PlantBomb from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: PlantBomb from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'Zelda
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'Zelda
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'Zelda
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'Zelda
+Received movement: MoveLeft from player 'Zelda
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveLeft from player 'Zelda
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'Zelda
+Received movement: MoveLeft from player 'Zelda
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveLeft from player 'Zelda
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveLeft from player 'Zelda
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'Zelda
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'Zelda
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'Zelda
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FoxMcCloud
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FoxMcCloud
+Received movement: MoveDown from player 'Zelda
 WARNING: COLLISSIONS DETECTED

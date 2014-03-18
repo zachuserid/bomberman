@@ -152,7 +152,7 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 		/*
 		 * Dealing with a world update
 		 * p.Command = PlayerCommandType.Update
-		 * p.Data = (char[][]):
+		 * p.Data = (World):
 		 * 		the character map representing the most recent world
 		 */
 		else if (commandType == 6) //update..
@@ -175,20 +175,29 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 			{
 				String pName = PlayerName.values()[i].toString();
 
-				int xPos = Utils.byteToInt(data[(i*4)+1]);
+				int xPos = Utils.byteToInt(data[(i*5)+1]);
 
-				int yPos = Utils.byteToInt(data[(i*4)+2]);
+				int yPos = Utils.byteToInt(data[(i*5)+2]);
 
 				B_Player pl = new B_Player(pName, new Point(xPos, yPos));
 
-				int kills = Utils.byteToInt(data[(i*4)+3]);
+				int kills = Utils.byteToInt(data[(i*5)+3]);
 				pl.setKillCount(kills);
 
-				Powerup powerup = Powerup.values()[Utils.byteToInt(data[(i*4)+4])];
+				Powerup powerup = Powerup.values()[Utils.byteToInt(data[(i*5)+4])];
 				pl.setPowerup(powerup);
+				
+				int isAlive = Utils.byteToInt(data[(i*5)+5]);
 
+				if (isAlive == 0)
+					pl.Kill();
+				
 				players[i] = pl;
 				playerList.add(pl);
+				
+				//debug
+				//System.out.println("player ("+xPos+","+yPos+") "+i+" killcount: " 
+				//                 + kills+" powerup: "+powerup+" isAlive: " + pl.isAlive());
 			}
 
 			GridObject[][] gridArr = new GridObject[this.grid_width][this.grid_height];
@@ -198,11 +207,13 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 			{
 				for (j=0; j<this.grid_height; j++)
 				{
-					gridArr[i][j] = GridObject.values()[ data[ ( (i * this.grid_width) + j) + 17 ] ];
+					gridArr[i][j] = GridObject.values()[ data[ ( (i * this.grid_width) + j) + 21 ] ];
 				}
 			}
 
-			int startB = (i*j)+17;
+			//TODO: Deprecate below or fix integer parsing
+			
+			int startB = (i*j)+21;
 
 			int numBombs = Utils.byteToInt(data[startB++]);
 			ArrayList<Bomb> worldBombs = new ArrayList<Bomb>();
@@ -237,16 +248,16 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 	@Override
 	protected byte[] parseSend(PlayerCommand[] commands) 
 	{
-		//TODO: handle new formatting
-		//Format ':<time>,<id>,<PlayerCommand>'
-
 		ArrayList<PlayerCommand> backlog = this.commandBacklog.readAll(true);
 
 		//To store the new and backlogged commands
 		PlayerCommand allCommands[] = new PlayerCommand[commands.length + backlog.size()];
+		
+		//debug
 		//System.out.println("commands.length: " + commands.length + 
 		//		". backlog.size: " + backlog.size() + 
 		//		". all.length: " + allCommands.length);
+		
 		//populate all
 		int count;
 		for (count=0; count<backlog.size(); count++)
@@ -288,10 +299,9 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 			}
 		}
 
-		//Add these commands to the backlog to resend unless 
+		//Add these commands to the backlog to re-send unless 
 		// we receive an ack for them.
 		this.commandBacklog.writeAll(commands, false);
-		System.out.println("Sending str '" + toSend +"'==" + toSend.getBytes());
 		
 		//send our char[] as bytes
 		return toSend.getBytes();

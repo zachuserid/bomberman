@@ -206,18 +206,13 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
     		//Deal with the bytes now
     		byte updateBytes[] = splitS[1].trim().getBytes();
     		
-    		//debug
-    		System.out.println("payload str '" + splitS[1].trim() +"'=="+updateBytes);
-    		
     		//this method knows that the byte represents a character of an int
     		int updateType = Utils.byteToInt(updateBytes[0]);
     		
     		//convert the 4 bytes storing a 4 character integer into the command id
     		byte bytesToInt[] = {updateBytes[1], updateBytes[2], updateBytes[3], updateBytes[4]};
 			int currentCommandId = Utils.byteArrToStrInt(bytesToInt);
-			
-			System.out.println("Current id (bytes): " + updateBytes[1]+":"+updateBytes[2]+":"+updateBytes[3]+":"+updateBytes[4]);
-    		
+			    		
     		//Instantiate inner array with length based on this player's update size
     		if (updateType == PlayerCommandType.valueOf("Update").ordinal())
     		{
@@ -298,33 +293,43 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 		//TODO: send player isDead bool, winner byte which could be 0 if game not over
 
 		//breakdown of payload size:
-		//num bytes in world [][] + 4*4+1 forall player information + numBombs*4+1 for bombs info
-		byte byteData[] = new byte[worldBytes.length+17+(numBombs*8)+1];
+		//num bytes in world [][] + 4*5+1 forall player information + numBombs*8+1 for bombs info
+		byte byteData[] = new byte[worldBytes.length+21+(numBombs*8)+1];
 
 		//[0] = command type
 		byteData[0] = Utils.intToByte(PlayerCommandType.Update.ordinal()); //header packet type
 
 		B_Player players[] = data.getPlayers();
-		//[1..4] [5..8] [9..12] [13..16] is the player[i]s stats:
-		//[xPos, yPox, killCount, Powerup]
-		for (int i=0; i<this.maxPlayers*4; i+=4)
+		//[1..5] [6..10] [11..15] [16..20] is the player[i]s stats:
+		//[xPos, yPox, killCount, Powerup, isAlive]
+		for (int i=0; i<this.maxPlayers*5; i+=5)
 		{
-			byteData[i+1] = Utils.intToByte(players[i/4].getX());
-			byteData[i+2] = Utils.intToByte(players[i/4].getY());
-			byteData[i+3] = Utils.intToByte(players[i/4].getKillCount());
-			byteData[i+4] = Utils.intToByte(players[i/4].getPowerup().ordinal());
+			byteData[i+1] = Utils.intToByte(players[i/5].getX());
+			byteData[i+2] = Utils.intToByte(players[i/5].getY());
+			byteData[i+3] = Utils.intToByte(players[i/5].getKillCount());
+			byteData[i+4] = Utils.intToByte(players[i/5].getPowerup().ordinal());
+			if (players[i/5].isAlive())
+				byteData[i+5] = Utils.intToByte(1);
+			else
+				byteData[i+5] = Utils.intToByte(0);
+			
+			//debug
+			//System.out.println("Sending player ("+players[i/5].getX()+","+players[i/5].getY()+") " +
+			//		           i+" killcount: "+players[i/5].getKillCount()
+			//		           +" powerup: "+players[i/5].getPowerup().ordinal()
+			//		           +" alive: " + players[i/5].isAlive());
 		}
 
 		//[18..n] = world grid array
 		for ( int i=0; i<worldBytes.length; i++ )
 		{
-			byteData[i+17] = worldBytes[i];
+			byteData[i+21] = worldBytes[i];
 		}
 
-
-
+		//TODO: Deprecate below or fix formatting for the ints passed.
+		
 		//number of bombs
-		int start = worldBytes.length + 17;
+		int start = worldBytes.length + 21;
 		ArrayList<Bomb> bombs = data.getWorld().getBombs();
 
 		//Place all bomb information in the packet

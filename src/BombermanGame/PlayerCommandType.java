@@ -11,5 +11,6 @@ public enum PlayerCommandType
 	Join,
 	Update,
 	Ack,
+	UsePowerup,
 	Start
 }

@@ -137,7 +137,6 @@ public class B_ServerMain
 
 		boolean startGame = false;
 		int playerjoinCount = 0;
-		boolean newUpdates = false;
 		ArrayList<B_Player> playersJoined = new ArrayList<B_Player>();
 		long prevTime = 0;
 		
@@ -187,8 +186,9 @@ public class B_ServerMain
 							network.Send(new B_NetworkPacket(w, w.getPlayers()));					
 						}
 					}
-				}else{
-					newUpdates = false;
+				}
+				else
+				{
 					received = network.getData();
 						
 					for(PlayerCommand[] command : received)
@@ -204,11 +204,9 @@ public class B_ServerMain
 						}
 							
 						ArrayList<PlayerCommand> cs = new ArrayList<PlayerCommand>();
-						System.out.println("Player: " + command[0].PlayerName);
+
 						for(PlayerCommand pc : command){
-							newUpdates = true;
 							cs.add(pc);
-							System.out.println("Command " + pc.Id +": " + pc.Command);
 						}
 							
 						c.AddCommands(command[0].PlayerName, cs);

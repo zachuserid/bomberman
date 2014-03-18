@@ -64,6 +64,7 @@ public class B_Player extends Entity
 		B_Player p = new B_Player(this.getName(), this.getLocation());
 		p.setKillCount(this.killCount);
 		p.setPowerup(this.powerup);
+		if (!this.isAlive()) p.Kill();
 		return p;
 	}
 }

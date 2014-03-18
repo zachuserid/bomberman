@@ -6,7 +6,11 @@ public class Bomb extends Entity
 	
 	protected int power;
 	
-	public float getTime() {return timer;}
+	protected int range;
+	
+	public float getTime() { return this.timer; }
+	
+	public int getRange() { return this.range; }
 	
 	public boolean isDetonated()
 	{
@@ -15,12 +19,18 @@ public class Bomb extends Entity
 	
 	public int getPower() {return this.power;}
 	
+	public void setRange(int r)
+	{
+		this.range = r;
+	}
+	
 	public Bomb(String playerName, Point location, int power, float time)
 	{
 		super(playerName, location, GridObject.Bomb);
 		
 		this.timer = time;
 		this.power = power;
+		this.range = 3;
 	}
 	
 	@Override

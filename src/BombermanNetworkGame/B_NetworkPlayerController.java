@@ -51,7 +51,8 @@ public class B_NetworkPlayerController extends B_Controller
 				else if (c.Command == PlayerCommandType.MoveLeft) this.world.TryMoveLeft(p.Player);
 				else if (c.Command == PlayerCommandType.MoveRight) this.world.TryMoveRight(p.Player);
 				else if (c.Command == PlayerCommandType.MoveUp) this.world.TryMoveUp(p.Player);
-				else if(c.Command == PlayerCommandType.PlantBomb) this.world.TryPlantBomb(p.Player);
+				else if (c.Command == PlayerCommandType.PlantBomb) this.world.TryPlantBomb(p.Player);
+				else if (c.Command == PlayerCommandType.UsePowerup) this.world.TryUsePowerup(p.Player);
 			}
 			p.Commands.clear();
 		}
