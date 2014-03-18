@@ -10,8 +10,6 @@ package Networking;
 
 import java.net.*;
 
-import BombermanGame.Utils;
-
 public abstract class ClientNetworkHandler<S, R> extends NetworkHandler<S, R> {
 
 	//Data members

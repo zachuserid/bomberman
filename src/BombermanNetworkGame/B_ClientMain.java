@@ -23,8 +23,8 @@ public class B_ClientMain
 			serverPort = Integer.parseInt(args[1]);
 		}
 			
-		System.out.println("Connecting to server at "+serverAddr+":"+serverPort);
-		B_ClientNetworkHandler network = new B_ClientNetworkHandler("127.0.0.1", 8090);
+		System.out.println("Server location: "+serverAddr+":"+serverPort);
+		B_ClientNetworkHandler network = new B_ClientNetworkHandler(serverAddr, serverPort);
 
 		//This client's player
 		//B_Player player = null;
@@ -152,8 +152,7 @@ public class B_ClientMain
 
 		for(B_Player currPlayer : theWorld.getPlayers())
 			System.out.println(currPlayer.getName() + " killcount: " 
-		                       + currPlayer.getKillCount() + " powerup: "
-		                       + currPlayer.getPowerup());
+		                       + currPlayer.getKillCount());
 		
 		//TODO: Maybe display an end screen with winner information,
 		// rather than closing window
