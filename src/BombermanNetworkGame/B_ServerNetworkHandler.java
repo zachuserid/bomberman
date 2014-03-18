@@ -145,9 +145,7 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 				break;
 			}
 		}
-
-		//TODO: Must be a better way to do casts from byte
-    			
+		
 		//Note: ignoring byte[0] because it is the player delimeter (:)
 
     	//In here means new player or spectator request
@@ -184,49 +182,43 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 	@Override
 	protected PlayerCommand[][] parseReceive(byte[] data)
 	{
-		/*
-		 * Protocol format:
-		 * ':<time>,<id>,<PlayerCommandType>,<time>,<id>,<PlayerCommandType>,...'
-		 * Where the ':' means start of a player's command
-		 * and each command itself is made up of the following:
-		 * <time>, which is the time of sending the update
-		 * <id>, the order of this update compared to all requests
-		 * <PlayerCommandType> is the type of movement or bomb drop (enum).
-		 */		
+		//byte data received as string
 		String protoStr = new String(data);
 
-		//System.out.println("Parsing string: "+protoStr);
-
+		//split to obtain commands per player
 		String playerUpdateStrs[] = protoStr.split(":");
 
 		//Give space for an array for each player. Note length - 1 since the split
 		// will give empty String since it is the first character in the protocol
 		PlayerCommand commands[][] = new PlayerCommand[playerUpdateStrs.length-1][];
 
-		//maintain a list of all player names to ack after we build update requests
+		//maintain a list of all player names to ack after we build PlayeComands
 		String playerNames[] = new String[playerUpdateStrs.length-1];
 
 		//For all players who sent update requests
     	for (int i=1; i<playerUpdateStrs.length; i++)
     	{
-    		
     		//Remove the name and delimeters from the buffer, added by preProcessPacket()
     		String splitS[] = playerUpdateStrs[i].split(",");
+    		
     		playerNames[i-1] = splitS[0];
 
     		//Deal with the bytes now
     		byte updateBytes[] = splitS[1].trim().getBytes();
     		
+    		//debug
+    		System.out.println("payload str '" + splitS[1].trim() +"'=="+updateBytes);
+    		
+    		//this method knows that the byte represents a character of an int
     		int updateType = Utils.byteToInt(updateBytes[0]);
     		
+    		//convert the 4 bytes storing a 4 character integer into the command id
     		byte bytesToInt[] = {updateBytes[1], updateBytes[2], updateBytes[3], updateBytes[4]};
-    		//The starting id
 			int currentCommandId = Utils.byteArrToStrInt(bytesToInt);
-			System.out.println("Current id (bytes): " + currentCommandId);
-    		/*
-    		 * Instantiate this player's array with length 
-    		 * appropriate to this player's update size
-    		 */
+			
+			System.out.println("Current id (bytes): " + updateBytes[1]+":"+updateBytes[2]+":"+updateBytes[3]+":"+updateBytes[4]);
+    		
+    		//Instantiate inner array with length based on this player's update size
     		if (updateType == PlayerCommandType.valueOf("Update").ordinal())
     		{
     			//System.out.println("Server: This client's update byte str: " + new String(updateBytes));
@@ -236,6 +228,7 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 	    		{
 	    			int id = currentCommandId++;
 
+	    			//this method assumes the byte arr represents a character of the int
 	    			int messageType = Utils.byteArrToStrInt(new byte[]{ updateBytes[j] });
 
 	    			if (messageType >= PlayerCommandType.values().length) 
@@ -245,16 +238,12 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 
 	    			PlayerCommandType type = PlayerCommandType.valueOf(commandStr);
 
-	    			//TODO: Ack everyone. Also, make sure joins are not getting here.
-
-	    			//Unless the id is above our current
-	    			// counter for this client, ignore this message,
-	    			// it's a resend due to our ack not yet reaching client
 	    			PlayerCommand toAdd = null;
+	    			
+	    			//update highest received packet for each player
 	    			Subscriber thisSub = this.getSubscriberByName(playerNames[i-1]);
 	    			if (thisSub != null)
 	    			{
-	    				//Acknowledge highest received id
 	    				if (id > thisSub.getAckCount())
 	    				{
 	    					thisSub.setAckCount(id);
@@ -264,13 +253,12 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 
 	    			if (toAdd != null) playerCommands.add(toAdd); 
 
-	    			//System.out.println("created command for player " + commands[i-1][commandsIndex-1].PlayerName);	
 	    		}//End for
     		
 	    		commands[i-1] = new PlayerCommand[playerCommands.size()];
 	    		playerCommands.toArray(commands[i-1]);
 
-	    		//before returning our parsed update requests, ack all
+	    		//ack all players with highest command id received
 	        	ackPlayers(playerNames);
     		}
     	}
@@ -306,6 +294,8 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 		byte worldBytes[] = data.getWorld().getBytes();
 
 		int numBombs = data.getWorld().getBombs().size();
+		
+		//TODO: send player isDead bool, winner byte which could be 0 if game not over
 
 		//breakdown of payload size:
 		//num bytes in world [][] + 4*4+1 forall player information + numBombs*4+1 for bombs info

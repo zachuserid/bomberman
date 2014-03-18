@@ -168,6 +168,8 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 			B_Player players[] = new B_Player[4];
 			ArrayList<B_Player> playerList = new ArrayList<B_Player>();
 
+			//TODO: handle player isDead bool, winner bytes when implemented in server send
+			
 			//Assuming 4 players here..
 			for (int i=0; i<4; i++)
 			{
@@ -258,33 +260,30 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 
 		String toSend = ":"; //Start of player request
 
-		//append this command type to the buffer (1 byte)
-		//Note: all updates sent in this call will be of ths same type..
-		//Only update or join...
+		//Handle update or join command to send
+		
+		//append header (1 char)
 		if (allCommands[0].Command == PlayerCommandType.Join)
 			toSend += PlayerCommandType.valueOf("Join").ordinal();
 		else
 			toSend += PlayerCommandType.valueOf("Update").ordinal();
-
-		//Get a 4 byte representation of the integer to send in the join packet
-		byte commandIdBytes[] = java.nio.ByteBuffer.allocate(4).putInt(allCommands[0].Id).array();
-
-		//Append all byte values to the string to send
-		// represents an int of the first player command Id.
-		//Will be incremented by the server on parse, to rebuild the commands
-		for (int k=0; k<commandIdBytes.length; k++)
-			toSend += commandIdBytes[k];
+		
+		//append command id (4 chars)
+		toSend+= Utils.intToPaddedStr(allCommands[0].Id);
 
 		if ( allCommands[0].Command == PlayerCommandType.Join )
 		{
-			System.out.println("Sending join game message");
 			//Not sending a name, server will take care of that
-			toSend += "1"; //playing
+			System.out.println("Sending join game message");
+			
+			//whether playing or spectating (bool) (1 char)
+			toSend += "1";
 		}
-		else 
+		else
 		{
 			for (int i=0; i<allCommands.length; i++)
 			{
+				//the update type (1 char per iter.)
 				toSend += allCommands[i].Command.ordinal();
 			}
 		}
@@ -292,7 +291,9 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 		//Add these commands to the backlog to resend unless 
 		// we receive an ack for them.
 		this.commandBacklog.writeAll(commands, false);
-
+		System.out.println("Sending str '" + toSend +"'==" + toSend.getBytes());
+		
+		//send our char[] as bytes
 		return toSend.getBytes();
 	}
 

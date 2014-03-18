@@ -62,5 +62,13 @@ public class Utils {
 		return s.getBytes();
 	}
 	
-
+	//Returns the string of this int padded to 4 digits
+	public static String intToPaddedStr(int i)
+	{
+		String s = new String(""+i).trim();
+		//pad s with 0's
+		while (s.length() < 4)
+			s = "0"+s;
+		return s;
+	}
 }
