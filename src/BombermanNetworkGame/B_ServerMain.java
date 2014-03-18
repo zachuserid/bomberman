@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import BombermanGame.B_Player;
 import BombermanGame.B_View;
+import BombermanGame.GridGenerator;
 import BombermanGame.GridObject;
 import BombermanGame.PlayerCommand;
 import BombermanGame.PlayerCommandType;
@@ -17,19 +18,7 @@ public class B_ServerMain
 	public static ArrayList<PlayerCommand[]> received = new ArrayList<PlayerCommand[]>();
 	public static ArrayList<PlayerCommand> commands = new ArrayList<PlayerCommand>();
 	
-	public static GridObject[][] grid = new GridObject[][]
-			{
-				new GridObject[] { GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty }, 
-				new GridObject[] { GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Wall, GridObject.HiddenPowerUp1, GridObject.Empty, GridObject.Empty }, 
-				new GridObject[] { GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty }, 
-				new GridObject[] { GridObject.HiddenDoor, GridObject.Empty, GridObject.Empty, GridObject.HiddenPowerUp2, GridObject.Empty, GridObject.Empty, GridObject.Empty }, 
-				new GridObject[] { GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty },
-				new GridObject[] { GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Wall, GridObject.Empty, GridObject.Empty },
-				new GridObject[] { GridObject.Wall, GridObject.Wall, GridObject.Empty, GridObject.Empty, GridObject.Wall, GridObject.Empty, GridObject.Empty }
-			};
-	
-	public static World w = new World(grid);
-
+	public static World w = new World(GridGenerator.RandomGrid(7, 7, false));
 
 	public static boolean updates = false;
 	public static boolean parsing = false;
@@ -40,6 +29,12 @@ public class B_ServerMain
 	
 	public static void main(String[] args)
 	{
+		
+		int port = 8090;
+		
+		if (args.length == 1)
+			port = Integer.parseInt(args[0]);
+		
 		String logger_path = "Logs/log.txt";
 		if ( args.length >= 1 ) logger_path = args[0];
 		
@@ -56,7 +51,8 @@ public class B_ServerMain
 		  System.out.println("ERROR: Could not stat file: " + logger_path + ". " + e.getMessage() + f.getAbsolutePath());
 		}
 		
-		B_ServerNetworkHandler network = new B_ServerNetworkHandler(8090, MAX_PLAYERS);
+		System.out.println("Starting server on port "+port);
+		B_ServerNetworkHandler network = new B_ServerNetworkHandler(port, MAX_PLAYERS);
 		
 		if(!network.Initialize())
 		{

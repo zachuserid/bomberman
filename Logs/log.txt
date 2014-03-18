@@ -2,13 +2,19 @@ Received movement: MoveRight from player 'Frank
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveRight from player 'Frank
 WARNING: COLLISSIONS DETECTED
+Received movement: MoveLeft from player 'Frank
+WARNING: COLLISSIONS DETECTED
 Received movement: MoveUp from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: PlantBomb from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveUp from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: PlantBomb from player 'Frank
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveUp from player 'Frank
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveUp from player 'Frank
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'Frank
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveRight from player 'Frank
 WARNING: COLLISSIONS DETECTED
@@ -16,15 +22,23 @@ Received movement: MoveRight from player 'Frank
 WARNING: COLLISSIONS DETECTED
 Received movement: PlantBomb from player 'Frank
 WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: PlantBomb from player 'Frank
+WARNING: COLLISSIONS DETECTED
 Received movement: MoveRight from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'Frank
-WARNING: COLLISSIONS DETECTED
 Received movement: MoveDown from player 'Frank
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveDown from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'Frank
+Received movement: PlantBomb from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveLeft from player 'Frank
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveDown from player 'Frank
 WARNING: COLLISSIONS DETECTED
@@ -38,51 +52,19 @@ Received movement: MoveLeft from player 'Frank
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveLeft from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
+Received movement: PlantBomb from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
+Received movement: MoveUp from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FryGuy
+Received movement: MoveUp from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
+Received movement: MoveUp from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
+Received movement: MoveRight from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'FryGuy
+Received movement: MoveUp from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: UsePowerup from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'FryGuy
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'Frank
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'Frank
+Received movement: MoveUp from player 'Frank
 WARNING: COLLISSIONS DETECTED
 Received movement: PlantBomb from player 'Frank
 WARNING: COLLISSIONS DETECTED
@@ -90,43 +72,73 @@ Received movement: MoveRight from player 'Frank
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveRight from player 'Frank
 WARNING: COLLISSIONS DETECTED
+Received movement: MoveRight from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveRight from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveRight from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: PlantBomb from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveLeft from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: PlantBomb from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveLeft from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveUp from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveLeft from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveLeft from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveLeft from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'Frank
+WARNING: COLLISSIONS DETECTED
+Received movement: PlantBomb from player 'Frank
+WARNING: COLLISSIONS DETECTED
 Received movement: MoveUp from player 'Frank
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveUp from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'FryGuy
+Received movement: MoveUp from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'FryGuy
+Received movement: MoveRight from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'FryGuy
+Received movement: MoveRight from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'Zelda
+Received movement: MoveRight from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'Zelda
+Received movement: MoveRight from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'Zelda
+Received movement: MoveLeft from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'Zelda
+Received movement: MoveLeft from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'Zelda
+Received movement: MoveLeft from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'Zelda
+Received movement: MoveLeft from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'Zelda
+Received movement: MoveUp from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'Zelda
+Received movement: MoveLeft from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'Zelda
+Received movement: MoveRight from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'Zelda
+Received movement: PlantBomb from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'Zelda
+Received movement: MoveUp from player 'Frank
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'Zelda
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'Zelda
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'Zelda
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'Zelda
+Received movement: MoveLeft from player 'Frank
 WARNING: COLLISSIONS DETECTED

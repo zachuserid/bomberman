@@ -54,9 +54,7 @@ public class B_Player extends Entity
 	
 	public void Update(float elapsed, World world)
 	{
-		//TODO: however the PlayerCommands modifications are
-		// being processed on this object, ensure the kills and powerup
-		// are updated accordingly.
+		
 	}
 	
 	public B_Player getCopy()

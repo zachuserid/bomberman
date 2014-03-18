@@ -13,22 +13,24 @@ public class B_ClientMain
 	{
 		// ----Initializations & Declerations----
 		//Network handler for client
+		
+		String serverAddr = "127.0.0.1";
+		int serverPort = 8090;
+		
+		if (args.length == 2)
+		{
+			serverAddr = args[0];
+			serverPort = Integer.parseInt(args[1]);
+		}
+			
+		System.out.println("Connecting to server at "+serverAddr+":"+serverPort);
 		B_ClientNetworkHandler network = new B_ClientNetworkHandler("127.0.0.1", 8090);
 
 		//This client's player
 		//B_Player player = null;
 
 		//The world object to be updated
-		World theWorld = new World(new GridObject[][]
-			{
-				new GridObject[] { GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty }, 
-				new GridObject[] { GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Wall, GridObject.HiddenPowerUp1, GridObject.Empty, GridObject.Empty }, 
-				new GridObject[] { GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty }, 
-				new GridObject[] { GridObject.HiddenDoor, GridObject.Empty, GridObject.Empty, GridObject.HiddenPowerUp2, GridObject.Empty, GridObject.Empty, GridObject.Empty }, 
-				new GridObject[] { GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty },
-				new GridObject[] { GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Empty, GridObject.Wall, GridObject.Empty, GridObject.Empty },
-				new GridObject[] { GridObject.Wall, GridObject.Wall, GridObject.Empty, GridObject.Empty, GridObject.Wall, GridObject.Empty, GridObject.Empty }
-			});
+		World theWorld = new World(GridGenerator.EmptyGrid(7, 7));
 
 		//the view
 		B_View view = new B_View(theWorld, 50);

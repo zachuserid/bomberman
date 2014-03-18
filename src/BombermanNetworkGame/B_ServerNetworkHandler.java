@@ -54,7 +54,6 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 
 	//After the server sorts out player position, character and jazz,
 	// send the player specific data to the client in an ack
-	//TODO: remember to get the server to call all these after receiving join requests
 	public void ackJoinRequest(B_Player p, int width, int height)
 	{
 		byte ackPacket[] = new byte[10];
@@ -84,7 +83,7 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 
 	protected void handleNewSubscriber(InetAddress ip, int port, boolean playing, int ackC)
 	{
-		String playerName = ""; //TODO: Should add names to spectators also..
+		String playerName = "";
 
     	if ( playing && canAddPlayer() )
     	{

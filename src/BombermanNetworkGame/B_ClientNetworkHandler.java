@@ -159,7 +159,9 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 		{	
 			if ( this.grid_width == -1 || this.grid_height == -1 )
 			{
-				//TODO: If not handled anywhere else, this indicates game started before
+				//TODO: Implement spectator mode so we don't break here...
+				
+				//If not handled anywhere else, this indicates game started before
 				// request to join. 
 				System.out.println("ERROR: DID NOT RECEIVE INITIAL JOIN ACK BEFORE UPDATE.. GRID NOT SET");
 				return null;
@@ -167,8 +169,6 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 
 			B_Player players[] = new B_Player[4];
 			ArrayList<B_Player> playerList = new ArrayList<B_Player>();
-
-			//TODO: handle player isDead bool, winner bytes when implemented in server send
 			
 			//Assuming 4 players here..
 			for (int i=0; i<4; i++)
