@@ -15,7 +15,6 @@ import BombermanGame.World;
 import Networking.ClientNetworkHandler;
 import Networking.DoubleBuffer;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[], B_Packet>{
