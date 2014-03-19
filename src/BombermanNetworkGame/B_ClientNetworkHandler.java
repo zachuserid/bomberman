@@ -226,14 +226,16 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 				int bX = Utils.byteToInt(data[startB++]);
 				int bY = Utils.byteToInt(data[startB++]);
 
-				byte timeBytes[] = new byte[]{ data[startB++], data[startB++], data[startB++], data[startB++] };
-				float bTime = ByteBuffer.wrap(timeBytes).getFloat();
-
-				int bPower = Utils.byteToInt(data[startB++]);
-				worldBombs.add(new Bomb(bombName, new Point(bX, bY), bPower, bTime));
+				int bRange = Utils.byteToInt(data[startB++]);
+				
+				Bomb b = new Bomb(bombName, new Point(bX, bY), 0, 0);
+				b.setRange(bRange);
+				
+				worldBombs.add(b);
 			}
 
 			p.Command = PlayerCommandType.Update;
+			
 			World world = new World(gridArr);
 			world.setPlayers(playerList);
 			world.setBombs(worldBombs);

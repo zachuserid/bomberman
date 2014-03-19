@@ -292,8 +292,8 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 		//TODO: send player isDead bool, winner byte which could be 0 if game not over
 
 		//breakdown of payload size:
-		//num bytes in world [][] + 4*5+1 forall player information + numBombs*8+1 for bombs info
-		byte byteData[] = new byte[worldBytes.length+21+(numBombs*8)+1];
+		//num bytes in world [][] + 4*5+1 forall player information + numBombs*4+1 for bombs info
+		byte byteData[] = new byte[worldBytes.length+21+(numBombs*4)+1];
 
 		//[0] = command type
 		byteData[0] = Utils.intToByte(PlayerCommandType.Update.ordinal()); //header packet type
@@ -342,16 +342,8 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 			byteData[start++] = Utils.intToByte(bX);
 			int bY = bomb.getY();
 			byteData[start++] = Utils.intToByte(bY);
-
-			//4bytes for bomb time as float
-			byte timeBytes[] = ByteBuffer.allocate(4).putFloat(bomb.getTime()).array();
-			byteData[start++] = timeBytes[0];
-			byteData[start++] = timeBytes[1];
-			byteData[start++] = timeBytes[2];
-			byteData[start++] = timeBytes[3];
-
-			int power = bomb.getPower();
-			byteData[start++] = Utils.intToByte(power);
+			int range = bomb.getRange();
+			byteData[start++] = Utils.intToByte(range);
 		}
 
 		return byteData;
