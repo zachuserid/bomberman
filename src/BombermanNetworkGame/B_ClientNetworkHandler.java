@@ -237,8 +237,11 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 			p.Command = PlayerCommandType.Update;
 			
 			World world = new World(gridArr);
+			
 			world.setPlayers(playerList);
+			
 			world.setBombs(worldBombs);
+			
 			p.MetaData = players;
 			p.Data = world;
 		}
