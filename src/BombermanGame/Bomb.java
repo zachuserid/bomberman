@@ -30,7 +30,8 @@ public class Bomb extends Entity
 		
 		this.timer = time;
 		this.power = power;
-		this.range = 3;
+		 //TODO: Pull this value from the player when created...
+		this.range = 2;
 	}
 	
 	@Override

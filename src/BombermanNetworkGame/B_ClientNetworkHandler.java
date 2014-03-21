@@ -156,6 +156,7 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 		 */
 		else if (commandType == 6) //update..
 		{	
+			
 			if ( this.grid_width == -1 || this.grid_height == -1 )
 			{
 				//TODO: Implement spectator mode so we don't break here...
@@ -169,34 +170,41 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 			B_Player players[] = new B_Player[4];
 			ArrayList<B_Player> playerList = new ArrayList<B_Player>();
 			
+			//number of bytes sent for one player
+			int player_data_bytes = 6;
+			int num_players = 4;
+			
 			//Assuming 4 players here..
-			for (int i=0; i<4; i++)
+			for (int i=0; i<num_players; i++)
 			{
 				String pName = PlayerName.values()[i].toString();
 
-				int xPos = Utils.byteToInt(data[(i*5)+1]);
+				int xPos = Utils.byteToInt(data[(i*player_data_bytes)+1]);
 
-				int yPos = Utils.byteToInt(data[(i*5)+2]);
+				int yPos = Utils.byteToInt(data[(i*player_data_bytes)+2]);
 
 				B_Player pl = new B_Player(pName, new Point(xPos, yPos));
 
-				int kills = Utils.byteToInt(data[(i*5)+3]);
+				int kills = Utils.byteToInt(data[(i*player_data_bytes)+3]);
 				pl.setKillCount(kills);
 
-				Powerup powerup = Powerup.values()[Utils.byteToInt(data[(i*5)+4])];
+				Powerup powerup = Powerup.values()[Utils.byteToInt(data[(i*player_data_bytes)+4])];
 				pl.setPowerup(powerup);
-				
-				int isAlive = Utils.byteToInt(data[(i*5)+5]);
+								
+				int isAlive = Utils.byteToInt(data[(i*player_data_bytes)+5]);
 
 				if (isAlive == 0)
 					pl.Kill();
+				
+				int bCount = Utils.byteToInt(data[(i*player_data_bytes)+6]);
+				pl.setBombCount(bCount);
 				
 				players[i] = pl;
 				playerList.add(pl);
 				
 				//debug
 				//System.out.println("player ("+xPos+","+yPos+") "+i+" killcount: " 
-				//                 + kills+" powerup: "+powerup+" isAlive: " + pl.isAlive());
+				//                + kills+" powerup: "+powerup+" isAlive: " + pl.isAlive() +" bombs: " + pl.getBombCount());
 			}
 
 			GridObject[][] gridArr = new GridObject[this.grid_width][this.grid_height];
@@ -206,13 +214,13 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 			{
 				for (j=0; j<this.grid_height; j++)
 				{
-					gridArr[i][j] = GridObject.values()[ data[ ( (i * this.grid_width) + j) + 21 ] ];
+					gridArr[i][j] = GridObject.values()[ data[ ( (i * this.grid_width) + j) + (num_players * player_data_bytes) +1 ] ];
 				}
 			}
 
 			//TODO: Deprecate below or fix integer parsing
 			
-			int startB = (i*j)+21;
+			int startB = (i*j)+num_players*player_data_bytes+1;
 
 			int numBombs = Utils.byteToInt(data[startB++]);
 			ArrayList<Bomb> worldBombs = new ArrayList<Bomb>();

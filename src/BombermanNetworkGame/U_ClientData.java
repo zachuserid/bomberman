@@ -77,6 +77,11 @@ public class U_ClientData {
 		return this.players[index].isAlive;
 	}
 	
+	public int getPlayerBombCount(int index)
+	{
+		return this.players[index].numBombs;
+	}
+	
 	//Bomb data getter methods for provided index
 	
 	public int numBombs()

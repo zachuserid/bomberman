@@ -19,14 +19,16 @@ public class U_PlayerData {
 	public boolean isAlive;
 	public int playerNumber;
 	public String name;
+	public int numBombs;
 	
-	public U_PlayerData(Point ps, Powerup pu, boolean alive, int pNum)
+	public U_PlayerData(Point ps, Powerup pu, boolean alive, int pNum, int numBombs)
 	{
 		this.position = ps;
 		this.powerup = pu;
 		this.isAlive = alive;
 		this.playerNumber = pNum;
 		this.name = PlayerName.values()[pNum].toString();
+		this.numBombs = numBombs;
 	}
 	
 	public U_PlayerData(B_Player player)
