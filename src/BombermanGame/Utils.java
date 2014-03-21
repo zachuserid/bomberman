@@ -65,10 +65,17 @@ public class Utils {
 	//Returns the string of this int padded to 4 digits
 	public static String intToPaddedStr(int i)
 	{
-		String s = new String(""+i).trim();
+		return intToPaddedStr(i, 4);
+	}
+	
+	public static String intToPaddedStr(int index, int pad)
+	{
+		String s = new String(""+index).trim();
+		
 		//pad s with 0's
-		while (s.length() < 4)
+		while (s.length() < pad)
 			s = "0"+s;
+		
 		return s;
 	}
 }

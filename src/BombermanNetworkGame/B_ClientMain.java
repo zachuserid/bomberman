@@ -8,7 +8,6 @@ import BombermanNetworkGame.B_ClientNetworkHandler;
 public class B_ClientMain
 {
 
-
 	public static void main(String[] args)
 	{
 		// ----Initializations & Declerations----
@@ -115,8 +114,8 @@ public class B_ClientMain
 			{
 				if (packet.Command == PlayerCommandType.Update)
 				{
-					World tmpW = (World)packet.Data;
-					theWorld.setUpdatedData(tmpW.getGrid(), tmpW.getPlayers());
+					U_ClientData update = (U_ClientData)packet.Data;
+					theWorld.setUpdatedData(update);
 				}
 			}
 			

@@ -2,6 +2,7 @@ package BombermanGame;
 
 import java.util.ArrayList;
 
+import BombermanNetworkGame.U_ClientData;
 import Networking.Sendable;
 
 /*
@@ -126,38 +127,39 @@ public class World implements Sendable<World>
 	@Override
 	public World getCopy()
 	{
-		World w = new World(this.grid);
+		World world = new World(this.grid);
 
 		for(B_Player p : this.players) 
-			w.AddExistingPlayer(p);
-
-		return w;
+			world.AddExistingPlayer(p);
+		
+		return world;
 	}
 
 	public boolean isGameOver() {return this.playersDead >= this.players.size() -1 || this.atDoor;}
 
 	//add more stuff here
-	public void setUpdatedData(GridObject[][] grid, B_Player[] playerList)
+	public void setUpdatedData(U_ClientData data)
 	{
 		this.playersDead = 0;
-		this.grid = grid;
-		for (int i=0; i<playerList.length; i++)
+		this.grid = data.getGrid();
+		for (int i=0; i<data.numPlayers(); i++)
 		{
-			this.players.get(i).setLocation(playerList[i].getLocation());
+			this.players.get(i).setLocation(data.getPlayerPosition(i));
 			
 			if (this.getElementAt(this.players.get(i).getLocation()) == GridObject.Door)
 				this.atDoor = true;
 			
-			this.players.get(i).setKillCount(playerList[i].getKillCount());
+			this.players.get(i).setKillCount(data.getPlayerKills(i));
 			
-			if (!playerList[i].isAlive())
+			if (!data.isPlayerAlive(i))
 				this.players.get(i).Kill();
 			
-			this.playersDead += playerList[i].getKillCount();
+			this.playersDead += data.getPlayerKills(i);
 			
-			this.players.get(i).setPowerup(playerList[i].getPowerup());
+			this.players.get(i).setPowerup(data.getPlayerPowerup(i));
 		}
 		
+		//TODO: update bomb positions based on bomb getter methods in data
 		this.bombs.clear();
 	}
 

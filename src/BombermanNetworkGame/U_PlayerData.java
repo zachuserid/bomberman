@@ -20,8 +20,9 @@ public class U_PlayerData {
 	public int playerNumber;
 	public String name;
 	public int numBombs;
+	public int kills;
 	
-	public U_PlayerData(Point ps, Powerup pu, boolean alive, int pNum, int numBombs)
+	public U_PlayerData(Point ps, Powerup pu, boolean alive, int pNum, int numBombs, int kills)
 	{
 		this.position = ps;
 		this.powerup = pu;
@@ -29,6 +30,7 @@ public class U_PlayerData {
 		this.playerNumber = pNum;
 		this.name = PlayerName.values()[pNum].toString();
 		this.numBombs = numBombs;
+		this.kills = kills;
 	}
 	
 	public U_PlayerData(B_Player player)
@@ -38,6 +40,14 @@ public class U_PlayerData {
 		this.isAlive = player.isAlive();
 		this.name = player.getName();
 		this.playerNumber = PlayerName.valueOf(this.name).ordinal();
+		this.numBombs = player.getBombCount();
+		this.kills = player.getKillCount();
+	}
+	
+	public U_PlayerData getCopy()
+	{
+		return new U_PlayerData(this.position, this.powerup, this.isAlive, 
+				this.playerNumber, this.numBombs, this.kills);
 	}
 		
 	

@@ -3,7 +3,6 @@ package BombermanNetworkGame;
 
 import BombermanGame.B_Packet;
 import BombermanGame.B_Player;
-import BombermanGame.Bomb;
 import BombermanGame.GridObject;
 import BombermanGame.PlayerCommand;
 import BombermanGame.PlayerCommandType;
@@ -11,7 +10,6 @@ import BombermanGame.PlayerName;
 import BombermanGame.Point;
 import BombermanGame.Powerup;
 import BombermanGame.Utils;
-import BombermanGame.World;
 import Networking.ClientNetworkHandler;
 import Networking.DoubleBuffer;
 
@@ -166,45 +164,37 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 				System.out.println("ERROR: DID NOT RECEIVE INITIAL JOIN ACK BEFORE UPDATE.. GRID NOT SET");
 				return null;
 			}
-
-			B_Player players[] = new B_Player[4];
-			ArrayList<B_Player> playerList = new ArrayList<B_Player>();
 			
 			//number of bytes sent for one player
 			int player_data_bytes = 6;
 			int num_players = 4;
 			
+			U_PlayerData playerData[] = new U_PlayerData[num_players];
+			
 			//Assuming 4 players here..
 			for (int i=0; i<num_players; i++)
 			{
-				String pName = PlayerName.values()[i].toString();
-
 				int xPos = Utils.byteToInt(data[(i*player_data_bytes)+1]);
 
 				int yPos = Utils.byteToInt(data[(i*player_data_bytes)+2]);
 
-				B_Player pl = new B_Player(pName, new Point(xPos, yPos));
-
 				int kills = Utils.byteToInt(data[(i*player_data_bytes)+3]);
-				pl.setKillCount(kills);
 
 				Powerup powerup = Powerup.values()[Utils.byteToInt(data[(i*player_data_bytes)+4])];
-				pl.setPowerup(powerup);
 								
 				int isAlive = Utils.byteToInt(data[(i*player_data_bytes)+5]);
-
+				boolean alive = true;
 				if (isAlive == 0)
-					pl.Kill();
+					alive = false;
 				
 				int bCount = Utils.byteToInt(data[(i*player_data_bytes)+6]);
-				pl.setBombCount(bCount);
 				
-				players[i] = pl;
-				playerList.add(pl);
-				
+				U_PlayerData pl = new U_PlayerData(new Point(xPos, yPos), powerup, alive, i, bCount, kills);
+				playerData[i] = pl;
+
 				//debug
-				//System.out.println("player ("+xPos+","+yPos+") "+i+" killcount: " 
-				//                + kills+" powerup: "+powerup+" isAlive: " + pl.isAlive() +" bombs: " + pl.getBombCount());
+				System.out.println("player ("+xPos+","+yPos+") "+i+" killcount: " 
+				                + kills+" powerup: "+powerup+" isAlive: " + alive +" bombs: " + bCount);
 			}
 
 			GridObject[][] gridArr = new GridObject[this.grid_width][this.grid_height];
@@ -217,14 +207,14 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 					gridArr[i][j] = GridObject.values()[ data[ ( (i * this.grid_width) + j) + (num_players * player_data_bytes) +1 ] ];
 				}
 			}
-
-			//TODO: Deprecate below or fix integer parsing
+			
+			U_WorldData worldData = new U_WorldData(gridArr);
 			
 			int startB = (i*j)+num_players*player_data_bytes+1;
 
 			int numBombs = Utils.byteToInt(data[startB++]);
-			ArrayList<Bomb> worldBombs = new ArrayList<Bomb>();
-
+			U_BombData bombData[] = new U_BombData[numBombs];
+			
 			for (int k=0; k<numBombs; k++)
 			{
 				int playerNum = Utils.byteToInt(data[startB++]);
@@ -235,22 +225,16 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 
 				int bRange = Utils.byteToInt(data[startB++]);
 				
-				Bomb b = new Bomb(bombName, new Point(bX, bY), 0, 0);
-				b.setRange(bRange);
+				U_BombData b = new U_BombData(bombName, new Point(bX, bY), bRange);
 				
-				worldBombs.add(b);
+				bombData[k] = b;
 			}
+			
+			U_ClientData clientData = new U_ClientData(worldData, playerData, bombData);
 
 			p.Command = PlayerCommandType.Update;
-			
-			World world = new World(gridArr);
-			
-			world.setPlayers(playerList);
-			
-			world.setBombs(worldBombs);
-			
-			p.MetaData = players;
-			p.Data = world;
+
+			p.Data = clientData;
 		}
 
 		return new B_Packet[] {p};
@@ -357,45 +341,9 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 		{
 			p.Command = original.Command;
 
-			World orig = (World)original.Data;
+			U_ClientData orig = (U_ClientData)original.Data;
 
-			int w = orig.getGridWidth();
-			int h = orig.getGridHeight();
-
-			GridObject[][] gridCopy = new GridObject[w][h];
-
-			for (int i=0; i<w; i++)
-			{
-				for (int j=0; j<h; j++)
-				{
-					gridCopy[i][j] = orig.getElementAt(j, i);
-				}
-			}
-
-			World wCopy = new World(gridCopy);			
-
-			B_Player[] players = (B_Player[])original.MetaData;
-
-			B_Player copyPlayers[] = new B_Player[players.length];
-			ArrayList<B_Player> copyPlayersList = new ArrayList<B_Player>();
-			for (int i=0; i<copyPlayers.length; i++)
-			{
-				B_Player tmp = players[i].getCopy();
-				copyPlayersList.add(tmp);
-				copyPlayers[i] = tmp;
-			}
-
-			ArrayList<Bomb> copyBombs = new ArrayList<Bomb>();
-			for (Bomb b: orig.getBombs())
-				copyBombs.add(new Bomb(b.getName(), b.getLocation(), b.getPower(), b.getTime()));
-
-			wCopy.setPlayers(copyPlayersList);
-
-			wCopy.setBombs(copyBombs);
-
-			p.Data = wCopy;
-
-			p.MetaData = copyPlayers;
+			p.Data = orig.getCopy();
 
 		}
 

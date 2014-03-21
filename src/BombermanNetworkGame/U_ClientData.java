@@ -82,6 +82,11 @@ public class U_ClientData {
 		return this.players[index].numBombs;
 	}
 	
+	public int getPlayerKills(int index)
+	{
+		return this.players[index].kills;
+	}
+	
 	//Bomb data getter methods for provided index
 	
 	public int numBombs()
@@ -107,6 +112,22 @@ public class U_ClientData {
 	public int getBombRange(int index)
 	{
 		return this.bombs[index].radius;
+	}
+	
+	//copy factory method
+	public U_ClientData getCopy()
+	{
+		U_WorldData wCopy = this.world.getCopy();
+		
+		U_PlayerData pCopy[] = new U_PlayerData[this.players.length];
+		for (int i=0; i<pCopy.length; i++)
+			pCopy[i] = this.players[i].getCopy();
+		
+		U_BombData bCopy[] = new U_BombData[this.bombs.length];
+		for (int i=0; i<bCopy.length; i++)
+			bCopy[i] = this.bombs[i].getCopy();
+		
+		return new U_ClientData(wCopy, pCopy, bCopy);
 	}
 
 }
