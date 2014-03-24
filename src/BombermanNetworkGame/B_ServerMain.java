@@ -25,6 +25,8 @@ public class B_ServerMain
 	public static Writer printer;
 	public static boolean shutdown = false;
 	
+	//FirstGitCommit
+	
 	public static final int MAX_PLAYERS = 4;
 	
 	public static void main(String[] args)
