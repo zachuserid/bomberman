@@ -63,7 +63,7 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 
 	//After the server sorts out player position, character and jazz,
 	// send the player specific data to the client in an ack
-	private void ackNewClient(String name, int xPos, int yPos, int width, int height)
+	private void ackNewClient(String name, int xPos, int yPos, int width, int height, boolean playing)
 	{
 		byte ackPacket[] = new byte[10];
 		ackPacket[0] = Utils.intToByte(PlayerCommandType.valueOf("Join").ordinal()); //[0] = message type
@@ -75,7 +75,11 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 		for (int i=0; i<commandIdBytes.length; i++) 
 			ackPacket[i+1] = commandIdBytes[i]; //[1,..,4] = highest command to acknowledge
 
-		int playerNumber = PlayerName.valueOf(name).ordinal();
+		int playerNumber;
+		if (playing)
+			playerNumber = PlayerName.valueOf(name).ordinal();
+		else
+			playerNumber = 0;
 
 		ackPacket[5] = Utils.intToByte(playerNumber); //[5] = the player's number
 
@@ -92,12 +96,12 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 	
 	public void ackSpectatorRequest(String name, int width, int height)
 	{
-		this.ackNewClient(name, 0, 0, width, height);
+		this.ackNewClient(name, 0, 0, width, height, false);
 	}
 	
 	public void ackJoinRequest(B_Player p, int width, int height)
 	{
-		this.ackNewClient(p.getName(), p.getX(), p.getY(), width, height);
+		this.ackNewClient(p.getName(), p.getX(), p.getY(), width, height, true);
 	}
 
 	protected void handleNewSubscriber(InetAddress ip, int port, boolean playing, int ackC)

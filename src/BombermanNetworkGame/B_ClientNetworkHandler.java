@@ -201,8 +201,8 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 				playerData[i] = pl;
 
 				//debug
-				System.out.println("player ("+xPos+","+yPos+") "+i+" killcount: " 
-				                + kills+" powerup: "+powerup+" isAlive: " + alive +" bombs: " + bCount);
+				//System.out.println("player ("+xPos+","+yPos+") "+i+" killcount: " 
+				//                + kills+" powerup: "+powerup+" isAlive: " + alive +" bombs: " + bCount);
 			}
 
 			GridObject[][] gridArr = new GridObject[this.grid_width][this.grid_height];
