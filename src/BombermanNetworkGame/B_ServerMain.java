@@ -52,7 +52,8 @@ public class B_ServerMain
 		}
 		
 		System.out.println("Starting server on port "+port);
-		B_ServerNetworkHandler network = new B_ServerNetworkHandler(port, MAX_PLAYERS);
+		B_ServerNetworkHandler network = new B_ServerNetworkHandler(port, MAX_PLAYERS, 
+				                                   w.getGridWidth(), w.getGridHeight());
 		
 		if(!network.Initialize())
 		{

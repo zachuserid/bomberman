@@ -7,9 +7,14 @@ import BombermanNetworkGame.B_ClientNetworkHandler;
 
 public class B_ClientMain
 {
+	
+	static B_ClientNetworkHandler network;
 
 	public static void main(String[] args)
 	{
+		
+		B_ClientMain client = new B_ClientMain();
+		
 		// ----Initializations & Declerations----
 		//Network handler for client
 		
@@ -23,7 +28,7 @@ public class B_ClientMain
 		}
 			
 		System.out.println("Server location: "+serverAddr+":"+serverPort);
-		B_ClientNetworkHandler network = new B_ClientNetworkHandler(serverAddr, serverPort);
+		network = new B_ClientNetworkHandler(serverAddr, serverPort);
 
 		//This client's player
 		//B_Player player = null;
@@ -35,65 +40,19 @@ public class B_ClientMain
 		B_View view = new B_View(theWorld, 50);
 
 		//Controller for key events to PlayerCommand updates
-		B_PlayerController controller = null;
+		B_PlayerController controller;
 
 		if (!network.Initialize(false, true)) {
 			System.out.println("Client network fail");
 			return;
 		}
 		// -----------------------------
-
-		int currentCommandId = 0;
-
-		B_Packet received[];
-
-		//Create a join request and send it
-		PlayerCommand[] commands = new PlayerCommand[] {new PlayerCommand(PlayerCommandType.Join,
-															currentCommandId++)};
-		network.Send(commands);
-
-		boolean haveJoinAck = false;
-		//Wait until I have an acknowledgement for my join.
-		//This will contain all of my player information
-		System.out.println("Waiting for an ack to my join...");
-		while (!haveJoinAck)
+		
+		controller = client.joinAsPlayer(theWorld);
+		
+		if (controller == null)
 		{
-			//Client blocks for first update() overriding receiverThread in network handler...
-			received = network.blockAndReceive();
-
-			//Iterate over each received B_Packet, handle it accordingly
-			for(B_Packet p : received)
-			{
-				if(p.Command == PlayerCommandType.Join)
-				{
-					B_Player player = (B_Player)p.Data;
-					int myPlayerId = PlayerName.valueOf(player.getName()).ordinal();
-					
-					//Create players in our world object
-					for (int i=0; i<myPlayerId; i++)
-					{
-						theWorld.AddPlayer(PlayerName.values()[i].toString());
-					}
-					
-					//Initialize player controller class with my initialized player
-					controller = B_PlayerController.Default(theWorld.AddPlayer(player.getName()), theWorld);
-					
-					for (int i=myPlayerId+1; i<4; i++)
-					{
-						theWorld.AddPlayer(PlayerName.values()[i].toString());
-					}
-					
-					System.out.println("Received my player: " + player.getName());
-					haveJoinAck = true;
-				} 
-			}
-		}
-
-		//Start the network's receiver thread
-		if (!network.startReceiver())
-		{
-			System.out.println("Could not start receiver thread");
-			network.Stop();
+			System.out.println("An error occured while joining game. Exiting.");
 			return;
 		}
 
@@ -157,5 +116,66 @@ public class B_ClientMain
 		// rather than closing window
 		if (view != null)
 			view.Dispose();
+		
+	} //End main
+	
+	//Join the game as player, initialize the controller objects. 
+	//Add all players to the world
+	//Returns success or failure boolean
+	public B_PlayerController joinAsPlayer(World world)
+	{
+		B_Packet received[];
+
+		//join server as player
+		network.joinGame(1);
+
+		boolean haveJoinAck = false;
+		
+		B_PlayerController controller = null;
+		
+		//Wait until I have an acknowledgement for my join.
+		//This will contain all of my player information
+		System.out.println("Waiting for an ack to my join...");
+		while (!haveJoinAck)
+		{
+			//Client blocks for first update() overriding receiverThread in network handler...
+			received = network.blockAndReceive();
+
+			//Iterate over each received B_Packet, handle it accordingly
+			for(B_Packet p : received)
+			{
+				if(p.Command == PlayerCommandType.Join)
+				{
+					B_Player player = (B_Player)p.Data;
+					int myPlayerId = PlayerName.valueOf(player.getName()).ordinal();
+					
+					//Create players in our world object
+					for (int i=0; i<myPlayerId; i++)
+					{
+						world.AddPlayer(PlayerName.values()[i].toString());
+					}
+					
+					//Initialize player controller class with my initialized player
+					controller = B_PlayerController.Default(world.AddPlayer(player.getName()), world);
+					
+					for (int i=myPlayerId+1; i<4; i++)
+					{
+						world.AddPlayer(PlayerName.values()[i].toString());
+					}
+					
+					System.out.println("Received my player: " + player.getName());
+					haveJoinAck = true;
+				} 
+			}
+		}
+
+		//Start the network's receiver thread
+		if (!network.startReceiver())
+		{
+			System.out.println("Could not start receiver thread");
+			network.Stop();
+		}
+		
+		return controller;
 	}
 }

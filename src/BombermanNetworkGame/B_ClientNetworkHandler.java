@@ -19,8 +19,9 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 
 	//Members
 
-	int grid_width;
-	int grid_height;
+	protected int grid_width;
+	protected int grid_height;
+	protected int playing;
 	
 	DoubleBuffer<PlayerCommand> commandBacklog;
 
@@ -40,8 +41,11 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 	//Methods
 
 	//Create packet requesting a join game, and call super.sendData();
-	public void joinGame()
+	//playing if the int == 1, not if int == 0
+	public void joinGame(int playing)
 	{
+		this.playing = playing;
+		
 		PlayerCommand joinCom[] = new PlayerCommand[1];
 
 		joinCom[0] = new PlayerCommand(PlayerCommandType.Join, 0);
@@ -166,7 +170,7 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 			}
 			
 			//number of bytes sent for one player
-			int player_data_bytes = 6;
+			int player_data_bytes = 7;
 			int num_players = 4;
 			
 			U_PlayerData playerData[] = new U_PlayerData[num_players];
@@ -187,7 +191,11 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 				if (isAlive == 0)
 					alive = false;
 				
-				int bCount = Utils.byteToInt(data[(i*player_data_bytes)+6]);
+				String bombCount = "";
+				bombCount += Utils.byteToInt(data[(i*player_data_bytes)+6]);
+				bombCount += Utils.byteToInt(data[(i*player_data_bytes)+7]);
+				
+				int bCount = Integer.parseInt(bombCount);
 				
 				U_PlayerData pl = new U_PlayerData(new Point(xPos, yPos), powerup, alive, i, bCount, kills);
 				playerData[i] = pl;
@@ -284,7 +292,7 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 			System.out.println("Sending join game message");
 			
 			//whether playing or spectating (bool) (1 char)
-			toSend += "1";
+			toSend += this.playing;
 		}
 		else
 		{

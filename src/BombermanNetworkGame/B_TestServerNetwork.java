@@ -54,7 +54,7 @@ public class B_TestServerNetwork
 		  System.out.println("ERROR: Could not stat file: " + logger_path + ". " + e.getMessage() + f.getAbsolutePath());
 		}
 
-		B_ServerNetworkHandler network = new B_ServerNetworkHandler(8090, MAX_PLAYERS);
+		B_ServerNetworkHandler network = new B_ServerNetworkHandler(8090, MAX_PLAYERS, 7, 7);
 
 		if(!network.Initialize())
 		{

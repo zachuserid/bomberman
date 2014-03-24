@@ -68,9 +68,9 @@ public class Utils {
 		return intToPaddedStr(i, 4);
 	}
 	
-	public static String intToPaddedStr(int index, int pad)
+	public static String intToPaddedStr(int i, int pad)
 	{
-		String s = new String(""+index).trim();
+		String s = new String(""+i).trim();
 		
 		//pad s with 0's
 		while (s.length() < pad)

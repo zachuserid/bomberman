@@ -21,13 +21,24 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 	protected int maxPlayers;
 
 	protected int currentPlayers;
+	
+	protected int spectators;
+	
+	protected int gridWidth;
+	
+	protected int gridHeight;
 
 	//Constructor
 
-	public B_ServerNetworkHandler(int port, int maxPlayers) {
+	public B_ServerNetworkHandler(int port, int maxPlayers, int width, int height) {
 		super(port);
 
 		this.maxPlayers = maxPlayers;
+		
+		this.spectators = 0;
+		
+		this.gridWidth = width;
+		this.gridHeight = height;
 
 		this.doubleJoinBuffer = new DoubleBuffer<PlayerCommand>();
 	}
@@ -52,36 +63,46 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 
 	//After the server sorts out player position, character and jazz,
 	// send the player specific data to the client in an ack
-	public void ackJoinRequest(B_Player p, int width, int height)
+	private void ackNewClient(String name, int xPos, int yPos, int width, int height)
 	{
 		byte ackPacket[] = new byte[10];
 		ackPacket[0] = Utils.intToByte(PlayerCommandType.valueOf("Join").ordinal()); //[0] = message type
 
-		int ackC = this.getSubscriberByName(p.getName()).getAckCount();
+		int ackC = this.getSubscriberByName(name).getAckCount();
 
 		byte commandIdBytes[] = Utils.intToStrByteArr(ackC);
 
 		for (int i=0; i<commandIdBytes.length; i++) 
 			ackPacket[i+1] = commandIdBytes[i]; //[1,..,4] = highest command to acknowledge
 
-		int playerNumber = PlayerName.valueOf(p.getName()).ordinal();
+		int playerNumber = PlayerName.valueOf(name).ordinal();
 
 		ackPacket[5] = Utils.intToByte(playerNumber); //[5] = the player's number
 
-		ackPacket[6] = Utils.intToByte(p.getX()); //[6] = x position
-		ackPacket[7] = Utils.intToByte(p.getY()); //[7] = y position
+		ackPacket[6] = Utils.intToByte(xPos); //[6] = x position
+		ackPacket[7] = Utils.intToByte(yPos); //[7] = y position
 
 		ackPacket[8] = Utils.intToByte(width); //[8] = world object width
 		ackPacket[9] = Utils.intToByte(height); //[9] = world object height
 
 		//System.out.println("Acking join request for player " + p.getName() + " with data: " + new String(ackPacket));
 
-		this.sendData(p.getName(), ackPacket);
+		this.sendData(name, ackPacket);
+	}
+	
+	public void ackSpectatorRequest(String name, int width, int height)
+	{
+		this.ackNewClient(name, 0, 0, width, height);
+	}
+	
+	public void ackJoinRequest(B_Player p, int width, int height)
+	{
+		this.ackNewClient(p.getName(), p.getX(), p.getY(), width, height);
 	}
 
 	protected void handleNewSubscriber(InetAddress ip, int port, boolean playing, int ackC)
 	{
-		String playerName = "";
+		String playerName = "spectator"+this.spectators++;
 
     	if ( playing && canAddPlayer() )
     	{
@@ -101,7 +122,10 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
     	{
     		//Update the count, acknowledging receving join request..
     		sub.setAckCount(ackC);
-    	}    	
+    	}
+    	
+    	if (!playing)
+    		this.ackSpectatorRequest(playerName, this.gridWidth, this.gridHeight);
     }
     
 	//If this class knows about the world, this should be in there...
@@ -284,12 +308,13 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 	protected byte[] parseSend(B_NetworkPacket data)
 	{
 		//number of bytes for one player's data
-		int player_bytes = 6;
+		int player_bytes = 7;
 		int num_players = 4;
 		
 		byte worldBytes[] = data.getWorld().getBytes();
 
-		int numBombs = data.getWorld().getBombs().size();
+		ArrayList<Bomb> bombs = data.getWorld().getBombs();
+		int numBombs = bombs.size();
 		
 		//breakdown of payload size:
 		//num bytes in world [][] + 4*5+1 forall player information + numBombs*4+1 for bombs info
@@ -312,7 +337,9 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 			else
 				byteData[i+5] = Utils.intToByte(0);
 			
-			byteData[i+6] = Utils.intToByte(players[i/player_bytes].getBombCount());
+			String bombC = Utils.intToPaddedStr(players[i/player_bytes].getBombCount(), 2);
+			byteData[i+6] = bombC.getBytes()[0];
+			byteData[i+7] = bombC.getBytes()[1];
 			
 			//debug
 			//System.out.println("Sending player ("+players[i/player_bytes].getX()+","+players[i/player_bytes].getY()+") " +
@@ -327,12 +354,9 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 		{
 			byteData[i+(num_players*player_bytes)+1] = worldBytes[i];
 		}
-
-		//TODO: Deprecate below or fix formatting for the ints passed.
 		
 		//number of bombs
 		int start = worldBytes.length + (num_players*player_bytes)+1;
-		ArrayList<Bomb> bombs = data.getWorld().getBombs();
 
 		//Place all bomb information in the packet
 		byteData[start++] = Utils.intToByte(numBombs);
