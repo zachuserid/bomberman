@@ -151,8 +151,8 @@ public class World implements Sendable<World>
 			
 			this.players.get(i).setKillCount(data.getPlayerKills(i));
 			
-			if (!data.isPlayerAlive(i))
-				this.players.get(i).Kill();
+			if (data.isPlayerAlive(i)) this.players.get(i).Revive();
+			else this.players.get(i).Kill();
 			
 			this.playersDead += data.getPlayerKills(i);
 			
@@ -160,7 +160,37 @@ public class World implements Sendable<World>
 		}
 		
 		//TODO: update bomb positions based on bomb getter methods in data
-		this.bombs.clear();
+		ArrayList<Bomb> l = this.bombs;
+		
+		for(int n = 0; n < data.numBombs(); n++)
+		{
+			boolean found = false;
+			
+			boolean bombsLeft = true;
+			
+			int index = 0;
+			
+			while(!found || bombsLeft)
+			{
+				if(index >= l.size()) bombsLeft = false;
+				else
+				{
+					Bomb b = l.get(index);
+					
+					if(b.getX() == data.getBombX(n) && b.getY() == data.getBombY(n))
+					{
+						l.remove(index);
+						found = true;
+					}
+					else index++;
+				}
+			}
+			
+			if(!found)
+			{
+				this.bombs.add(new Bomb("", new Point(data.getBombX(n), data.getBombY(n)), data.getBombRange(n), 5));
+			}
+		}
 	}
 
 	//returns the (currently)char elements at x,y

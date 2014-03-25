@@ -66,6 +66,8 @@ public class B_Player extends Entity
 	
 	public void Kill() {this.alive = false;}
 	
+	public void Revive() {this.alive = true;}
+	
 	public int getBombCount()
 	{
 		return this.bombCount;
