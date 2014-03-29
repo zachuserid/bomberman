@@ -114,6 +114,11 @@ public class U_ClientData {
 		return this.bombs[index].radius;
 	}
 	
+	public float getBombTime(int index)
+	{
+		return this.bombs[index].radius;
+	}
+	
 	//copy factory method
 	public U_ClientData getCopy()
 	{

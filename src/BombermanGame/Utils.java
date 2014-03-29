@@ -78,4 +78,19 @@ public class Utils {
 		
 		return s;
 	}
+	
+	public static String floatToPaddedStr(float f, int pad)
+	{
+		String s = new String(""+f).trim();
+
+		//pad s with 0's
+		while (s.length() < pad)
+			s = "0"+s;
+
+		//trim (round down) to reach pad if necessary
+		if (s.length() > pad)
+			s = s.substring(0, pad);
+
+		return s;
+	}
 }
