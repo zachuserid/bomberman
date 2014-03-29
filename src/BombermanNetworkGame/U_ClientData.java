@@ -17,9 +17,9 @@ public class U_ClientData {
 	 *  the world.
 	 */
 	
-	private U_WorldData world;
-	private U_PlayerData players[];
-	private U_BombData bombs[];
+	public U_WorldData world;
+	public U_PlayerData players[];
+	public U_BombData bombs[];
 	
 	public U_ClientData(U_WorldData world, U_PlayerData players[], U_BombData bombs[])
 	{
@@ -28,6 +28,7 @@ public class U_ClientData {
 		this.bombs = bombs;
 	}
 	
+	/* not sure why this was necessary....
 	//World data getter methods
 	
 	public GridObject[][] getGrid()
@@ -117,7 +118,7 @@ public class U_ClientData {
 	public float getBombTime(int index)
 	{
 		return this.bombs[index].radius;
-	}
+	}*/
 	
 	//copy factory method
 	public U_ClientData getCopy()
