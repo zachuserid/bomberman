@@ -134,6 +134,9 @@ public class World implements Sendable<World>
 		for(B_Player p : this.players) 
 			world.AddExistingPlayer(p);
 		
+		for(Bomb b : this.bombs) 
+			world.AddExistingBomb(b);
+		
 		return world;
 	}
 
@@ -516,6 +519,15 @@ public class World implements Sendable<World>
 		B_Player copy = p.getCopy();
 
 		this.players.add(copy);
+
+		//this.SetElementAt(copy.getLocation(), copy.getGridObject());
+	}
+	
+	protected void AddExistingBomb(Bomb b)
+	{
+		Bomb copy = b.getCopy();
+
+		this.bombs.add(copy);
 
 		//this.SetElementAt(copy.getLocation(), copy.getGridObject());
 	}

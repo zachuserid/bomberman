@@ -49,4 +49,9 @@ public class Bomb extends Entity
 		this.timer -= elapsed;
 		
 	}
+	
+	public Bomb getCopy()
+	{
+		return new Bomb(this.name, this.location, this.power, this.timer);
+	}
 }
