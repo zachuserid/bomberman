@@ -25,17 +25,28 @@ public class B_ServerMain
 	public static Writer printer;
 	public static boolean shutdown = false;
 	
-	//FirstGitCommit
-	
 	public static final int MAX_PLAYERS = 4;
+	long milliwait;
+	long start;
+	long time;
+	int port;
+	B_ServerNetworkHandler network;
+	ViewRenderer v;
+	B_NetworkPlayerController c;
+	
+	
+	
 	
 	public static void main(String[] args)
 	{
+		B_ServerMain server = new B_ServerMain();
 		
-		int port = 8090;
+		server.serverInit();
+		
+		
 		
 		if (args.length == 1)
-			port = Integer.parseInt(args[0]);
+			server.port = Integer.parseInt(args[0]);
 		
 		String logger_path = "Logs/log.txt";
 		if ( args.length >= 1 ) logger_path = args[0];
@@ -46,31 +57,14 @@ public class B_ServerMain
 			f = new File(logger_path);
 			FileOutputStream st = new FileOutputStream(f);
 			///st = new FileOutputStream(logger_path);
-		    printer = new BufferedWriter(new OutputStreamWriter(st, "utf-8"));
+			printer = new BufferedWriter(new OutputStreamWriter(st, "utf-8"));
 		} 
 		catch (IOException e) 
 		{
 		  System.out.println("ERROR: Could not stat file: " + logger_path + ". " + e.getMessage() + f.getAbsolutePath());
 		}
 		
-		System.out.println("Starting server on port "+port);
-		B_ServerNetworkHandler network = new B_ServerNetworkHandler(port, MAX_PLAYERS, 
-				                                   w.getGridWidth(), w.getGridHeight());
 		
-		if(!network.Initialize())
-		{
-			System.out.println("Server Fail");
-			return;
-		}
-		
-		ViewRenderer v = new B_View(w, 50);
-		
-		B_NetworkPlayerController c = new B_NetworkPlayerController(w);
-		
-		long milliwait = 100;
-		
-		long start = System.currentTimeMillis();
-		long time = 0;
 		
 		//Create the logger
 		Thread testLogger = new Thread(new Runnable(){
@@ -133,20 +127,53 @@ public class B_ServerMain
 		}); //End thread
 		
 		testLogger.start();
-
+		
+		server.playerJoin();
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	public void serverInit(){
+		port = 8090;
+		
+		System.out.println("Starting server on port "+port);
+		
+		network = new B_ServerNetworkHandler(port, MAX_PLAYERS, w.getGridWidth(), w.getGridHeight());
+		
+		if(!network.Initialize())
+		{
+			System.out.println("Server Fail");
+			return;
+		}
+		
+		v = new B_View(w, 50);
+		
+		c = new B_NetworkPlayerController(w);
+		
+		milliwait = 100;
+		start = System.currentTimeMillis();
+		time = 0;
+	}
+	
+	
+	
+	public void playerJoin()
+	{
 		boolean startGame = false;
 		int playerjoinCount = 0;
 		ArrayList<B_Player> playersJoined = new ArrayList<B_Player>();
-		long prevTime = 0;
-		
+				
 		try
 		{
 			v.Draw();
 			while(!v.exitPrompt())
 			{	
-				float elapsedSeconds = (time-prevTime)/1000f;
-				
-				
 				if (!startGame){
 					
 					PlayerCommand[] joins = network.getJoinRequests();
@@ -180,70 +207,108 @@ public class B_ServerMain
 								network.ackJoinRequest(p,  w.getGridWidth(), w.getGridHeight());
 							}
 							
+							if (playerjoinCount < MAX_PLAYERS){
+								//create AI client
+								
+								AI(MAX_PLAYERS-playerjoinCount);
+							}
+							
 							
 							startGame = true;
-							network.Send(new B_NetworkPacket(w, w.getPlayers()));					
+							network.Send(new B_NetworkPacket(w, w.getPlayers()));
+							serverUpdateLoop();
 						}
 					}
 				}
-				else
-				{
-					received = network.getData();
-						
-					for(PlayerCommand[] command : received)
-					{
-						//If some error occurred and we have empty updates, bail to next
-						if (command.length == 0) continue;
-						
-						//Test logger stuff
-						synchronized(commands)
-						{
-							for(int i = 0; i < command.length; i++)
-								commands.add(command[i].getCopy());
-						}
-							
-						ArrayList<PlayerCommand> cs = new ArrayList<PlayerCommand>();
-
-						for(PlayerCommand pc : command){
-							cs.add(pc);
-						}
-							
-						c.AddCommands(command[0].PlayerName, cs);
-						
-					}
-					
-					c.Update(elapsedSeconds);
-					w.Update(elapsedSeconds);
-					
-					network.Send(new B_NetworkPacket(w, w.getPlayers()));
-
-					
-					v.Draw();					
+			}
+			
+		} catch(Exception e)
+		{
+			System.out.println("Exception in server main: " + e.getMessage());
+			e.printStackTrace();
+			if (v != null) v.Dispose(); 
+		}
+		finally
+		{
+			System.out.println("Stopping server");
+			
+			network.Stop();
+			
+			synchronized(commands)
+			{
+				shutdown = true;
+				commands.notify();
+			}
+		}
+	}
+			
 	
-					updates = true;
-					if ( commands.size() > 0 )
+	
+			
+	public void serverUpdateLoop(){
+		long prevTime = 0;
+		
+		try
+		{
+			v.Draw();
+			while(!v.exitPrompt())
+			{	
+				float elapsedSeconds = (time-prevTime)/1000f;
+				
+				received = network.getData();
+				
+				for(PlayerCommand[] command : received)
+				{
+					//If some error occurred and we have empty updates, bail to next
+					if (command.length == 0) continue;
+					
+					//Test logger stuff
+					synchronized(commands)
 					{
-						synchronized(commands){
-							commands.notify();
-						}
+						for(int i = 0; i < command.length; i++)
+							commands.add(command[i].getCopy());
 					}
-					
-					//w.printGrid();
-					//network.Send(new B_NetworkPacket(w, w.getPlayers()));
-							
-					try { Thread.sleep(milliwait); } 
-					catch (InterruptedException e) { e.printStackTrace(); }
-					
-					prevTime = time;
-					time = System.currentTimeMillis() - start;
-					
-					
-					
-					if (w.isGameOver()){
-						//network.Send(new B_NetworkPacket(w, w.getPlayers()));
 						
-						break;
+					ArrayList<PlayerCommand> cs = new ArrayList<PlayerCommand>();
+		
+					for(PlayerCommand pc : command){
+						cs.add(pc);
 					}
+						
+					c.AddCommands(command[0].PlayerName, cs);
+					
+				}
+				
+				c.Update(elapsedSeconds);
+				w.Update(elapsedSeconds);
+				
+				network.Send(new B_NetworkPacket(w, w.getPlayers()));
+		
+				
+				v.Draw();					
+		
+				updates = true;
+				if ( commands.size() > 0 )
+				{
+					synchronized(commands){
+						commands.notify();
+					}
+				}
+				
+				//w.printGrid();
+				//network.Send(new B_NetworkPacket(w, w.getPlayers()));
+						
+				try { Thread.sleep(milliwait); } 
+				catch (InterruptedException e) { e.printStackTrace(); }
+				
+				prevTime = time;
+				time = System.currentTimeMillis() - start;
+				
+				
+				if (w.isGameOver())
+				{
+					//network.Send(new B_NetworkPacket(w, w.getPlayers()));
+					gameOver();
 				}
 			}
 		} catch(Exception e)
@@ -264,15 +329,39 @@ public class B_ServerMain
 				commands.notify();
 			}
 		}
+			
+	}
+	
+	public void AI(int n){
 		
+		
+		ArrayList<B_ClientMain> playerAI = new ArrayList<B_ClientMain>(n);
+		
+		for (int i=0; i<n; i++){
+			
+			playerAI.add(new B_ClientMain(1));
+		}
+		
+		
+		while(!v.exitPrompt())
+		{	
+				
+			
+		}
+	}
+	
+	
+	public void gameOver(){
 		//The game is over. Compute winner, end prompt
-				B_Player winner = w.getWinner();
-				if(winner != null) 
-					System.out.println("Winner is " + winner.getName());
-				else 
-					System.out.println("No Winner");
+		B_Player winner = w.getWinner();
+		if(winner != null) 
+			System.out.println("Winner is " + winner.getName());
+		else 
+			System.out.println("No Winner");
 
-				for(B_Player currPlayer : w.getPlayers())
-					System.out.println(currPlayer.getName() + " killcount: " + currPlayer.getKillCount());
+		for(B_Player currPlayer : w.getPlayers())
+			System.out.println(currPlayer.getName() + " killcount: " + currPlayer.getKillCount());
 	}
 }
+		
+		

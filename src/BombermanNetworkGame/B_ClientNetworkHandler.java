@@ -53,6 +53,10 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 		this.Send(joinCom);
 	}
     
+	public void startGame(){
+		
+	}
+	
 	//Remove messages from our backlog buffer that have been confirmed by the server
 	protected void handleAck(int highAck)
 	{		
@@ -134,6 +138,40 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 			p.Command = PlayerCommandType.Join;
 
 		}
+		
+		/*
+		 * PlayerCommandType[9] = Start
+		 * p.Command = PlayerCommandType.Start
+		 * p.Data = (BombermanPlayer):
+		 * 		the player that is joining the game
+		 */
+		if(commandType == 9)
+		{
+			//Handle the ack value nested in the servers response to join game request
+			byte bytesToInt[] = {data[1], data[2], data[3], data[4]};
+			int ackValue = Utils.byteArrToStrInt(bytesToInt);
+			handleAck(ackValue);
+
+			//Build the player
+
+			int playerNumber = Utils.byteToInt(data[5]);
+
+			String playerName = PlayerName.values()[playerNumber].toString();
+
+			int xPos = Utils.byteToInt(data[6]);
+			int yPos = Utils.byteToInt(data[7]);
+
+			this.grid_width = Utils.byteToInt(data[8]);
+			this.grid_height = Utils.byteToInt(data[9]);
+
+			B_Player player = new B_Player(playerName, new Point(xPos, yPos));
+
+			p.Data = player;
+
+			p.Command = PlayerCommandType.Start;
+
+		}
+				 
 		/*
 		 * PlayerCommandType[7] = Ack
 		 * p.Command = PlayerCommandType.Ack
