@@ -8,9 +8,18 @@ public class Bomb extends Entity
 	
 	protected int range;
 	
+	//if the server confirmed this bomb
+	protected boolean confirmed = false;
+	
 	public float getTime() { return this.timer; }
 	
 	public int getRange() { return this.range; }
+	
+	public void setTimer(float time) {this.timer = time;}
+	
+	public boolean isConfirmed() {return this.confirmed;}
+	
+	public void confirm() {this.confirmed = true;}
 	
 	public boolean isDetonated()
 	{

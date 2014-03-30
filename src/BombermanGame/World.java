@@ -2,7 +2,9 @@ package BombermanGame;
 
 import java.util.ArrayList;
 
+import BombermanNetworkGame.U_BombData;
 import BombermanNetworkGame.U_ClientData;
+import BombermanNetworkGame.U_PlayerData;
 import Networking.Sendable;
 
 /*
@@ -141,56 +143,92 @@ public class World implements Sendable<World>
 	public void setUpdatedData(U_ClientData data)
 	{
 		this.playersDead = 0;
-		this.grid = data.getGrid();
-		for (int i=0; i<data.numPlayers(); i++)
+		
+		//updates the local grid with the sent grid
+		this.grid = data.world.grid;
+		
+		U_PlayerData[] players = data.players;
+		
+		//updates all players
+		for(int i = 0; i < players.length; i++)
 		{
-			this.players.get(i).setLocation(data.getPlayerPosition(i));
+			B_Player player = this.players.get(i);
 			
-			if (this.getElementAt(this.players.get(i).getLocation()) == GridObject.Door)
-				this.atDoor = true;
-			
-			this.players.get(i).setKillCount(data.getPlayerKills(i));
-			
-			if (data.isPlayerAlive(i)) this.players.get(i).Revive();
-			else this.players.get(i).Kill();
-			
-			this.playersDead += data.getPlayerKills(i);
-			
-			this.players.get(i).setPowerup(data.getPlayerPowerup(i));
+			if(players[i].isAlive)
+			{
+				player.Revive();
+				player.setLocation(players[i].position);
+				player.setBombCount(players[i].numBombs);
+				player.setKillCount(players[i].kills);
+			}
+			else
+			{
+				player.Kill();
+				this.playersDead++;
+			}
 		}
 		
 		//TODO: update bomb positions based on bomb getter methods in data
 		ArrayList<Bomb> l = this.bombs;
+		U_BombData[] bombs = data.bombs;
 		
+		//updates all bombs
+		for(int n = 0; n < bombs.length; n++)
+		{
+			boolean found = false;
+			
+			int index = 0;
+			
+			//bomb not found in local or there are no bombs left in local list
+			while(!found || index >= l.size())
+			{
+				Bomb b = l.get(index);
+				
+				//if they are the same bomb
+				if(b.getX() == bombs[n].position.X && b.getY() == bombs[n].position.X)
+				{
+					if(!b.isConfirmed()) b.confirm();
+					
+					b.setTimer(bombs[n].time);
+					System.out.println(bombs[n].time);
+					l.remove(index);
+					found = true;
+				}
+				else index++;
+			}
+			
+			//if the bomb was not in the local list
+			if(!found)
+			{
+				Bomb b = new Bomb(bombs[n].bName, bombs[n].position, bombs[n].radius, bombs[n].time);
+				b.confirm();
+				
+				this.bombs.add(b);
+			}
+		}
+		
+		/*
+		//go through all bombs in the packet
 		for(int n = 0; n < data.numBombs(); n++)
 		{
 			boolean found = false;
 			
 			boolean bombsLeft = true;
 			
+			
+			
 			int index = 0;
 			
 			while(!found || bombsLeft)
 			{
-				if(index >= l.size()) bombsLeft = false;
-				else
-				{
-					Bomb b = l.get(index);
-					
-					if(b.getX() == data.getBombX(n) && b.getY() == data.getBombY(n))
-					{
-						l.remove(index);
-						found = true;
-					}
-					else index++;
-				}
+				
 			}
 			
 			if(!found)
 			{
 				this.bombs.add(new Bomb("", new Point(data.getBombX(n), data.getBombY(n)), data.getBombRange(n), 5));
 			}
-		}
+		}*/
 	}
 
 	//returns the (currently)char elements at x,y

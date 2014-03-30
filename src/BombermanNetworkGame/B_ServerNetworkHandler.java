@@ -364,6 +364,7 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 
 		//Place all bomb information in the packet
 		byteData[start++] = Utils.intToByte(numBombs);
+		System.out.println("num bombs: " + numBombs);
 		for (int i=0; i<numBombs; i++)
 		{
 			Bomb bomb = bombs.get(i);
@@ -375,6 +376,11 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 			byteData[start++] = Utils.intToByte(bY);
 			int range = bomb.getRange();
 			byteData[start++] = Utils.intToByte(range);
+			float time = bomb.getTime();
+			//5 char string representing the float to send
+			String fTime = Utils.floatToPaddedStr(time, 5);
+			for (int j=0; j<5; j++)
+				byteData[start++] = fTime.getBytes()[j];
 		}
 
 		return byteData;

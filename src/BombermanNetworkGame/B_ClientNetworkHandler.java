@@ -271,7 +271,15 @@ public class B_ClientNetworkHandler extends ClientNetworkHandler<PlayerCommand[]
 
 				int bRange = Utils.byteToInt(data[startB++]);
 				
-				U_BombData b = new U_BombData(bombName, new Point(bX, bY), bRange);
+				//the next 5 bytes are a 5 char string for the bomb timer
+				byte byteTime[] = new byte[5];
+				for (int n=0; n<5; n++)
+					byteTime[n] = data[startB++];
+				
+				String strTime = new String (byteTime);
+				float bTime = Float.parseFloat(strTime);
+				
+				U_BombData b = new U_BombData(bombName, new Point(bX, bY), bRange, bTime);
 				
 				bombData[k] = b;
 			}
