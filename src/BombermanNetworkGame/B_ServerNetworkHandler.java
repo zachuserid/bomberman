@@ -322,7 +322,7 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 		
 		//breakdown of payload size:
 		//num bytes in world [][] + 4*5+1 forall player information + numBombs*4+1 for bombs info
-		byte byteData[] = new byte[worldBytes.length+(num_players*player_bytes)+1+(numBombs*4)+1];
+		byte byteData[] = new byte[worldBytes.length+(num_players*player_bytes)+1+(numBombs*9)+1];
 
 		//[0] = command type
 		byteData[0] = Utils.intToByte(PlayerCommandType.Update.ordinal()); //header packet type
@@ -364,7 +364,6 @@ public class B_ServerNetworkHandler extends ServerNetworkHandler<B_NetworkPacket
 
 		//Place all bomb information in the packet
 		byteData[start++] = Utils.intToByte(numBombs);
-		System.out.println("num bombs: " + numBombs);
 		for (int i=0; i<numBombs; i++)
 		{
 			Bomb bomb = bombs.get(i);

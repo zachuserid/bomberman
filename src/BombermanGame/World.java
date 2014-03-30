@@ -183,7 +183,7 @@ public class World implements Sendable<World>
 			int index = 0;
 			
 			//bomb not found in local or there are no bombs left in local list
-			while(!found || index >= l.size())
+			while(!found && index < l.size())
 			{
 				Bomb b = l.get(index);
 				
