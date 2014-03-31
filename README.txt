@@ -28,8 +28,18 @@ java -Dfile.encoding=US-ASCII -classpath path/to/bomberman/bin /path/to/bomberma
 and:
 java -Dfile.encoding=US-ASCII -classpath path/to/bomberman/bin /path/to/bomberman/src/BombermanGame.B_ClientMain
 
-Things to note:
-	-Due to a small bug in the conversion from byte to int of acked command id, we are ignoring packets after the 10th client command update on the server. This is because it is converted to an int that has already been acknowledged. A simple fix for this will come in the next milestone.
+File locations:
+-Performance and other testing is summarized in the INSTRUCTIONS.pdf file, located in the Testframe.zip file. This should also summarize our extensions.
+
+-All of the idea files and code are located in code.zip. This is the bomberman repository and contains extra files. The src/ directory has the code and the Testframe/ directory contains the files that exist in Testframe.zip
+
+----Things to note----:
 	-When running the four client programs, you will initially see a grey window until all four players have joined the game.
 
-The test framework is located in the Testframe directory in this root bomberman directory. In Testframe you will find the INSTRUCTIONS.pdf documentation for testing. You will find the code for test cases in the corresponding sub directories.
+	-Noted bug in the view: Occasionally, starting a client/spectator will result in a grey box that does not change with updates from server, or more commonly, a very small empty box. Research suggests that this is related to sometimes failing to pack() the components in the view. If this occurs, please try again. It seems to be much more common on linux and occurs infrequently on windows.
+
+	-We interpreted the bomb count number as the total number of bombs that a player is allowed to drop in a game. This starts at a default number of 5 and is only incremented when the correct power up is picked up. We only realized on submission day that the this value was supposed to represent the number of bombs on the field at once.
+
+----Playing the game----:
+The game, as it stands now, is a free for all deathmatch. The objectives of the game that create a win scenario are being the last man standing, or being the first player to enter a door. The default bomb radius is two squares in four directions from the point of explosion. If a brick or a player is within the blast radius, it will be destroyed. Some powerups are hidden under bricks, while the door is also occasionally hidden under a brick.
+
