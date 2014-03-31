@@ -61,7 +61,7 @@ public class B_PlayerController extends B_Controller implements KeyEventDispatch
 		//adds this object as a listener to the key dispatch event
 		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(this);
 		
-		this.controlCount = 6;
+		this.controlCount = 7;
 		
 		this.boolsDown = new boolean[this.controlCount];
 		

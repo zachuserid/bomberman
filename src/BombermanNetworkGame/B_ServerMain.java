@@ -334,19 +334,15 @@ public class B_ServerMain
 	
 	public void AI(int n){
 		
-		
-		ArrayList<B_ClientMain> playerAI = new ArrayList<B_ClientMain>(n);
-		
+		//ArrayList<B_ClientMain> playerAI = new ArrayList<B_ClientMain>(n);
 		for (int i=0; i<n; i++){
-			
-			playerAI.add(new B_ClientMain(1));
-		}
-		
-		
-		while(!v.exitPrompt())
-		{	
-				
-			
+			(new Thread(new Runnable(){
+				public void run(){
+					
+						new B_ClientMain(1);
+					
+				}
+			})).start();
 		}
 	}
 	

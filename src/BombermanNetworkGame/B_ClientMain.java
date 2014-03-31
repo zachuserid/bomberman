@@ -10,6 +10,7 @@ public class B_ClientMain
 {
 	
 	static B_ClientNetworkHandler network;
+	int cmdID = 0;
 	
 	public B_ClientMain(int n){
 		if (n == 1){
@@ -24,6 +25,7 @@ public class B_ClientMain
 			
 			//Start client
 			network = new B_ClientNetworkHandler(serverAddr, serverPort);
+			
 			
 			this.startAIClient();
 		}
@@ -212,7 +214,10 @@ public class B_ClientMain
 			B_Packet received[];
 			B_PlayerController controller;
 			boolean startAck = false;
-		    public void run(){
+		   
+			public void run(){
+		    	
+		    	//controller = B_PlayerController.Default(world.AddPlayer(player.getName()), world);
 		    	
 		        while (!startAck){
 		        	
@@ -516,21 +521,34 @@ public class B_ClientMain
 	
 	public void playAI(B_PlayerController controller, B_View view, World world){
 		
-		ArrayList<PlayerCommandType> commandList = new ArrayList<PlayerCommandType>();
-		ArrayList<String> commandTypes = new ArrayList<String>();
+		//ArrayList<PlayerCommandType> commandList = new ArrayList<PlayerCommandType>();
+		//ArrayList<String> commandTypes = new ArrayList<String>();
 		
-		commandTypes.add("MoveLeft");
-		commandTypes.add("MoveRight");
-		commandTypes.add("MoveUp");
-		commandTypes.add("MoveDown");
-		commandTypes.add("PlantBomb");
-		commandTypes.add("UsePowerup");
+		PlayerCommandType[] cmdType = null;
 		
+		cmdType[0]=PlayerCommandType.MoveLeft;
+		cmdType[1]=PlayerCommandType.MoveRight;
+		cmdType[2]=PlayerCommandType.MoveUp;
+		cmdType[3]=PlayerCommandType.MoveDown;
+		cmdType[4]=PlayerCommandType.PlantBomb;
+		cmdType[5]=PlayerCommandType.UsePowerup;
+	
+		
+		
+		//String name = controller.player.getName();
 		while(!view.exitPrompt() && !world.isGameOver())
 		{	
 			Random r = new Random();
 			int value = r.nextInt(6);
 			
+			PlayerCommand[] pc = new PlayerCommand[1];
+			
+				
+			
+			cmdID++;
+			
+			
+			//network.Send(new PlayerCommand(cmdType[value], cmdID));
 			
 		}
 	}
