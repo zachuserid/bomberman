@@ -229,7 +229,7 @@ public class B_ClientMain
 		        	
 		        	//Client blocks for first update() overriding receiverThread in network handler...
 					received = network.blockAndReceive();
-
+					
 					//Iterate over each received B_Packet, handle it accordingly
 					for(B_Packet p : received)
 					{
