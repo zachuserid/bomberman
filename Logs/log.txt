@@ -1,18 +1,26 @@
 Received movement: MoveRight from player 'Zelda
-Received movement: MoveDown from player 'Zelda
-Received movement: MoveRight from player 'Zelda
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'Zelda
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'Zelda
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveRight from player 'Zelda
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveUp from player 'Zelda
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveRight from player 'Zelda
 WARNING: COLLISSIONS DETECTED
+Received movement: MoveRight from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: PlantBomb from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveRight from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveRight from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'Zelda
+WARNING: COLLISSIONS DETECTED
 Received movement: MoveUp from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveUp from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveLeft from player 'Zelda
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveLeft from player 'Zelda
 WARNING: COLLISSIONS DETECTED
@@ -20,35 +28,97 @@ Received movement: MoveLeft from player 'Zelda
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveRight from player 'Zelda
 WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'Zelda
+WARNING: COLLISSIONS DETECTED
 Received movement: MoveUp from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveUp from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveUp from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveUp from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveUp from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveLeft from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveLeft from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: PlantBomb from player 'Zelda
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveRight from player 'Zelda
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'Zelda
+Received movement: PlantBomb from player 'Zelda
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveUp from player 'Zelda
+Received movement: MoveRight from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: PlantBomb from player 'Zelda
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveDown from player 'Zelda
 WARNING: COLLISSIONS DETECTED
+Received movement: PlantBomb from player 'Zelda
+WARNING: COLLISSIONS DETECTED
 Received movement: MoveDown from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: PlantBomb from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: PlantBomb from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveRight from player 'Zelda
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveRight from player 'Zelda
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveDown from player 'Zelda
 WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'Zelda
-WARNING: COLLISSIONS DETECTED
 Received movement: MoveDown from player 'Zelda
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'Zelda
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'Zelda
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'Zelda
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveDown from player 'Zelda
-WARNING: COLLISSIONS DETECTED
-Received movement: MoveLeft from player 'Zelda
 WARNING: COLLISSIONS DETECTED
 Received movement: MoveUp from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveUp from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveUp from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveUp from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveUp from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveUp from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveLeft from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveLeft from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveLeft from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveLeft from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveLeft from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveRight from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveRight from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveRight from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveRight from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: PlantBomb from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveRight from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'Zelda
+WARNING: COLLISSIONS DETECTED
+Received movement: MoveDown from player 'Zelda
 WARNING: COLLISSIONS DETECTED

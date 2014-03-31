@@ -6,14 +6,12 @@ public class Bomb extends Entity
 	
 	protected int power;
 	
-	protected int range;
-	
 	//if the server confirmed this bomb
 	protected boolean confirmed = false;
 	
 	public float getTime() { return this.timer; }
 	
-	public int getRange() { return this.range; }
+	public int getRange() { return this.power; }
 	
 	public void setTimer(float time) {this.timer = time;}
 	
@@ -30,7 +28,7 @@ public class Bomb extends Entity
 	
 	public void setRange(int r)
 	{
-		this.range = r;
+		this.power = r;
 	}
 	
 	public Bomb(String playerName, Point location, int power, float time)
@@ -39,8 +37,6 @@ public class Bomb extends Entity
 		
 		this.timer = time;
 		this.power = power;
-		 //TODO: Pull this value from the player when created...
-		this.range = 2;
 	}
 	
 	@Override

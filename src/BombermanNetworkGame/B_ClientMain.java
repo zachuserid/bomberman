@@ -210,44 +210,7 @@ public class B_ClientMain
 		//This will contain all of my player information
 		System.out.println("Waiting for an ack to my join...");
 		
-		(new Thread(new Runnable(){
-			B_Packet received[];
-			B_PlayerController controller;
-			boolean startAck = false;
-		   
-			public void run(){
-		    	
-		    	//controller = B_PlayerController.Default(world.AddPlayer(player.getName()), world);
-		    	
-		        while (!startAck){
-		        	
-		        	
-		        	
-		            //key = get key pressed from controller
-		            //if (key == 't')
-		            //    network.send(new PlayerCommand(PlayerCommandType.Start, 0, 0), ...);
-		        	
-		        	//Client blocks for first update() overriding receiverThread in network handler...
-					received = network.blockAndReceive();
-					
-					//Iterate over each received B_Packet, handle it accordingly
-					for(B_Packet p : received)
-					{
-						if(p.Command == PlayerCommandType.Start)
-						{
-							
-							//Initialize player controller class with my initialized player
-							//startController = B_PlayerController.Default(world.AddPlayer(player.getName()), world);
-							
-							startAck = true;
-						} 
-					}
-						        	
-		        	
-		        	
-		        }
-		    }
-		})).start();
+		
 		
 		while (!haveJoinAck)
 		{
