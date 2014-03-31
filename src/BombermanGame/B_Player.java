@@ -26,7 +26,7 @@ public class B_Player extends Entity
 		this.killCount = 0;
 		this.powerup = Powerup.None;
 		this.alive = true;
-		this.bombCount = 15; //default
+		this.bombCount = 5; //default
 		this.bombRange = 2; //default
 	}
 	
@@ -90,6 +90,8 @@ public class B_Player extends Entity
 		B_Player p = new B_Player(this.getName(), this.getLocation());
 		p.setKillCount(this.killCount);
 		p.setPowerup(this.powerup);
+		p.setBombCount(this.bombCount);
+		p.setBombRange(this.bombRange);
 		if (!this.isAlive()) p.Kill();
 		return p;
 	}

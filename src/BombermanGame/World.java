@@ -163,6 +163,9 @@ public class World implements Sendable<World>
 				player.setLocation(players[i].position);
 				player.setBombCount(players[i].numBombs);
 				player.setKillCount(players[i].kills);
+				
+				if(this.getElementAt(players[i].position) == GridObject.Door)
+					this.atDoor = true;
 			}
 			else
 			{
@@ -170,9 +173,9 @@ public class World implements Sendable<World>
 				this.playersDead++;
 			}
 		}
-		
+
 		//TODO: update bomb positions based on bomb getter methods in data
-		ArrayList<Bomb> l = this.bombs;
+		ArrayList<Bomb> l = (ArrayList<Bomb>) this.bombs.clone();
 		U_BombData[] bombs = data.bombs;
 		
 		//updates all bombs
@@ -181,19 +184,18 @@ public class World implements Sendable<World>
 			boolean found = false;
 			
 			int index = 0;
-			
+
 			//bomb not found in local or there are no bombs left in local list
 			while(!found && index < l.size())
 			{
 				Bomb b = l.get(index);
-				
-				//if they are the same bomb
-				if(b.getX() == bombs[n].position.X && b.getY() == bombs[n].position.X)
+				//if they are the same bomb, found in local
+				if(b.getX() == bombs[n].position.X && b.getY() == bombs[n].position.Y)
 				{
 					if(!b.isConfirmed()) b.confirm();
 					
 					b.setTimer(bombs[n].time);
-					System.out.println(bombs[n].time);
+
 					l.remove(index);
 					found = true;
 				}
@@ -204,34 +206,21 @@ public class World implements Sendable<World>
 			if(!found)
 			{
 				Bomb b = new Bomb(bombs[n].bName, bombs[n].position, bombs[n].radius, bombs[n].time);
+				
 				b.confirm();
 				
 				this.bombs.add(b);
-			}
+			}	
 		}
 		
-		/*
-		//go through all bombs in the packet
-		for(int n = 0; n < data.numBombs(); n++)
+		//if there are still local bombs
+		for(int i = 0; i < l.size(); i++)
 		{
-			boolean found = false;
-			
-			boolean bombsLeft = true;
-			
-			
-			
-			int index = 0;
-			
-			while(!found || bombsLeft)
-			{
-				
-			}
-			
-			if(!found)
-			{
-				this.bombs.add(new Bomb("", new Point(data.getBombX(n), data.getBombY(n)), data.getBombRange(n), 5));
-			}
-		}*/
+			System.out.println("Local " + i);
+			Bomb b = l.get(i);
+			if(b.isConfirmed() || b.getTime() <= 0)
+				this.bombs.remove(b);
+		}
 	}
 
 	//returns the (currently)char elements at x,y
@@ -297,6 +286,8 @@ public class World implements Sendable<World>
 
 	protected void explode(Bomb b)
 	{
+		System.out.println("range " + b.getRange());
+		
 		this.SetElementAt(b.getLocation(), GridObject.Empty);
 
 		B_Player player = null;
@@ -307,9 +298,11 @@ public class World implements Sendable<World>
 				player = p;
 				break;
 			}
+		//on it
+		this.explodeLocation(new Point(b.getX(), b.getY()), player);
 
 		//right
-		for(int i = 0; i < b.getRange(); i++)
+		for(int i = 1; i <= b.getRange(); i++)
 		{
 			int x = b.getX() + i;
 			if(x > this.getGridWidth() - 1) break;
@@ -319,7 +312,7 @@ public class World implements Sendable<World>
 			}
 		}
 		//left
-		for(int i = 0; i < b.getRange(); i++)
+		for(int i = 1; i <= b.getRange(); i++)
 		{
 			int x = b.getX() - i;
 			if(x < 0) break;
@@ -329,7 +322,7 @@ public class World implements Sendable<World>
 			}
 		}
 		//up
-		for(int i = 0; i < b.getRange(); i++)
+		for(int i = 1; i <= b.getRange(); i++)
 		{
 			int y = b.getY() - i;
 			if(y < 0) break;
@@ -339,7 +332,7 @@ public class World implements Sendable<World>
 			}
 		}
 		//up
-		for(int i = 0; i < b.getRange(); i++)
+		for(int i = 1; i <= b.getRange(); i++)
 		{
 			int y = b.getY() + i;
 			if(y > this.getGridHeight() - 1) break;
@@ -440,17 +433,19 @@ public class World implements Sendable<World>
 				return WorldActionOutcome.Approved;
 			case PowerUp1:
 				e.setLocation(pos);
-				e.setPowerup(Powerup.PowerupA);
+				//e.setPowerup(Powerup.PowerupA);
+				e.setBombCount(e.bombCount + 5);
 				this.SetElementAt(pos, GridObject.Empty);
 				return WorldActionOutcome.Approved;
 			case PowerUp2:
 				e.setLocation(pos);
-				e.setPowerup(Powerup.PowerupB);
+				//e.setPowerup(Powerup.PowerupB);
+				e.setBombRange(e.getBombRange() + 1);
 				this.SetElementAt(pos, GridObject.Empty);
 				return WorldActionOutcome.Approved;
 			case PowerUp3:
 				e.setLocation(pos);
-				e.setPowerup(Powerup.PowerupC);
+				//e.setPowerup(Powerup.PowerupC);
 				this.SetElementAt(pos, GridObject.Empty);
 				return WorldActionOutcome.Approved;
 			case Door:
@@ -476,12 +471,16 @@ public class World implements Sendable<World>
 		this.SetElementAt(b, o1);
 	}
 
-	public WorldActionOutcome TryPlantBomb(Entity e)
+	public WorldActionOutcome TryPlantBomb(B_Player e)
 	{
 		if(this.getElementAt(e.getLocation()) == GridObject.Bomb) return WorldActionOutcome.DeniedDynamic;
 
+		if(e.getBombCount() <= 0) return WorldActionOutcome.DeniedDynamic;
+		
+		e.setBombCount(e.getBombCount()-1);
+		
 		this.SetElementAt(e.getLocation(), GridObject.Bomb);
-		this.bombs.add(new Bomb(e.name, e.getLocation(), 5, 5));
+		this.bombs.add(new Bomb(e.name, e.getLocation(), e.getBombRange(), 5));
 
 		return WorldActionOutcome.Approved;
 	}
