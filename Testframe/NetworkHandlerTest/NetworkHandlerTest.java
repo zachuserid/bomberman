@@ -14,7 +14,7 @@ public class NetworkHandlerTest
     public NetworkHandlerTest()
     {
     }
-
+//
     /**
      * Sets up the test fixture.
      *
@@ -25,7 +25,7 @@ public class NetworkHandlerTest
     {
         net = new NetworkHandler();
     }
-
+//
     /**
      * Tears down the test fixture.
      *

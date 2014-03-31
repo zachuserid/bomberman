@@ -21,7 +21,7 @@ cd /path/to/bomberman/bin
 Compile the server and client with the following:
 javac -classpath path/to/bomberman/bin /path/to/bomberman/src/BombermanGame/B_ServerMain.java
 and:
-javac -classpath path/to/bomberman/bin /path/to/bomberman/src/BombermanGame/B_ClientMain.java
+javac -classpath path/to/bomberman/bin /path/to/bombeTestframe/Server/package.bluejrman/src/BombermanGame/B_ClientMain.java
 
 Execute the compiled server followed by the client four times, using the following:
 java -Dfile.encoding=US-ASCII -classpath path/to/bomberman/bin /path/to/bomberman/src/BombermanGame.B_ServerMain
@@ -31,7 +31,7 @@ java -Dfile.encoding=US-ASCII -classpath path/to/bomberman/bin /path/to/bomberma
 File locations:
 -Performance and other testing is summarized in the INSTRUCTIONS.pdf file, located in the Testframe.zip file. This should also summarize our extensions.
 
--All of the idea files and code are located in code.zip. This is the bomberman repository and contains extra files. The src/ directory has the code and the Testframe/ directory contains the files that exist in Testframe.zip
+-All of the idea files and code are located in code.zip. This is the bomberman repository and contains extra files. The sTestframe/Server/package.bluejrc/ directory has the code and the Testframe/ directory contains the files that exist in Testframe.zip
 
 ----Things to note----:
 	-When running the four client programs, you will initially see a grey window until all four players have joined the game.
@@ -43,3 +43,7 @@ File locations:
 ----Playing the game----:
 The game, as it stands now, is a free for all deathmatch. The objectives of the game that create a win scenario are being the last man standing, or being the first player to enter a door. The default bomb radius is two squares in four directions from the point of explosion. If a brick or a player is within the blast radius, it will be destroyed. Some powerups are hidden under bricks, while the door is also occasionally hidden under a brick.
 
+Power up color coordination: 
+Red - Extra bombs (5).
+Green - Increase bomb radius by 1.
+Other colors: Super secret. (nothing).

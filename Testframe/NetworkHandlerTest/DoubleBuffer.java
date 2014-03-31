@@ -28,7 +28,7 @@ public class DoubleBuffer<T> {
         
     }
     
-    
+    //
     //methods
 
     protected ArrayDeque<T> getWrite()

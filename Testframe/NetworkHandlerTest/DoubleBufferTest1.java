@@ -28,7 +28,7 @@ public class DoubleBufferTest1<T>
     {
         net = new DoubleBuffer();        
     }
-
+//
     /**
      * Tears down the test fixture.
      *
